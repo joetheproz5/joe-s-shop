@@ -164,6 +164,7 @@ export default function AdminLayout() {
           'lg:static lg:z-auto',
           // Open/closed state
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          'lg:translate-x-0',
           sidebarCollapsed ? 'lg:w-[72px]' : 'lg:w-64',
           'w-64'
         )}
