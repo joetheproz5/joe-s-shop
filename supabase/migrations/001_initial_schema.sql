@@ -174,8 +174,7 @@ create table if not exists public.cart_items (
   variant_id uuid references public.product_variants(id) on delete cascade,
   quantity   integer not null default 1,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (user_id, product_id, coalesce(variant_id, '00000000-0000-0000-0000-000000000000'))
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.wishlist_items (
@@ -348,6 +347,11 @@ create index idx_reviews_status          on public.reviews (status);
 create index idx_reviews_user            on public.reviews (user_id);
 
 create index idx_cart_user               on public.cart_items (user_id);
+create unique index idx_cart_unique_item on public.cart_items (
+  user_id,
+  product_id,
+  coalesce(variant_id, '00000000-0000-0000-0000-000000000000'::uuid)
+);
 create index idx_wishlist_user           on public.wishlist_items (user_id);
 
 create index idx_orders_user             on public.orders (user_id);
