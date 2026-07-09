@@ -121,6 +121,7 @@ export default function App() {
           </ProtectedRoute>
         }>
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/categories" element={<AdminCategoriesPage />} />

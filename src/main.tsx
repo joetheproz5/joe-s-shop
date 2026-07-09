@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, HashRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HelmetProvider } from 'react-helmet-async'
 import { Toaster } from 'react-hot-toast'
@@ -19,10 +19,7 @@ const queryClient = new QueryClient({
   },
 })
 
-const routerBasename =
-  import.meta.env.BASE_URL === '/'
-    ? undefined
-    : import.meta.env.BASE_URL.replace(/\/$/, '')
+const Router = import.meta.env.BASE_URL === '/' ? BrowserRouter : HashRouter
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -30,7 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <HelmetProvider>
         <ThemeProvider>
           <AuthProvider>
-            <BrowserRouter basename={routerBasename}>
+            <Router>
               <App />
               <Toaster
                 position="bottom-right"
@@ -48,7 +45,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   className: '!dark:bg-surface-900/90 !dark:text-surface-50 !dark:border-surface-700/50',
                 }}
               />
-            </BrowserRouter>
+            </Router>
           </AuthProvider>
         </ThemeProvider>
       </HelmetProvider>
