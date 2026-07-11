@@ -186,6 +186,171 @@
   .perspective-scene:hover .hero-product-plane-base {
     transform: rotateX(12deg) rotateY(-14deg) rotateZ(-5deg) translateZ(-4px);
   }
+
+  .showroom {
+    min-height: calc(100vh - 72px);
+  }
+
+  .showroom-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 56px 56px;
+    transform: perspective(900px) rotateX(62deg) translateY(-22%);
+    transform-origin: top center;
+    animation: showroomGridDrift 18s linear infinite;
+  }
+
+  .showroom-scan {
+    background: linear-gradient(90deg, transparent, rgba(103, 232, 249, 0.8), transparent);
+    animation: showroomScan 4s ease-in-out infinite;
+  }
+
+  .showroom-marquee {
+    overflow: hidden;
+  }
+
+  .showroom-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marqueeSlide 28s linear infinite;
+  }
+
+  .orbit-stage {
+    perspective: 1300px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition: transform 180ms ease-out;
+  }
+
+  .orbit-ring {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    inset: 11%;
+    transform: rotateX(68deg) rotateZ(-18deg);
+    animation: orbitSpin 18s linear infinite;
+  }
+
+  .orbit-ring-two {
+    inset: 22%;
+    border-color: rgba(103, 232, 249, 0.22);
+    animation-duration: 13s;
+    animation-direction: reverse;
+  }
+
+  .orbit-platform {
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    bottom: 8%;
+    height: 82px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.02));
+    transform: rotateX(72deg);
+    box-shadow: 0 48px 90px rgba(0, 0, 0, 0.45);
+  }
+
+  .orbit-card {
+    transform-style: preserve-3d;
+    transition: transform 500ms ease, box-shadow 500ms ease;
+  }
+
+  .orbit-card-main {
+    transform: rotateX(8deg) rotateY(-18deg) rotateZ(-2deg) translateZ(74px);
+    animation: productFloatMain 7s ease-in-out infinite;
+  }
+
+  .orbit-card-small-1 {
+    right: 3%;
+    top: 16%;
+    transform: rotateX(10deg) rotateY(-28deg) rotateZ(5deg) translateZ(38px);
+    animation: productFloatSmall 6s ease-in-out infinite;
+  }
+
+  .orbit-card-small-2 {
+    left: 2%;
+    bottom: 17%;
+    transform: rotateX(11deg) rotateY(24deg) rotateZ(-5deg) translateZ(8px);
+    animation: productFloatSmall 7.5s ease-in-out infinite reverse;
+  }
+
+  .orbit-card-small-3 {
+    right: 18%;
+    bottom: 4%;
+    transform: rotateX(14deg) rotateY(-12deg) rotateZ(2deg) translateZ(22px);
+    animation: productFloatSmall 6.8s ease-in-out infinite;
+  }
+
+  .category-tilt-grid {
+    perspective: 1100px;
+  }
+
+  .category-tilt-card {
+    transform-style: preserve-3d;
+    transition: transform 360ms ease, box-shadow 360ms ease, border-color 360ms ease;
+  }
+
+  .category-tilt-card:hover {
+    transform: rotateX(8deg) rotateY(-8deg) translateY(-8px);
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.14);
+  }
+
+  .launch-product-card {
+    transform-style: preserve-3d;
+    transition: transform 420ms ease, border-color 420ms ease, background-color 420ms ease;
+  }
+
+  .launch-product-card:hover {
+    transform: translateY(-10px) rotateX(4deg) rotateY(-5deg);
+    border-color: rgba(103, 232, 249, 0.42);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .newsletter-cube {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    transform-style: preserve-3d;
+    animation: cubeTurn 11s linear infinite;
+  }
+
+  .newsletter-cube-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-weight: 900;
+    font-size: 1.5rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .newsletter-cube-front {
+    transform: translateZ(60px);
+  }
+
+  .newsletter-cube-back {
+    transform: rotateY(180deg) translateZ(60px);
+  }
+
+  .newsletter-cube-right {
+    transform: rotateY(90deg) translateZ(60px);
+  }
+
+  .newsletter-cube-left {
+    transform: rotateY(-90deg) translateZ(60px);
+  }
+
+  .newsletter-cube-top {
+    transform: rotateX(90deg) translateZ(60px);
+  }
+
+  .newsletter-cube-bottom {
+    transform: rotateX(-90deg) translateZ(60px);
+  }
 }
 
 @layer utilities {
@@ -219,8 +384,83 @@
     .perspective-scene:hover .hero-product-plane-main,
     .perspective-scene:hover .hero-product-plane-side,
     .perspective-scene:hover .hero-product-plane-base,
-    .product-card-3d:hover .product-card-media {
+    .product-card-3d:hover .product-card-media,
+    .showroom-grid,
+    .showroom-scan,
+    .showroom-marquee-track,
+    .orbit-ring,
+    .orbit-card-main,
+    .orbit-card-small-1,
+    .orbit-card-small-2,
+    .orbit-card-small-3,
+    .newsletter-cube {
+      animation: none;
       transform: none;
+    }
+  }
+
+  @keyframes showroomGridDrift {
+    from {
+      background-position: 0 0, 0 0;
+    }
+    to {
+      background-position: 0 56px, 56px 0;
+    }
+  }
+
+  @keyframes showroomScan {
+    0%, 100% {
+      opacity: 0.1;
+      transform: translateX(-35%);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(35%);
+    }
+  }
+
+  @keyframes marqueeSlide {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes orbitSpin {
+    from {
+      transform: rotateX(68deg) rotateZ(-18deg);
+    }
+    to {
+      transform: rotateX(68deg) rotateZ(342deg);
+    }
+  }
+
+  @keyframes productFloatMain {
+    0%, 100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -12px;
+    }
+  }
+
+  @keyframes productFloatSmall {
+    0%, 100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -9px;
+    }
+  }
+
+  @keyframes cubeTurn {
+    from {
+      transform: rotateX(-18deg) rotateY(0deg);
+    }
+    to {
+      transform: rotateX(-18deg) rotateY(360deg);
     }
   }
 }
