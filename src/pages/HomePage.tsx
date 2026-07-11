@@ -4,12 +4,12 @@ import { motion } from 'framer-motion'
 import {
   ArrowRight,
   BadgeCheck,
-  Box,
   ChevronRight,
-  Quote,
+  Headphones,
+  Package,
   RotateCcw,
   ShieldCheck,
-  Star,
+  Sparkles,
   Truck,
 } from 'lucide-react'
 import { useFeaturedProducts, useNewArrivals, useBestSellers } from '@/hooks/useProducts'
@@ -22,6 +22,8 @@ import { formatCurrency } from '@/lib/utils'
 import type { Product } from '@/types'
 import toast from 'react-hot-toast'
 
+const accent = 'text-blue-600 dark:text-blue-400'
+
 export default function HomePage() {
   const { data: settings } = useSettings()
   const { data: categories, isLoading: catLoading } = useCategories()
@@ -29,57 +31,79 @@ export default function HomePage() {
   const { data: arrivals, isLoading: arrLoading } = useNewArrivals(4)
   const { data: bestSellers, isLoading: bestLoading } = useBestSellers(4)
 
+  const configuredTitle = settings?.hero_title?.trim()
+  const configuredSubtitle = settings?.hero_subtitle?.trim()
   const hero = {
-    title: settings?.hero_title || 'Everyday goods, edited with taste.',
+    title:
+      configuredTitle && configuredTitle !== 'Premium Products for Modern Living'
+        ? configuredTitle
+        : 'Good products. Clear choices.',
     subtitle:
-      settings?.hero_subtitle ||
-      'A calm, curated shop for useful tech, style, home, fitness, and reading essentials.',
-    ctaText: settings?.hero_cta_text || 'Shop now',
+      configuredSubtitle && configuredSubtitle !== "Shop handpicked essentials from the world's best brands. Fast shipping, easy returns."
+        ? configuredSubtitle
+        : 'Useful finds across tech, home, style, fitness, and more. Easy to browse, easy to buy.',
+    ctaText: settings?.hero_cta_text || 'Shop all products',
     ctaLink: settings?.hero_cta_link || '/shop',
   }
 
-  const topCats = (categories || []).filter((c) => !c.parent_id).slice(0, 5)
+  const topCategories = (categories || []).filter((category) => !category.parent_id).slice(0, 6)
   const heroProducts = [...(featured || []), ...(bestSellers || []), ...(arrivals || [])]
-    .filter((product, index, list) => list.findIndex((p) => p.id === product.id) === index)
+    .filter((product, index, list) => list.findIndex((item) => item.id === product.id) === index)
     .slice(0, 3)
 
   return (
-    <div className="bg-[#fbfaf7] text-[#191815] dark:bg-surface-950 dark:text-white">
+    <div className="bg-white text-surface-900 dark:bg-surface-950 dark:text-white">
+      <Announcement />
       <Hero hero={hero} products={heroProducts} loading={featLoading && bestLoading && arrLoading} />
-      <ServiceBar />
-      <Categories categories={topCats} loading={catLoading} />
+      <CategoryStrip categories={topCategories} loading={catLoading} />
 
       <ProductSection
-        eyebrow="Featured"
-        title="The current edit"
-        subtitle="Handpicked products with clean details and easy decisions."
+        label="Featured"
+        title="Popular right now"
+        description="Customer favorites and standout picks from across the store."
         link="/shop?is_featured=true"
       >
         <ProductGrid products={featured} loading={featLoading} />
       </ProductSection>
 
-      <EditorialBand products={(bestSellers || featured || []).slice(0, 2)} />
+      <PromoPanel products={(bestSellers || featured || []).slice(0, 2)} />
 
       <ProductSection
-        eyebrow="Best sellers"
-        title="What customers choose most"
-        subtitle="Reliable picks from across the store."
+        label="Best sellers"
+        title="Tried, tested, and selling fast"
+        description="The products people keep coming back for."
         link="/shop?is_best_seller=true"
       >
         <ProductGrid products={bestSellers} loading={bestLoading} />
       </ProductSection>
 
+      <Benefits />
+
       <ProductSection
-        eyebrow="New arrivals"
-        title="Freshly added"
-        subtitle="New products, simply presented."
+        label="Just in"
+        title="New this week"
+        description="A fresh selection of recently added products."
         link="/shop?is_new_arrival=true"
       >
         <ProductGrid products={arrivals} loading={arrLoading} />
       </ProductSection>
 
-      <Reviews />
       <Newsletter />
+    </div>
+  )
+}
+
+function Announcement() {
+  return (
+    <div className="border-b border-blue-100 bg-blue-50 text-blue-950 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-100">
+      <div className="section-container flex min-h-9 items-center justify-center gap-2 py-2 text-center text-xs font-semibold sm:text-sm">
+        <Truck size={15} />
+        Free shipping on orders over $100
+        <span className="hidden text-blue-300 sm:inline">|</span>
+        <Link to="/shop" className="hidden items-center gap-1 hover:text-blue-600 sm:inline-flex dark:hover:text-blue-300">
+          Shop now <ChevronRight size={14} />
+        </Link>
+      </div>
     </div>
   )
 }
@@ -93,90 +117,91 @@ function Hero({
   products: Product[]
   loading: boolean
 }) {
-  const main = products[0]
+  const mainProduct = products[0]
 
   return (
-    <section className="border-b border-[#191815]/10 bg-[#f1eadf] dark:border-white/10 dark:bg-[#111318]">
-      <div className="section-container grid min-h-[calc(100vh-72px)] items-center gap-12 py-16 lg:grid-cols-[0.92fr_1.08fr]">
-        <div>
-          <motion.p
+    <section className="border-b border-surface-200 bg-surface-50 dark:border-surface-800 dark:bg-surface-900/40">
+      <div className="section-container grid items-center gap-10 py-12 lg:grid-cols-[0.9fr_1.1fr] lg:py-16">
+        <div className="max-w-xl">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm dark:border-blue-800 dark:bg-surface-900 dark:text-blue-300"
+          >
+            <Sparkles size={14} />
+            New picks added every week
+          </motion.div>
+          <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs font-black uppercase tracking-[0.26em] text-[#8d6f43] dark:text-primary-300"
-          >
-            {SITE_NAME} collection
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="mt-5 max-w-3xl text-5xl font-black leading-[0.96] tracking-tight sm:text-6xl lg:text-7xl"
+            transition={{ delay: 0.04 }}
+            className="max-w-2xl text-4xl font-bold leading-[1.08] tracking-tight text-surface-950 sm:text-5xl lg:text-6xl dark:text-white"
           >
             {hero.title}
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mt-6 max-w-xl text-lg leading-8 text-[#6c6254] dark:text-surface-300"
+            transition={{ delay: 0.08 }}
+            className="mt-5 max-w-lg text-base leading-7 text-surface-600 sm:text-lg dark:text-surface-300"
           >
             {hero.subtitle}
           </motion.p>
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mt-9 flex flex-col gap-3 sm:flex-row"
+            transition={{ delay: 0.12 }}
+            className="mt-7 flex flex-col gap-3 sm:flex-row"
           >
-            <Link
-              to={hero.ctaLink}
-              className="inline-flex items-center justify-center gap-2 bg-[#191815] px-6 py-3 text-sm font-black text-white transition-colors hover:bg-[#3a3329] dark:bg-white dark:text-surface-950"
-            >
+            <Link to={hero.ctaLink} className="btn-primary">
               {hero.ctaText}
-              <ArrowRight size={18} />
+              <ArrowRight size={17} />
             </Link>
-            <Link
-              to="/shop?is_new_arrival=true"
-              className="inline-flex items-center justify-center gap-2 border border-[#191815]/15 bg-white/50 px-6 py-3 text-sm font-black text-[#191815] transition-colors hover:bg-white dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-            >
-              View new arrivals
-              <ChevronRight size={18} />
+            <Link to="/categories" className="btn-secondary">
+              Browse categories
             </Link>
           </motion.div>
+          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-surface-500 dark:text-surface-400">
+            <span className="inline-flex items-center gap-1.5"><BadgeCheck size={16} className="text-emerald-500" /> Quality checked</span>
+            <span className="inline-flex items-center gap-1.5"><RotateCcw size={16} className="text-emerald-500" /> 30-day returns</span>
+          </div>
         </div>
 
         {loading ? (
-          <Skeleton className="h-[560px]" />
+          <Skeleton className="h-[480px] rounded-lg" />
         ) : (
-          <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="grid min-w-0 gap-3 sm:min-h-[420px] sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:gap-4">
             <Link
-              to={main ? `/product/${main.slug}` : '/shop'}
-              className="group block overflow-hidden bg-white shadow-sm ring-1 ring-[#191815]/10 dark:bg-surface-900 dark:ring-white/10"
+              to={mainProduct ? `/product/${mainProduct.slug}` : '/shop'}
+              className="group relative min-w-0 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-surface-200 dark:bg-surface-900 dark:ring-surface-800"
             >
-              <ProductImage product={main} className="aspect-[4/5]" />
-              <div className="p-5">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#8d6f43]">Featured pick</p>
-                <div className="mt-2 flex items-start justify-between gap-4">
-                  <h2 className="line-clamp-2 text-2xl font-black leading-tight">{main?.name || 'Explore the collection'}</h2>
-                  {main && <span className="shrink-0 font-black">{formatCurrency(main.sale_price ?? main.selling_price)}</span>}
+              <ProductImage product={mainProduct} className="h-full min-h-[340px] sm:min-h-[420px]" />
+              <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/95 p-4 shadow-lg backdrop-blur-sm dark:bg-surface-950/90">
+                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">Featured pick</p>
+                <div className="mt-1 flex items-end justify-between gap-3">
+                  <h2 className="line-clamp-2 font-semibold leading-snug">{mainProduct?.name || 'Explore all products'}</h2>
+                  {mainProduct && (
+                    <span className="shrink-0 text-sm font-bold">
+                      {formatCurrency(mainProduct.sale_price ?? mainProduct.selling_price)}
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>
 
-            <div className="grid gap-4">
+            <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-1 sm:gap-4">
               {products.slice(1, 3).map((product) => (
                 <Link
                   key={product.id}
                   to={`/product/${product.slug}`}
-                  className="group flex gap-3 bg-white p-3 shadow-sm ring-1 ring-[#191815]/10 transition-colors hover:bg-[#fffdf8] dark:bg-surface-900 dark:ring-white/10"
+                  className="group min-w-0 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-surface-200 transition-shadow hover:shadow-md dark:bg-surface-900 dark:ring-surface-800"
                 >
-                  <ProductImage product={product} className="h-28 w-28 shrink-0" />
-                  <div className="min-w-0 py-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8d6f43]">Selected</p>
-                    <h3 className="mt-2 line-clamp-2 font-black leading-tight">{product.name}</h3>
-                    <div className="mt-2 text-sm font-bold text-[#6c6254] dark:text-surface-300">
+                  <ProductImage product={product} className="aspect-square" />
+                  <div className="p-3">
+                    <h3 className="line-clamp-1 text-sm font-semibold">{product.name}</h3>
+                    <p className="mt-1 text-sm font-bold text-blue-600 dark:text-blue-400">
                       {formatCurrency(product.sale_price ?? product.selling_price)}
-                    </div>
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -189,80 +214,61 @@ function Hero({
 }
 
 function ProductImage({ product, className }: { product?: Product; className: string }) {
-  const image = product?.images?.find((img) => img.is_featured)?.url || product?.images?.[0]?.url
+  const image = product?.images?.find((item) => item.is_featured)?.url || product?.images?.[0]?.url
 
   return (
-    <div className={`relative overflow-hidden bg-[#e7dfd1] dark:bg-surface-800 ${className}`}>
+    <div className={`relative overflow-hidden bg-surface-100 dark:bg-surface-800 ${className}`}>
       {image ? (
-        <img src={image} alt={product?.name || 'Product'} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+        <img
+          src={image}
+          alt={product?.name || 'Product'}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        />
       ) : (
-        <div className="flex h-full w-full items-center justify-center text-[#8d6f43] dark:text-surface-400">
-          <Box size={44} />
+        <div className="flex h-full w-full items-center justify-center text-surface-400">
+          <Package size={42} />
         </div>
       )}
     </div>
   )
 }
 
-function ServiceBar() {
+function CategoryStrip({ categories, loading }: { categories: any[]; loading: boolean }) {
   return (
-    <section className="border-b border-[#191815]/10 bg-[#191815] text-white dark:border-white/10">
-      <div className="section-container grid sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { icon: Truck, label: 'Fast shipping', text: 'Free over $100' },
-          { icon: RotateCcw, label: 'Easy returns', text: '30-day window' },
-          { icon: ShieldCheck, label: 'Secure checkout', text: 'Protected payments' },
-          { icon: BadgeCheck, label: 'Curated catalog', text: 'Picked with care' },
-        ].map((item) => (
-          <div key={item.label} className="flex items-center gap-3 border-b border-white/10 py-5 sm:border-r sm:px-5 lg:border-b-0 first:sm:pl-0 last:border-r-0">
-            <item.icon size={20} className="text-[#d7c29a]" />
-            <div>
-              <div className="font-black">{item.label}</div>
-              <div className="text-sm text-surface-400">{item.text}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function Categories({ categories, loading }: { categories: any[]; loading: boolean }) {
-  return (
-    <section className="section-container py-16">
+    <section className="section-container py-12">
       <SectionHeading
-        eyebrow="Departments"
-        title="Shop by category"
-        subtitle="Simple paths into the products you actually want."
-        link="/shop"
+        label="Categories"
+        title="Find what you need"
+        description="Jump straight into the department you want."
+        link="/categories"
       />
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-44" />)}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, index) => <Skeleton key={index} className="h-32 rounded-lg" />)}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-5">
-          {categories.map((cat, index) => (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {categories.map((category, index) => (
             <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 16 }}
+              key={category.id}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.04 }}
+              transition={{ delay: index * 0.035 }}
             >
               <Link
-                to={`/shop?category_id=${cat.id}`}
-                className="group block h-44 bg-white p-4 shadow-sm ring-1 ring-[#191815]/10 transition-colors hover:bg-[#fffdf8] dark:bg-surface-900 dark:ring-white/10"
+                to={`/shop?category_id=${category.id}`}
+                className="group flex h-32 flex-col justify-between rounded-lg border border-surface-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-surface-800 dark:bg-surface-900 dark:hover:border-blue-800"
               >
-                <div className="flex h-20 items-center justify-center bg-[#f1eadf] text-4xl font-black text-[#8d6f43] dark:bg-surface-800">
-                  {cat.image_url ? <img src={cat.image_url} alt={cat.name} className="h-full w-full object-cover" /> : cat.name[0]}
+                <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-blue-50 text-lg font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
+                  {category.image_url ? <img src={category.image_url} alt="" className="h-full w-full object-cover" /> : category.name[0]}
                 </div>
-                <div className="mt-5 flex items-end justify-between gap-3">
+                <div className="flex items-end justify-between gap-2">
                   <div>
-                    <div className="font-black leading-tight">{cat.name}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[#8d6f43]">{cat.product_count || 0} items</div>
+                    <div className="line-clamp-1 text-sm font-semibold">{category.name}</div>
+                    <div className="mt-0.5 text-xs text-surface-400">{category.product_count || 0} items</div>
                   </div>
-                  <ArrowRight size={18} className="text-[#8a806f] transition-transform group-hover:translate-x-1" />
+                  <ChevronRight size={16} className="shrink-0 text-surface-400 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-600" />
                 </div>
               </Link>
             </motion.div>
@@ -273,47 +279,42 @@ function Categories({ categories, loading }: { categories: any[]; loading: boole
   )
 }
 
-function ProductSection({ eyebrow, title, subtitle, link, children }: {
-  eyebrow: string
+function ProductSection({ label, title, description, link, children }: {
+  label: string
   title: string
-  subtitle: string
+  description: string
   link: string
   children: React.ReactNode
 }) {
   return (
-    <section className="section-container py-14">
-      <SectionHeading eyebrow={eyebrow} title={title} subtitle={subtitle} link={link} />
+    <section className="section-container py-12">
+      <SectionHeading label={label} title={title} description={description} link={link} />
       {children}
     </section>
   )
 }
 
-function EditorialBand({ products }: { products: Product[] }) {
+function PromoPanel({ products }: { products: Product[] }) {
   return (
-    <section className="bg-[#191815] text-white">
-      <div className="section-container grid gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.26em] text-[#d7c29a]">Aesthetic, not loud</p>
-          <h2 className="mt-4 max-w-xl text-4xl font-black leading-tight tracking-tight sm:text-5xl">
-            A storefront should make products feel easy to trust.
-          </h2>
-          <p className="mt-5 max-w-xl leading-8 text-surface-300">
-            Quiet contrast, clear sections, and product imagery doing the heavy lifting.
+    <section className="section-container py-6">
+      <div className="grid overflow-hidden rounded-lg bg-blue-600 text-white lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-12">
+          <p className="text-sm font-semibold text-blue-100">Smart picks, better prices</p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Small upgrades that make a difference.</h2>
+          <p className="mt-4 max-w-lg leading-7 text-blue-100">
+            Browse everyday products chosen for usefulness, quality, and value.
           </p>
-          <Link to="/shop" className="mt-8 inline-flex items-center gap-2 bg-white px-6 py-3 text-sm font-black text-[#191815]">
-            Browse all
-            <ArrowRight size={18} />
+          <Link to="/shop" className="mt-7 inline-flex w-fit items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50">
+            Explore the collection <ArrowRight size={17} />
           </Link>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid min-h-64 grid-cols-2 gap-px bg-blue-500">
           {products.map((product) => (
-            <Link key={product.id} to={`/product/${product.slug}`} className="group overflow-hidden bg-[#f1eadf] text-[#191815]">
-              <ProductImage product={product} className="aspect-[4/5]" />
-              <div className="p-4">
-                <h3 className="line-clamp-2 font-black leading-tight">{product.name}</h3>
-                <div className="mt-2 text-sm font-black text-[#8d6f43]">
-                  {formatCurrency(product.sale_price ?? product.selling_price)}
-                </div>
+            <Link key={product.id} to={`/product/${product.slug}`} className="group relative min-h-64 overflow-hidden bg-surface-100">
+              <ProductImage product={product} className="h-full" />
+              <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/95 p-3 text-surface-900 shadow-sm backdrop-blur-sm">
+                <h3 className="line-clamp-1 text-sm font-semibold">{product.name}</h3>
+                <p className="mt-1 text-sm font-bold text-blue-600">{formatCurrency(product.sale_price ?? product.selling_price)}</p>
               </div>
             </Link>
           ))}
@@ -323,30 +324,27 @@ function EditorialBand({ products }: { products: Product[] }) {
   )
 }
 
-function Reviews() {
+function Benefits() {
+  const benefits = [
+    { icon: Truck, title: 'Fast delivery', text: 'Clear tracking from checkout to your door.' },
+    { icon: RotateCcw, title: 'Easy returns', text: 'A simple 30-day return window.' },
+    { icon: ShieldCheck, title: 'Secure checkout', text: 'Your payment details stay protected.' },
+    { icon: Headphones, title: 'Helpful support', text: 'Real help whenever you need it.' },
+  ]
+
   return (
-    <section className="section-container py-16">
-      <div className="grid gap-4 lg:grid-cols-3">
-        {[
-          ['Clean shopping', 'No noise. Just products, prices, and categories that are easy to read.'],
-          ['Looks trustworthy', 'The layout feels closer to a real store and less like a generated landing page.'],
-          ['Easy to browse', 'Everything is calm enough to scan quickly.'],
-        ].map(([title, text], index) => (
-          <motion.div
-            key={title}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.05 }}
-            className="bg-white p-6 shadow-sm ring-1 ring-[#191815]/10 dark:bg-surface-900 dark:ring-white/10"
-          >
-            <Quote className="mb-5 text-[#8d6f43]" size={26} />
-            <h3 className="font-black">{title}</h3>
-            <p className="mt-3 leading-7 text-[#6c6254] dark:text-surface-300">"{text}"</p>
-            <div className="mt-5 flex text-warning-500">
-              {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+    <section className="border-y border-surface-200 bg-surface-50 dark:border-surface-800 dark:bg-surface-900/50">
+      <div className="section-container grid sm:grid-cols-2 lg:grid-cols-4">
+        {benefits.map((benefit) => (
+          <div key={benefit.title} className="flex gap-3 border-b border-surface-200 py-7 sm:px-5 lg:border-b-0 lg:border-r dark:border-surface-800 first:sm:pl-0 last:border-r-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm ring-1 ring-surface-200 dark:bg-surface-900 dark:text-blue-400 dark:ring-surface-800">
+              <benefit.icon size={19} />
             </div>
-          </motion.div>
+            <div>
+              <h3 className="text-sm font-semibold">{benefit.title}</h3>
+              <p className="mt-1 text-sm leading-6 text-surface-500 dark:text-surface-400">{benefit.text}</p>
+            </div>
+          </div>
         ))}
       </div>
     </section>
@@ -355,41 +353,33 @@ function Reviews() {
 
 function Newsletter() {
   const [email, setEmail] = useState('')
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
+
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault()
     if (!email) return
     toast.success('You are on the list.')
     setEmail('')
   }
 
   return (
-    <section className="section-container pb-16">
-      <div className="grid bg-white shadow-sm ring-1 ring-[#191815]/10 dark:bg-surface-900 dark:ring-white/10 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="p-8 sm:p-10">
-          <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8d6f43]">Newsletter</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight">Get new edits first.</h2>
-          <p className="mt-3 max-w-xl leading-7 text-[#6c6254] dark:text-surface-300">
-            Fresh products, clean deals, and useful updates.
-          </p>
-          <form onSubmit={submit} className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="input-field flex-1 rounded-none"
-            />
-            <button type="submit" className="bg-[#191815] px-6 py-3 text-sm font-black text-white dark:bg-white dark:text-surface-950">
-              Join list
-            </button>
-          </form>
+    <section className="section-container py-14">
+      <div className="flex flex-col gap-7 rounded-lg border border-surface-200 bg-surface-50 p-7 sm:p-9 lg:flex-row lg:items-center lg:justify-between dark:border-surface-800 dark:bg-surface-900">
+        <div>
+          <p className={`text-sm font-semibold ${accent}`}>Stay in the loop</p>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">New products and worthwhile deals.</h2>
+          <p className="mt-2 text-surface-500 dark:text-surface-400">A useful email now and then. No clutter.</p>
         </div>
-        <div className="flex items-center justify-center border-t border-[#191815]/10 bg-[#f1eadf] p-8 dark:border-white/10 dark:bg-surface-950 lg:border-l lg:border-t-0">
-          <div className="flex h-40 w-40 items-center justify-center rounded-full bg-[#191815] text-center text-4xl font-black leading-none text-white">
-            10%<br />OFF
-          </div>
-        </div>
+        <form onSubmit={submit} className="flex w-full max-w-lg flex-col gap-2 sm:flex-row">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Email address"
+            className="input-field flex-1"
+          />
+          <button type="submit" className="btn-primary shrink-0">Join the list</button>
+        </form>
       </div>
     </section>
   )
@@ -399,14 +389,14 @@ function ProductGrid({ products, loading }: { products: Product[] | undefined; l
   if (loading) {
     return (
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} variant="card" />)}
+        {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} variant="card" />)}
       </div>
     )
   }
 
   if (!products || products.length === 0) {
     return (
-      <div className="border border-dashed border-[#191815]/20 bg-white py-12 text-center font-semibold text-[#6c6254] dark:border-white/20 dark:bg-surface-900">
+      <div className="rounded-lg border border-dashed border-surface-300 bg-surface-50 py-12 text-center text-sm font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900">
         No products available yet.
       </div>
     )
@@ -414,28 +404,27 @@ function ProductGrid({ products, loading }: { products: Product[] | undefined; l
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+      {products.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
     </div>
   )
 }
 
-function SectionHeading({ eyebrow, title, subtitle, link }: {
-  eyebrow: string
+function SectionHeading({ label, title, description, link }: {
+  label: string
   title: string
-  subtitle: string
+  description: string
   link?: string
 }) {
   return (
-    <div className="mb-8 flex items-end justify-between gap-5">
+    <div className="mb-7 flex items-end justify-between gap-5">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8d6f43]">{eyebrow}</p>
-        <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{title}</h2>
-        <p className="mt-3 max-w-2xl leading-7 text-[#6c6254] dark:text-surface-300">{subtitle}</p>
+        <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{label}</p>
+        <h2 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-surface-500 sm:text-base dark:text-surface-400">{description}</p>
       </div>
       {link && (
-        <Link to={link} className="hidden shrink-0 items-center gap-2 text-sm font-black text-[#191815] hover:text-[#8d6f43] dark:text-surface-300 sm:flex">
-          View all
-          <ArrowRight size={16} />
+        <Link to={link} className="hidden shrink-0 items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 sm:flex dark:text-blue-400 dark:hover:text-blue-300">
+          View all <ArrowRight size={16} />
         </Link>
       )}
     </div>

@@ -64,7 +64,7 @@ export default function MobileMenu() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-surface-950/45 backdrop-blur-sm"
             onClick={closeMobileMenu}
           />
 
@@ -79,7 +79,8 @@ export default function MobileMenu() {
             <div className="flex h-full flex-col overflow-y-auto">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
-                <span className="text-lg font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
+                <span className="flex items-center gap-2 text-lg font-bold text-surface-950 dark:text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm text-white">J</span>
                   Joe's Shop
                 </span>
                 <button
@@ -100,9 +101,9 @@ export default function MobileMenu() {
                         to={link.path}
                         onClick={closeMobileMenu}
                         className={clsx(
-                          'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all',
-                          'text-gray-700 hover:bg-gray-50 hover:text-violet-600',
-                          'dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-violet-400'
+                          'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
+                          'text-gray-700 hover:bg-blue-50 hover:text-blue-700',
+                          'dark:text-gray-300 dark:hover:bg-blue-950/30 dark:hover:text-blue-300'
                         )}
                       >
                         <link.icon className="h-5 w-5 shrink-0" />
@@ -129,8 +130,8 @@ export default function MobileMenu() {
                                 onClick={closeMobileMenu}
                                 className={clsx(
                                   'block rounded-lg px-4 py-2 text-sm transition-colors',
-                                  'text-gray-500 hover:bg-gray-50 hover:text-violet-600',
-                                  'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400'
+                                  'text-gray-500 hover:bg-blue-50 hover:text-blue-700',
+                                  'dark:text-gray-400 dark:hover:bg-blue-950/30 dark:hover:text-blue-300'
                                 )}
                               >
                                 {cat.label}
@@ -150,7 +151,7 @@ export default function MobileMenu() {
                 <button
                   onClick={toggleTheme}
                   className={clsx(
-                    'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all',
+                    'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
                     'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                   )}
                 >
@@ -172,7 +173,7 @@ export default function MobileMenu() {
                   to="/wishlist"
                   onClick={closeMobileMenu}
                   className={clsx(
-                    'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all',
+                    'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
                     'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                   )}
                 >
@@ -190,7 +191,7 @@ export default function MobileMenu() {
                       to="/profile"
                       onClick={closeMobileMenu}
                       className={clsx(
-                        'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all',
+                        'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
                         'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                       )}
                     >
@@ -201,7 +202,7 @@ export default function MobileMenu() {
                       to="/dashboard"
                       onClick={closeMobileMenu}
                       className={clsx(
-                        'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all',
+                        'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
                         'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                       )}
                     >
@@ -214,7 +215,7 @@ export default function MobileMenu() {
                         closeMobileMenu();
                       }}
                       className={clsx(
-                        'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all',
+                        'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
                         'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30'
                       )}
                     >
@@ -228,7 +229,7 @@ export default function MobileMenu() {
                       to="/login"
                       onClick={closeMobileMenu}
                       className={clsx(
-                        'flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium transition-all',
+                        'flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-3 text-sm font-medium transition-all',
                         'text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800'
                       )}
                     >
@@ -238,7 +239,7 @@ export default function MobileMenu() {
                     <Link
                       to="/register"
                       onClick={closeMobileMenu}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-3 text-sm font-medium text-white transition-all hover:opacity-90"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                     >
                       <User className="h-4 w-4" />
                       <span>Create Account</span>

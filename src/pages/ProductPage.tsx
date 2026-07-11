@@ -89,27 +89,28 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="page-container">
+    <div className="min-h-screen bg-white dark:bg-surface-950">
+      <div className="page-container py-10">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-1.5 text-sm text-surface-500 mb-6 flex-wrap">
-        <Link to="/" className="hover:text-primary-600">Home</Link>
+        <Link to="/" className="hover:text-blue-600">Home</Link>
         <ChevronRight size={14} />
         {product.categories?.[0] && (
           <>
-            <Link to={`/shop?category_id=${product.categories[0].id}`} className="hover:text-primary-600">{product.categories[0].name}</Link>
+            <Link to={`/shop?category_id=${product.categories[0].id}`} className="hover:text-blue-600">{product.categories[0].name}</Link>
             <ChevronRight size={14} />
           </>
         )}
         <span className="text-surface-900 dark:text-surface-50 truncate">{product.name}</span>
       </nav>
 
-      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
         {/* ===== Gallery ===== */}
         <div>
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative aspect-square rounded-3xl overflow-hidden bg-surface-100 dark:bg-surface-800 cursor-zoom-in"
+            className="relative aspect-square cursor-zoom-in overflow-hidden rounded-lg bg-surface-100 dark:bg-surface-800"
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setZoom((z) => ({ ...z, active: false }))}
           >
@@ -136,8 +137,8 @@ export default function ProductPage() {
                   key={img.id}
                   onClick={() => setActiveImage(i)}
                   className={clsx(
-                    'w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all',
-                    activeImage === i ? 'border-primary-600 scale-105' : 'border-transparent opacity-70 hover:opacity-100'
+                    'h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all',
+                    activeImage === i ? 'border-blue-600' : 'border-transparent opacity-70 hover:opacity-100'
                   )}
                 >
                   <img src={img.url} alt={img.alt_text || `view ${i + 1}`} className="w-full h-full object-cover" />
@@ -150,7 +151,7 @@ export default function ProductPage() {
         {/* ===== Info ===== */}
         <div>
           {product.brand && (
-            <Link to={`/shop?brand_id=${product.brand.id}`} className="text-sm text-primary-600 dark:text-primary-400 font-semibold hover:underline">
+            <Link to={`/shop?brand_id=${product.brand.id}`} className="text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400">
               {product.brand.name}
             </Link>
           )}
@@ -169,7 +170,7 @@ export default function ProductPage() {
               ))}
             </div>
             <span className="text-sm font-medium">{product.average_rating?.toFixed(1) || '0.0'}</span>
-            <a href="#reviews" className="text-sm text-surface-500 hover:text-primary-600">({product.review_count || 0} reviews)</a>
+            <a href="#reviews" className="text-sm text-surface-500 hover:text-blue-600">({product.review_count || 0} reviews)</a>
           </div>
 
           {/* Price */}
@@ -211,9 +212,9 @@ export default function ProductPage() {
                       setSelectedVariant(v?.id || null)
                     }}
                     className={clsx(
-                      'px-4 py-2 rounded-xl border-2 text-sm font-medium transition-all',
+                      'rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all',
                       variants.find((v) => v.id === selectedVariant)?.color === c
-                        ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/30'
                         : 'border-surface-300 dark:border-surface-700 hover:border-surface-400'
                     )}
                   >
@@ -237,9 +238,9 @@ export default function ProductPage() {
                       setSelectedVariant(v?.id || null)
                     }}
                     className={clsx(
-                      'min-w-[3rem] px-3 py-2 rounded-xl border-2 text-sm font-medium transition-all',
+                      'min-w-[3rem] rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all',
                       variants.find((v) => v.id === selectedVariant)?.size === s
-                        ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/30'
                         : 'border-surface-300 dark:border-surface-700 hover:border-surface-400'
                     )}
                   >
@@ -252,12 +253,12 @@ export default function ProductPage() {
 
           {/* Quantity + actions */}
           <div className="mt-6 flex items-center gap-3">
-            <div className="flex items-center border border-surface-300 dark:border-surface-700 rounded-xl">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-3 hover:text-primary-600" aria-label="Decrease">
+            <div className="flex items-center rounded-lg border border-surface-300 dark:border-surface-700">
+              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-3 hover:text-blue-600" aria-label="Decrease">
                 <Minus size={16} />
               </button>
               <span className="w-12 text-center font-semibold">{qty}</span>
-              <button onClick={() => setQty((q) => q + 1)} className="p-3 hover:text-primary-600" aria-label="Increase">
+              <button onClick={() => setQty((q) => q + 1)} className="p-3 hover:text-blue-600" aria-label="Increase">
                 <Plus size={16} />
               </button>
             </div>
@@ -300,8 +301,8 @@ export default function ProductPage() {
               { icon: RotateCcw, label: '30-day returns', sub: 'Hassle-free' },
               { icon: ShieldCheck, label: 'Secure', sub: 'Protected checkout' },
             ].map((b) => (
-              <div key={b.label} className="card p-3 text-center">
-                <b.icon className="mx-auto text-primary-600 mb-1" size={20} />
+              <div key={b.label} className="rounded-lg border border-surface-200 bg-surface-50 p-3 text-center dark:border-surface-800 dark:bg-surface-900">
+                <b.icon className="mx-auto mb-1 text-blue-600 dark:text-blue-400" size={20} />
                 <div className="text-xs font-semibold">{b.label}</div>
                 <div className="text-[10px] text-surface-500">{b.sub}</div>
               </div>
@@ -345,6 +346,7 @@ export default function ProductPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
@@ -435,7 +437,7 @@ function ReviewsSection({ productId, reviews, averageRating, reviewCount, isLogg
           reviews.map((r: any) => (
             <div key={r.id} className="card p-5">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center font-semibold flex-shrink-0">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 font-semibold text-white">
                   {(r.user?.first_name?.[0] || 'A').toUpperCase()}
                 </div>
                 <div className="flex-1">
@@ -451,8 +453,8 @@ function ReviewsSection({ productId, reviews, averageRating, reviewCount, isLogg
                   {r.title && <div className="font-medium mt-2">{r.title}</div>}
                   <p className="text-surface-600 dark:text-surface-400 mt-1">{r.comment}</p>
                   {r.admin_reply && (
-                    <div className="mt-3 p-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 text-sm">
-                      <div className="font-semibold text-primary-700 dark:text-primary-300 mb-1">Store Response</div>
+                    <div className="mt-3 rounded-lg bg-blue-50 p-3 text-sm dark:bg-blue-950/30">
+                      <div className="mb-1 font-semibold text-blue-700 dark:text-blue-300">Store Response</div>
                       {r.admin_reply}
                     </div>
                   )}

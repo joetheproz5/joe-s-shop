@@ -28,8 +28,8 @@ export default function ShopPage() {
   const page = parseInt(searchParams.get('page') || '1', 10)
   const sortValue = searchParams.get('sort') || 'newest'
   const search = searchParams.get('search') || ''
-  const categoryIds = searchParams.getAll('category').filter(Boolean)
-  const brandIds = searchParams.getAll('brand').filter(Boolean)
+  const categoryIds = [...searchParams.getAll('category'), ...searchParams.getAll('category_id')].filter(Boolean)
+  const brandIds = [...searchParams.getAll('brand'), ...searchParams.getAll('brand_id')].filter(Boolean)
   const minPrice = searchParams.get('min_price') ? Number(searchParams.get('min_price')) : undefined
   const maxPrice = searchParams.get('max_price') ? Number(searchParams.get('max_price')) : undefined
   const color = searchParams.get('color') || undefined
@@ -83,16 +83,17 @@ export default function ShopPage() {
   ].filter(Boolean).length
 
   return (
-    <div className="page-container">
+    <div className="min-h-screen bg-surface-50/70 dark:bg-surface-950">
+      <div className="page-container py-10">
       {/* Header */}
-      <div className="mb-6">
-        <nav className="text-sm text-surface-500 mb-2">
+      <div className="mb-8">
+        <nav className="mb-2 text-sm text-surface-500">
           <span>Home</span> <span className="mx-1">/</span> <span className="text-surface-900 dark:text-surface-50">Shop</span>
         </nav>
-        <div className="flex items-end justify-between gap-4 flex-wrap">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Shop All Products</h1>
-            <p className="text-surface-500 mt-1">{data?.total || 0} products available</p>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">All products</h1>
+            <p className="mt-2 text-surface-500">{data?.total || 0} products, ready to browse.</p>
           </div>
           <div className="flex items-center gap-3">
             {/* Sort */}
@@ -107,11 +108,11 @@ export default function ShopPage() {
               <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 pointer-events-none" />
             </div>
             {/* View toggle */}
-            <div className="hidden sm:flex border border-surface-300 dark:border-surface-700 rounded-xl overflow-hidden">
-              <button onClick={() => setView('grid')} className={clsx('p-2.5', view === 'grid' ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600' : 'text-surface-500')}>
+            <div className="hidden overflow-hidden rounded-lg border border-surface-300 bg-white sm:flex dark:border-surface-700 dark:bg-surface-900">
+              <button onClick={() => setView('grid')} className={clsx('p-2.5', view === 'grid' ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400' : 'text-surface-500')} aria-label="Grid view">
                 <Grid3x3 size={18} />
               </button>
-              <button onClick={() => setView('list')} className={clsx('p-2.5', view === 'list' ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600' : 'text-surface-500')}>
+              <button onClick={() => setView('list')} className={clsx('p-2.5', view === 'list' ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400' : 'text-surface-500')} aria-label="List view">
                 <List size={18} />
               </button>
             </div>
@@ -123,10 +124,11 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
         {/* Sidebar filters — desktop */}
         <aside className="hidden lg:block">
-          <FilterPanel
+          <div className="sticky top-24 rounded-lg border border-surface-200 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+            <FilterPanel
             categories={categories || []}
             brands={brands || []}
             categoryIds={categoryIds}
@@ -141,7 +143,8 @@ export default function ShopPage() {
             onColorChange={(v) => updateParam('color', v)}
             onClear={clearFilters}
             activeCount={activeFilterCount}
-          />
+            />
+          </div>
         </aside>
 
         {/* Mobile filter drawer */}
@@ -153,14 +156,14 @@ export default function ShopPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setShowFilters(false)}
-                className="lg:hidden fixed inset-0 bg-black/50 z-40"
+                className="fixed inset-0 z-40 bg-surface-950/45 lg:hidden"
               />
               <motion.div
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', damping: 30 }}
-                className="lg:hidden fixed top-0 left-0 bottom-0 w-[85%] max-w-sm bg-white dark:bg-surface-900 z-50 overflow-y-auto p-5"
+                className="fixed bottom-0 left-0 top-0 z-50 w-[85%] max-w-sm overflow-y-auto bg-white p-5 shadow-xl dark:bg-surface-900 lg:hidden"
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold text-lg">Filters</h3>
@@ -195,7 +198,7 @@ export default function ShopPage() {
               {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} variant="card" />)}
             </div>
           ) : !data || data.data.length === 0 ? (
-            <div className="card p-16 text-center">
+            <div className="rounded-lg border border-surface-200 bg-white p-16 text-center dark:border-surface-800 dark:bg-surface-900">
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
                 <SlidersHorizontal className="text-surface-400" size={28} />
               </div>
@@ -222,6 +225,7 @@ export default function ShopPage() {
             </>
           )}
         </div>
+      </div>
       </div>
     </div>
   )
@@ -256,12 +260,12 @@ function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxP
       {/* Categories */}
       <FilterGroup title="Category">
         {(categories || []).filter((category) => !category.parent_id).map((cat) => (
-          <label key={cat.id} className="flex items-center gap-2 py-1 cursor-pointer hover:text-primary-600">
+          <label key={cat.id} className="flex cursor-pointer items-center gap-2 py-1 hover:text-blue-600">
             <input
               type="checkbox"
               checked={categoryIds.includes(cat.id)}
               onChange={() => onToggleCategory(cat.id)}
-              className="w-4 h-4 rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              className="h-4 w-4 rounded border-surface-300 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm">{cat.name}</span>
             <span className="ml-auto text-xs text-surface-400">{cat.product_count}</span>
@@ -272,12 +276,12 @@ function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxP
       {/* Brands */}
       <FilterGroup title="Brand">
         {(brands || []).map((brand) => (
-          <label key={brand.id} className="flex items-center gap-2 py-1 cursor-pointer hover:text-primary-600">
+          <label key={brand.id} className="flex cursor-pointer items-center gap-2 py-1 hover:text-blue-600">
             <input
               type="checkbox"
               checked={brandIds.includes(brand.id)}
               onChange={() => onToggleBrand(brand.id)}
-              className="w-4 h-4 rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+              className="h-4 w-4 rounded border-surface-300 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm">{brand.name}</span>
           </label>
@@ -294,7 +298,7 @@ function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxP
             onChange={(e) => onPriceChange(Number(e.target.value) || 0, maxPrice || 0)}
             className="input-field py-1.5 text-sm"
           />
-          <span className="text-surface-400">–</span>
+          <span className="text-surface-400">-</span>
           <input
             type="number"
             placeholder="Max"
@@ -315,7 +319,7 @@ function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxP
               title={c}
               className={clsx(
                 'w-8 h-8 rounded-full border-2 transition-all',
-                color === c ? 'border-primary-600 scale-110' : 'border-surface-200 dark:border-surface-700'
+                color === c ? 'scale-110 border-blue-600' : 'border-surface-200 dark:border-surface-700'
               )}
               style={{ backgroundColor: colorNameToHex(c) }}
             />
@@ -325,7 +329,7 @@ function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxP
 
       <FilterGroup title="Rating">
         {[5, 4, 3].map((r) => (
-          <button key={r} className="flex items-center gap-1 py-1 text-sm text-surface-500 hover:text-primary-600">
+          <button key={r} className="flex items-center gap-1 py-1 text-sm text-surface-500 hover:text-blue-600">
             {Array.from({ length: r }).map((_, i) => <Star key={i} size={13} className="text-warning-500" fill="currentColor" />)}
             <span>& up</span>
           </button>

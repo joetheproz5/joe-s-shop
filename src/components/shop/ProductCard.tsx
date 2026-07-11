@@ -52,7 +52,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.04, 0.4) }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -2 }}
       className="card group flex flex-col"
     >
       <Link to={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface-100 dark:bg-surface-800">
@@ -61,7 +61,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
             src={featuredImage}
             alt={product.name}
             loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-surface-300">
@@ -102,7 +102,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className="flex-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg py-2.5 text-sm font-semibold flex items-center justify-center gap-2 shadow-lg hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-blue-700 disabled:opacity-50"
           >
             <ShoppingCart size={16} /> Add
           </button>
@@ -122,7 +122,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
         )}
         <Link
           to={`/product/${product.slug}`}
-          className="font-medium leading-snug hover:text-primary-600 dark:hover:text-primary-400 transition-colors line-clamp-2"
+          className="line-clamp-2 font-medium leading-snug transition-colors hover:text-blue-600 dark:hover:text-blue-400"
         >
           {product.name}
         </Link>

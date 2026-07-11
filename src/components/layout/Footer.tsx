@@ -40,39 +40,34 @@ const paymentMethods = ['Visa', 'Mastercard', 'PayPal', 'Apple Pay', 'Google Pay
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-950">
+    <footer className="border-t border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-950">
       {/* Main footer content */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Column 1: Company info */}
           <div className="sm:col-span-2 lg:col-span-1">
             {/* Logo */}
-            <Link to="/" className="inline-block text-xl font-extrabold tracking-tight">
-              <span className="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
-                Joe's
-              </span>
-              <span className="bg-gradient-to-r from-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
-                {' '}Shop
-              </span>
+            <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-surface-950 dark:text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm text-white">J</span>
+              <span>Joe's Shop</span>
             </Link>
 
             <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Premium products curated with care. We bring you the finest selection with
-              exceptional quality, fast shipping, and world-class customer service.
+              Useful products, clear prices, fast shipping, and support when you need it.
             </p>
 
             {/* Contact info */}
             <ul className="mt-6 space-y-3">
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <MapPin className="h-4 w-4 flex-shrink-0 text-violet-500" />
+                <MapPin className="h-4 w-4 flex-shrink-0 text-blue-500" />
                 <span>123 Commerce Street, NY 10001</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Phone className="h-4 w-4 flex-shrink-0 text-violet-500" />
+                <Phone className="h-4 w-4 flex-shrink-0 text-blue-500" />
                 <span>+1 (555) 123-4567</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Mail className="h-4 w-4 flex-shrink-0 text-violet-500" />
+                <Mail className="h-4 w-4 flex-shrink-0 text-blue-500" />
                 <span>hello@joesshop.com</span>
               </li>
             </ul>
@@ -85,9 +80,9 @@ export default function Footer() {
                   href={social.href}
                   aria-label={social.label}
                   className={clsx(
-                    'flex h-9 w-9 items-center justify-center rounded-full transition-all',
-                    'text-gray-500 hover:bg-violet-100 hover:text-violet-600',
-                    'dark:text-gray-400 dark:hover:bg-violet-950/30 dark:hover:text-violet-400'
+                    'flex h-9 w-9 items-center justify-center rounded-lg transition-all',
+                    'text-gray-500 hover:bg-blue-50 hover:text-blue-600',
+                    'dark:text-gray-400 dark:hover:bg-blue-950/30 dark:hover:text-blue-400'
                   )}
                 >
                   <social.icon className="h-4 w-4" />
@@ -108,7 +103,7 @@ export default function Footer() {
                     to={link.path}
                     className={clsx(
                       'text-sm transition-colors',
-                      'text-gray-600 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400'
+                      'text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400'
                     )}
                   >
                     {link.label}
@@ -130,7 +125,7 @@ export default function Footer() {
                     to={link.path}
                     className={clsx(
                       'text-sm transition-colors',
-                      'text-gray-600 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400'
+                      'text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400'
                     )}
                   >
                     {link.label}
@@ -156,16 +151,16 @@ export default function Footer() {
                   className={clsx(
                     'w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-all',
                     'border-gray-200 bg-white placeholder-gray-400',
-                    'focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20',
+                    'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20',
                     'dark:border-gray-700 dark:bg-gray-900 dark:placeholder-gray-500',
-                    'dark:focus:border-violet-400 dark:focus:ring-violet-400/20'
+                    'dark:focus:border-blue-400 dark:focus:ring-blue-400/20'
                   )}
                 />
                 <button
                   type="submit"
                   className={clsx(
                     'flex shrink-0 items-center justify-center rounded-lg px-4 py-2.5 transition-all',
-                    'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-90'
+                    'bg-blue-600 text-white hover:bg-blue-700'
                   )}
                   aria-label="Subscribe"
                 >
@@ -223,13 +218,13 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             <Link
               to="/privacy"
-              className="text-sm text-gray-500 transition-colors hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400"
+              className="text-sm text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
             >
               Privacy Policy
             </Link>
             <Link
               to="/terms"
-              className="text-sm text-gray-500 transition-colors hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400"
+              className="text-sm text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
             >
               Terms of Service
             </Link>

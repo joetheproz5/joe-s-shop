@@ -109,10 +109,10 @@ export default function Header() {
     <>
       <header
         className={clsx(
-          'fixed top-0 left-0 right-0 z-40 transition-all duration-300',
+          'fixed left-0 right-0 top-0 z-40 border-b border-surface-200 transition-all duration-200 dark:border-surface-800',
           scrolled
-            ? 'bg-white/80 shadow-lg shadow-black/5 backdrop-blur-xl dark:bg-gray-950/80'
-            : 'bg-white dark:bg-gray-950'
+            ? 'bg-white/95 shadow-sm backdrop-blur-xl dark:bg-surface-950/95'
+            : 'bg-white dark:bg-surface-950'
         )}
       >
         {/* Search overlay */}
@@ -150,14 +150,10 @@ export default function Header() {
           {/* Left: Logo */}
           <Link
             to="/"
-            className="flex items-center gap-2 text-xl font-extrabold tracking-tight"
+            className="flex items-center gap-2 text-xl font-bold tracking-tight text-surface-950 dark:text-white"
           >
-            <span className="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
-              Joe's
-            </span>
-            <span className="bg-gradient-to-r from-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
-              Shop
-            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">J</span>
+            <span>Joe's Shop</span>
           </Link>
 
           {/* Center: Desktop Navigation */}
@@ -174,8 +170,8 @@ export default function Header() {
                   className={clsx(
                     'flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-all',
                     isActive(link.path)
-                      ? 'text-violet-600 dark:text-violet-400'
-                      : 'text-gray-600 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400'
+                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'
+                      : 'text-gray-600 hover:bg-surface-50 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-surface-900 dark:hover:text-blue-400'
                   )}
                 >
                   {link.label}
@@ -199,7 +195,7 @@ export default function Header() {
                         exit={{ opacity: 0, y: 8, scale: 0.98 }}
                         transition={{ duration: 0.15 }}
                         className={clsx(
-                          'absolute top-full left-1/2 mt-2 -translate-x-1/2 rounded-2xl border shadow-2xl',
+                          'absolute left-1/2 top-full mt-2 -translate-x-1/2 rounded-lg border shadow-xl',
                           'border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900',
                           'w-[480px]'
                         )}
@@ -215,9 +211,9 @@ export default function Header() {
                               key={child.path}
                               to={child.path}
                               className={clsx(
-                                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
-                                'text-gray-700 hover:bg-violet-50 hover:text-violet-600',
-                                'dark:text-gray-300 dark:hover:bg-violet-950/30 dark:hover:text-violet-400'
+                                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+                                'text-gray-700 hover:bg-blue-50 hover:text-blue-700',
+                                'dark:text-gray-300 dark:hover:bg-blue-950/30 dark:hover:text-blue-300'
                               )}
                             >
                               <Package className="h-4 w-4 text-gray-400" />
@@ -229,8 +225,8 @@ export default function Header() {
                           <Link
                             to="/categories"
                             className={clsx(
-                              'flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium',
-                              'text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-950/30'
+                              'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium',
+                              'text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30'
                             )}
                           >
                             View All Categories
@@ -251,10 +247,10 @@ export default function Header() {
             <button
               onClick={toggleSearch}
               className={clsx(
-                'rounded-full p-2 transition-all',
-                'text-gray-600 hover:bg-gray-100 hover:text-violet-600',
-                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400',
-                searchOpen && 'bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400'
+                'rounded-lg p-2 transition-all',
+                'text-gray-600 hover:bg-gray-100 hover:text-blue-600',
+                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400',
+                searchOpen && 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
               )}
               aria-label="Toggle search"
             >
@@ -265,9 +261,9 @@ export default function Header() {
             <button
               onClick={toggleTheme}
               className={clsx(
-                'rounded-full p-2 transition-all',
-                'text-gray-600 hover:bg-gray-100 hover:text-violet-600',
-                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400'
+                'hidden rounded-lg p-2 transition-all sm:inline-flex',
+                'text-gray-600 hover:bg-gray-100 hover:text-blue-600',
+                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400'
               )}
               aria-label="Toggle theme"
             >
@@ -278,9 +274,9 @@ export default function Header() {
             <Link
               to="/wishlist"
               className={clsx(
-                'relative rounded-full p-2 transition-all',
-                'text-gray-600 hover:bg-gray-100 hover:text-violet-600',
-                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400'
+                'relative hidden rounded-lg p-2 transition-all sm:inline-flex',
+                'text-gray-600 hover:bg-gray-100 hover:text-blue-600',
+                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400'
               )}
               aria-label="Wishlist"
             >
@@ -288,7 +284,7 @@ export default function Header() {
               {wishlistCount > 0 && (
                 <span className={clsx(
                   'absolute -right-0.5 -top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full px-1',
-                  'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-[10px] font-bold text-white'
+                  'bg-blue-600 text-[10px] font-bold text-white'
                 )}>
                   {wishlistCount}
                 </span>
@@ -299,9 +295,9 @@ export default function Header() {
             <Link
               to="/cart"
               className={clsx(
-                'relative rounded-full p-2 transition-all',
-                'text-gray-600 hover:bg-gray-100 hover:text-violet-600',
-                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400'
+                'relative rounded-lg p-2 transition-all',
+                'text-gray-600 hover:bg-gray-100 hover:text-blue-600',
+                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400'
               )}
               aria-label="Cart"
             >
@@ -309,7 +305,7 @@ export default function Header() {
               {itemCount > 0 && (
                 <span className={clsx(
                   'absolute -right-0.5 -top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full px-1',
-                  'bg-gradient-to-r from-violet-600 to-fuchsia-500 text-[10px] font-bold text-white'
+                  'bg-blue-600 text-[10px] font-bold text-white'
                 )}>
                   {itemCount}
                 </span>
@@ -321,14 +317,14 @@ export default function Header() {
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className={clsx(
-                  'flex items-center gap-2 rounded-full p-2 transition-all',
-                  'text-gray-600 hover:bg-gray-100 hover:text-violet-600',
-                  'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400'
+                  'flex items-center gap-2 rounded-lg p-2 transition-all',
+                  'text-gray-600 hover:bg-gray-100 hover:text-blue-600',
+                  'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400'
                 )}
                 aria-label="User menu"
               >
                 {user ? (
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-xs font-bold text-white">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-xs font-bold text-white">
                     {user.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 ) : (
@@ -344,7 +340,7 @@ export default function Header() {
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
                     className={clsx(
-                      'absolute top-full right-0 mt-2 w-56 overflow-hidden rounded-xl border shadow-xl',
+                      'absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-lg border shadow-xl',
                       'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900'
                     )}
                   >
@@ -417,7 +413,7 @@ export default function Header() {
                           to="/register"
                           className={clsx(
                             'mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all',
-                            'bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:opacity-90'
+                            'bg-blue-600 hover:bg-blue-700'
                           )}
                         >
                           Create Account
@@ -433,9 +429,9 @@ export default function Header() {
             <button
               onClick={openMobileMenu}
               className={clsx(
-                'rounded-full p-2 transition-all lg:hidden',
-                'text-gray-600 hover:bg-gray-100 hover:text-violet-600',
-                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400'
+                'rounded-lg p-2 transition-all lg:hidden',
+                'text-gray-600 hover:bg-gray-100 hover:text-blue-600',
+                'dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400'
               )}
               aria-label="Open menu"
             >
