@@ -530,11 +530,43 @@ export function SettingsPage() {
 }
 
 export function RolesPage() {
-  const modules = ['dashboard', 'products', 'orders', 'customers', 'coupons', 'reviews', 'analytics', 'inventory', 'media', 'settings', 'roles']
+  const modules = ['dashboard', 'products', 'categories', 'brands', 'orders', 'customers', 'coupons', 'reviews', 'analytics', 'inventory', 'media', 'settings', 'roles']
+  const hasAdminAccess = (role: UserRole) => role === 'super_admin' || role === 'admin'
+
   return (
     <div className="space-y-6"><AdminPageHeader eyebrow="Access" title="Roles & Permissions" description="Role matrix for super admins, admins, managers, employees, and customers." />
-      <div className="grid gap-4 md:grid-cols-5">{ROLES.map((role) => <AdminMetricCard key={role.value} label={role.label} value={role.value === 'customer' ? 'Shop' : 'Staff'} helper={role.description} tone={statusTone[role.value]} icon={<Shield size={19} />} />)}</div>
-      <div className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900"><div className="overflow-x-auto"><table className="admin-table min-w-[860px]"><thead className="admin-thead"><tr><th>Module</th>{ROLES.map((role) => <th key={role.value}>{role.label}</th>)}</tr></thead><tbody>{modules.map((module) => <tr key={module}><td className="font-semibold capitalize">{module}</td>{ROLES.map((role) => { const allowed = role.value === 'super_admin' || (role.value === 'admin' && module !== 'roles') || (role.value === 'manager' && ['dashboard', 'products', 'orders', 'customers', 'coupons', 'reviews', 'analytics', 'inventory', 'media'].includes(module)) || (role.value === 'employee' && ['dashboard', 'orders', 'inventory', 'media'].includes(module)) || (role.value === 'customer' && module === 'dashboard'); return <td key={role.value}>{allowed ? <Check size={17} className="text-success-600" /> : <X size={17} className="text-surface-300" />}</td> })}</tr>)}</tbody></table></div></div>
+      <div className="grid gap-4 md:grid-cols-5">
+        {ROLES.map((role) => (
+          <AdminMetricCard
+            key={role.value}
+            label={role.label}
+            value={hasAdminAccess(role.value) ? 'Admin' : 'Store only'}
+            helper={role.description}
+            tone={statusTone[role.value]}
+            icon={<Shield size={19} />}
+          />
+        ))}
+      </div>
+      <div className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
+        <div className="overflow-x-auto">
+          <table className="admin-table min-w-[860px]">
+            <thead className="admin-thead">
+              <tr><th>Module</th>{ROLES.map((role) => <th key={role.value}>{role.label}</th>)}</tr>
+            </thead>
+            <tbody>
+              {modules.map((module) => (
+                <tr key={module}>
+                  <td className="font-semibold capitalize">{module}</td>
+                  {ROLES.map((role) => {
+                    const allowed = hasAdminAccess(role.value)
+                    return <td key={role.value}>{allowed ? <Check size={17} className="text-success-600" aria-label="Allowed" /> : <X size={17} className="text-surface-300" aria-label="Not allowed" />}</td>
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Instagram, Mail, MapPin } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 
 const columns = [
   { title: 'Shop', links: [
@@ -9,11 +10,13 @@ const columns = [
     ['My account', '/account'], ['Orders', '/account/orders'], ['Contact', '/contact'], ['Returns', '/contact'],
   ] },
   { title: 'Joe’s', links: [
-    ['Our story', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms'], ['Admin', '/admin'],
+    ['Our story', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms'],
   ] },
 ]
 
 export default function Footer() {
+  const { isAdmin } = useAuth()
+
   return (
     <footer className="border-t border-surface-200 bg-[#f7f7f5] dark:border-surface-800 dark:bg-[#111]">
       <div className="section-container py-16 sm:py-20">
@@ -28,7 +31,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            {columns.map((column) => <div key={column.title}><h3 className="text-xs font-semibold uppercase tracking-[.16em] text-surface-400">{column.title}</h3><ul className="mt-5 space-y-3.5">{column.links.map(([label, path]) => <li key={label}><Link to={path} className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">{label}</Link></li>)}</ul></div>)}
+            {columns.map((column) => <div key={column.title}><h3 className="text-xs font-semibold uppercase tracking-[.16em] text-surface-400">{column.title}</h3><ul className="mt-5 space-y-3.5">{column.links.map(([label, path]) => <li key={label}><Link to={path} className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">{label}</Link></li>)}{column.title === 'Joe’s' && isAdmin && <li><Link to="/admin" className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">Admin</Link></li>}</ul></div>)}
           </div>
         </div>
         <div className="mt-16 flex flex-col gap-4 border-t border-surface-200 pt-7 text-xs text-surface-400 sm:flex-row sm:items-center sm:justify-between dark:border-surface-800">

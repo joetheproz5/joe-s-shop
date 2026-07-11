@@ -32,7 +32,7 @@ const categories = [
 export default function MobileMenu() {
   const { mobileMenuOpen, closeMobileMenu } = useUIStore();
   const { theme, toggleTheme } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -198,17 +198,19 @@ export default function MobileMenu() {
                       <User className="h-5 w-5" />
                       <span>Profile</span>
                     </Link>
-                    <Link
-                      to="/admin/dashboard"
-                      onClick={closeMobileMenu}
-                      className={clsx(
-                        'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
-                        'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
-                      )}
-                    >
-                      <LayoutDashboard className="h-5 w-5" />
-                      <span>Dashboard</span>
-                    </Link>
+                    {isAdmin && (
+                      <Link
+                        to="/admin/dashboard"
+                        onClick={closeMobileMenu}
+                        className={clsx(
+                          'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
+                          'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+                        )}
+                      >
+                        <LayoutDashboard className="h-5 w-5" />
+                        <span>Dashboard</span>
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         signOut();
