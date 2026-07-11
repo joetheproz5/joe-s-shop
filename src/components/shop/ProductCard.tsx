@@ -52,10 +52,10 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.04, 0.4) }}
-      whileHover={{ y: -4 }}
-      className="card group flex flex-col"
+      whileHover={{ y: -6, rotateX: 1.5, rotateY: -1.5 }}
+      className="card product-card-3d group flex flex-col"
     >
-      <Link to={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface-100 dark:bg-surface-800">
+      <Link to={`/product/${product.slug}`} className="product-card-media relative block aspect-square overflow-hidden bg-surface-100 transition-transform duration-300 dark:bg-surface-800">
         {featuredImage ? (
           <img
             src={featuredImage}
@@ -81,7 +81,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
           onClick={handleWishlist}
           aria-label="Toggle wishlist"
           className={clsx(
-            'absolute top-3 right-3 w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all',
+            'absolute top-3 right-3 w-9 h-9 rounded-lg backdrop-blur-md flex items-center justify-center transition-all',
             isInWishlist
               ? 'bg-danger-500 text-white'
               : 'bg-white/80 dark:bg-surface-900/80 text-surface-700 dark:text-surface-300 hover:bg-white dark:hover:bg-surface-800'
@@ -102,14 +102,14 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className="flex-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 shadow-lg hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50"
+            className="flex-1 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg py-2.5 text-sm font-semibold flex items-center justify-center gap-2 shadow-lg hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50"
           >
             <ShoppingCart size={16} /> Add
           </button>
           <button
             onClick={handleQuickView}
             aria-label="Quick view"
-            className="w-10 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-xl flex items-center justify-center shadow-lg hover:bg-surface-100 dark:hover:bg-surface-800"
+            className="w-10 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg flex items-center justify-center shadow-lg hover:bg-surface-100 dark:hover:bg-surface-800"
           >
             <Eye size={16} />
           </button>

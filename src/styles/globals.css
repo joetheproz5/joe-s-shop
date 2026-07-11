@@ -94,7 +94,7 @@
   }
 
   .card {
-    @apply bg-white dark:bg-surface-900 rounded-2xl border border-surface-200 dark:border-surface-800 shadow-sm overflow-hidden transition-all duration-200;
+    @apply bg-white dark:bg-surface-900 rounded-lg border border-surface-200 dark:border-surface-800 shadow-sm overflow-hidden transition-all duration-200;
   }
 
   .admin-table {
@@ -152,6 +152,40 @@
   .page-container {
     @apply section-container py-8;
   }
+
+  .perspective-scene {
+    perspective: 1200px;
+    transform-style: preserve-3d;
+  }
+
+  .hero-product-plane {
+    transform-style: preserve-3d;
+    transition: transform 500ms ease, box-shadow 500ms ease;
+  }
+
+  .hero-product-plane-main {
+    transform: rotateX(7deg) rotateY(-16deg) rotateZ(-2deg) translateZ(56px);
+  }
+
+  .hero-product-plane-side {
+    transform: rotateX(10deg) rotateY(-26deg) rotateZ(4deg) translateZ(14px);
+  }
+
+  .hero-product-plane-base {
+    transform: rotateX(14deg) rotateY(-18deg) rotateZ(-7deg) translateZ(-18px);
+  }
+
+  .perspective-scene:hover .hero-product-plane-main {
+    transform: rotateX(5deg) rotateY(-10deg) rotateZ(-1deg) translateZ(76px) translateY(-8px);
+  }
+
+  .perspective-scene:hover .hero-product-plane-side {
+    transform: rotateX(8deg) rotateY(-20deg) rotateZ(3deg) translateZ(30px) translateY(-4px);
+  }
+
+  .perspective-scene:hover .hero-product-plane-base {
+    transform: rotateX(12deg) rotateY(-14deg) rotateZ(-5deg) translateZ(-4px);
+  }
 }
 
 @layer utilities {
@@ -166,5 +200,27 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .product-card-3d {
+    transform-style: preserve-3d;
+  }
+
+  .product-card-3d:hover {
+    box-shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
+  }
+
+  .product-card-3d:hover .product-card-media {
+    transform: translateZ(18px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-product-plane,
+    .perspective-scene:hover .hero-product-plane-main,
+    .perspective-scene:hover .hero-product-plane-side,
+    .perspective-scene:hover .hero-product-plane-base,
+    .product-card-3d:hover .product-card-media {
+      transform: none;
+    }
   }
 }

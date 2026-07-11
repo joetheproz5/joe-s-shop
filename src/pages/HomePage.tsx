@@ -1,18 +1,28 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  ArrowRight, Sparkles, TrendingUp, Star, Truck, ShieldCheck, RotateCcw,
-  Facebook, Twitter, Instagram, Youtube, Quote,
+  ArrowRight,
+  BadgeCheck,
+  Box,
+  ChevronRight,
+  Quote,
+  RotateCcw,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Truck,
+  Zap,
 } from 'lucide-react'
 import { useFeaturedProducts, useNewArrivals, useBestSellers } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { useSettings } from '@/hooks/useSettings'
 import { ProductCard } from '@/components/shop/ProductCard'
 import { Skeleton } from '@/components/ui'
-import { clsx } from '@/lib/utils'
 import { SITE_NAME } from '@/lib/constants'
+import { formatCurrency } from '@/lib/utils'
+import type { Product } from '@/types'
 import toast from 'react-hot-toast'
-import { useState } from 'react'
 
 export default function HomePage() {
   const { data: settings } = useSettings()
@@ -22,206 +32,238 @@ export default function HomePage() {
   const { data: bestSellers, isLoading: bestLoading } = useBestSellers(4)
 
   const hero = {
-    title: settings?.hero_title || 'Premium Products for Modern Living',
-    subtitle: settings?.hero_subtitle || 'Shop handpicked essentials from the world\'s best brands.',
-    ctaText: settings?.hero_cta_text || 'Shop Now',
+    title: settings?.hero_title || 'Curated gear for sharper everyday living',
+    subtitle:
+      settings?.hero_subtitle ||
+      'Shop useful, well-made products across tech, style, home, fitness, and books.',
+    ctaText: settings?.hero_cta_text || 'Shop the edit',
     ctaLink: settings?.hero_cta_link || '/shop',
   }
 
   const topCats = (categories || []).filter((c) => !c.parent_id).slice(0, 5)
+  const heroProducts = (featured || []).slice(0, 3)
 
   return (
-    <div>
-      {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white">
-        <div className="absolute inset-0 opacity-20">
-          <motion.div
-            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-            transition={{ duration: 12, repeat: Infinity }}
-            className="absolute top-10 left-1/4 w-72 h-72 bg-primary-300 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
-            transition={{ duration: 15, repeat: Infinity }}
-            className="absolute bottom-10 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl"
-          />
+    <div className="bg-white text-surface-950 dark:bg-surface-950 dark:text-white">
+      <section className="relative overflow-hidden border-b border-surface-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] dark:border-surface-800 dark:bg-[linear-gradient(180deg,#0d1117_0%,#111827_100%)]">
+        <div className="section-container grid min-h-[calc(100vh-72px)] items-center gap-12 py-14 lg:grid-cols-[0.95fr_1.05fr] lg:py-20">
+          <div className="max-w-2xl">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-surface-600 shadow-sm dark:border-surface-800 dark:bg-surface-900 dark:text-surface-300"
+            >
+              <Sparkles size={14} className="text-primary-500" />
+              {SITE_NAME} selection
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="max-w-3xl text-5xl font-black leading-[0.95] tracking-tight text-surface-950 dark:text-white sm:text-6xl lg:text-7xl"
+            >
+              {hero.title}
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-6 max-w-xl text-base leading-8 text-surface-600 dark:text-surface-300 sm:text-lg"
+            >
+              {hero.subtitle}
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="mt-8 flex flex-col gap-3 sm:flex-row"
+            >
+              <Link
+                to={hero.ctaLink}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-surface-950 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-surface-950/10 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-white dark:text-surface-950"
+              >
+                {hero.ctaText}
+                <ArrowRight size={18} />
+              </Link>
+              <Link
+                to="/shop?is_new_arrival=true"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-surface-300 bg-white px-6 py-3 text-sm font-bold text-surface-900 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-900 dark:text-white dark:hover:bg-surface-800"
+              >
+                New arrivals
+                <ChevronRight size={18} />
+              </Link>
+            </motion.div>
+
+            <div className="mt-10 grid grid-cols-3 gap-4 border-t border-surface-200 pt-6 dark:border-surface-800">
+              {[
+                ['12+', 'curated categories'],
+                ['30d', 'easy returns'],
+                ['24/7', 'secure checkout'],
+              ].map(([value, label]) => (
+                <div key={label}>
+                  <div className="text-2xl font-black text-surface-950 dark:text-white">{value}</div>
+                  <div className="mt-1 text-xs font-medium text-surface-500 dark:text-surface-400">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <HeroProductStage products={heroProducts} loading={featLoading} />
         </div>
 
-        <div className="relative z-10 section-container py-20 lg:py-32 text-center max-w-4xl mx-auto">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-sm font-medium mb-6"
-          >
-            <Sparkles size={14} /> Welcome to {SITE_NAME}
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-balance"
-          >
-            {hero.title}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-6 text-lg lg:text-xl text-primary-100 max-w-2xl mx-auto"
-          >
-            {hero.subtitle}
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <Link
-              to={hero.ctaLink}
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white text-primary-700 font-semibold shadow-xl hover:scale-[1.03] active:scale-[0.98] transition-all"
-            >
-              {hero.ctaText} <ArrowRight size={18} />
-            </Link>
-            <Link
-              to="/shop?is_new_arrival=true"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white/10 backdrop-blur-md text-white font-semibold border border-white/20 hover:bg-white/20 transition-all"
-            >
-              Explore New Arrivals
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Trust badges */}
-        <div className="relative z-10 border-t border-white/10">
-          <div className="section-container py-5 grid grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+        <div className="border-t border-surface-200 bg-white/80 backdrop-blur dark:border-surface-800 dark:bg-surface-950/80">
+          <div className="section-container grid gap-3 py-4 text-sm text-surface-600 dark:text-surface-300 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: Truck, label: 'Free shipping over $100' },
               { icon: RotateCcw, label: '30-day returns' },
-              { icon: ShieldCheck, label: 'Secure checkout' },
-              { icon: Star, label: 'Top-rated products' },
-            ].map((b) => (
-              <div key={b.label} className="flex items-center justify-center gap-2 text-primary-100">
-                <b.icon size={18} /> {b.label}
+              { icon: ShieldCheck, label: 'Protected payments' },
+              { icon: BadgeCheck, label: 'Verified product picks' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2">
+                <item.icon size={18} className="text-primary-500" />
+                <span>{item.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== CATEGORIES ===== */}
-      <Section title="Shop by Category" subtitle="Find exactly what you're looking for" link="/shop">
+      <section className="section-container py-12">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-300">
+              Browse faster
+            </p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Shop by category</h2>
+          </div>
+          <Link to="/shop" className="hidden items-center gap-1 text-sm font-bold text-surface-700 hover:text-primary-600 dark:text-surface-300 sm:flex">
+            View all
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+
         {catLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="aspect-[4/5]" />)}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-36 rounded-lg" />
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             {topCats.map((cat, i) => (
-              <motion.div key={cat.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+              >
                 <Link
                   to={`/shop?category_id=${cat.id}`}
-                  className="card overflow-hidden group block text-center"
+                  className="group block rounded-lg border border-surface-200 bg-surface-50 p-4 transition-all hover:-translate-y-1 hover:border-surface-300 hover:bg-white hover:shadow-xl hover:shadow-surface-950/5 dark:border-surface-800 dark:bg-surface-900 dark:hover:border-surface-700 dark:hover:bg-surface-900/80"
                 >
-                  <div className="aspect-[4/5] bg-gradient-to-br from-primary-100 to-primary-50 dark:from-surface-800 dark:to-surface-900 flex items-center justify-center overflow-hidden">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-lg bg-white text-2xl font-black text-surface-900 shadow-sm transition-transform group-hover:rotate-3 group-hover:scale-105 dark:bg-surface-800 dark:text-white">
                     {cat.image_url ? (
-                      <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      <img src={cat.image_url} alt={cat.name} className="h-full w-full rounded-lg object-cover" />
                     ) : (
-                      <span className="text-5xl font-bold text-primary-300 dark:text-primary-800 group-hover:scale-110 transition-transform">
-                        {cat.name[0]}
-                      </span>
+                      cat.name[0]
                     )}
                   </div>
-                  <div className="p-4">
-                    <div className="font-semibold">{cat.name}</div>
-                    <div className="text-xs text-surface-500 mt-0.5">{cat.product_count || 0} items</div>
-                  </div>
+                  <div className="font-bold text-surface-950 dark:text-white">{cat.name}</div>
+                  <div className="mt-1 text-xs text-surface-500">{cat.product_count || 0} items</div>
                 </Link>
               </motion.div>
             ))}
           </div>
         )}
-      </Section>
+      </section>
 
-      {/* ===== FEATURED ===== */}
-      <Section title="Featured Products" subtitle="Our handpicked favorites" link="/shop?is_featured=true" icon={<Sparkles size={20} />}>
+      <ProductSection
+        eyebrow="Editor picks"
+        title="Featured products"
+        subtitle="The pieces we would put at the top of the shelf."
+        link="/shop?is_featured=true"
+      >
         <ProductGrid products={featured} loading={featLoading} />
-      </Section>
+      </ProductSection>
 
-      {/* ===== PROMO BANNER ===== */}
-      <div className="section-container py-8">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-surface-900 to-primary-900 text-white p-8 lg:p-14"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/30 rounded-full blur-3xl" />
-          <div className="relative z-10 max-w-xl">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-sm mb-4">
-              <TrendingUp size={14} /> Limited Time
-            </span>
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Up to 40% off tech essentials</h2>
-            <p className="text-primary-100 mb-6">Upgrade your gear with our biggest sale of the season. Stock is limited — shop before it's gone.</p>
-            <Link to="/shop" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-surface-900 font-semibold hover:scale-105 transition-transform">
-              Shop the Sale <ArrowRight size={18} />
-            </Link>
+      <section className="my-8 border-y border-surface-200 bg-surface-950 text-white dark:border-surface-800">
+        <div className="section-container grid gap-10 py-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-300">Limited drop</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+              Upgrade the everyday kit without the clutter.
+            </h2>
           </div>
-        </motion.div>
-      </div>
-
-      {/* ===== BEST SELLERS ===== */}
-      <Section title="Best Sellers" subtitle="Loved by thousands of customers" link="/shop?is_best_seller=true" icon={<TrendingUp size={20} />}>
-        <ProductGrid products={bestSellers} loading={bestLoading} />
-      </Section>
-
-      {/* ===== NEW ARRIVALS ===== */}
-      <Section title="New Arrivals" subtitle="Fresh drops every week" link="/shop?is_new_arrival=true">
-        <ProductGrid products={arrivals} loading={arrLoading} />
-      </Section>
-
-      {/* ===== TESTIMONIALS ===== */}
-      <section className="section-container py-16">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold">What Our Customers Say</h2>
-          <p className="text-surface-500 mt-2">Real reviews from real shoppers</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { icon: Zap, title: 'Fast picks', text: 'Top items, easy scanning.' },
+              { icon: Box, title: 'Clean stock', text: 'Useful gear across categories.' },
+              { icon: ShieldCheck, title: 'Low risk', text: 'Secure checkout and returns.' },
+            ].map((item) => (
+              <div key={item.title} className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+                <item.icon size={22} className="mb-4 text-primary-300" />
+                <div className="font-bold">{item.title}</div>
+                <p className="mt-2 text-sm leading-6 text-surface-300">{item.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
+      </section>
+
+      <ProductSection
+        eyebrow="Proven sellers"
+        title="Best sellers"
+        subtitle="The items customers keep coming back for."
+        link="/shop?is_best_seller=true"
+      >
+        <ProductGrid products={bestSellers} loading={bestLoading} />
+      </ProductSection>
+
+      <ProductSection
+        eyebrow="Fresh shelf"
+        title="New arrivals"
+        subtitle="Recently added products, ready to browse."
+        link="/shop?is_new_arrival=true"
+      >
+        <ProductGrid products={arrivals} loading={arrLoading} />
+      </ProductSection>
+
+      <section className="section-container py-14">
+        <div className="grid gap-4 lg:grid-cols-3">
           {[
-            { name: 'Sarah K.', role: 'Verified Buyer', text: 'Absolutely love the quality and fast shipping. Joe\'s Shop has become my go-to for everything.', rating: 5 },
-            { name: 'Mike R.', role: 'Verified Buyer', text: 'Best online shopping experience I\'ve had. The product exceeded my expectations.', rating: 5 },
-            { name: 'Emily L.', role: 'Verified Buyer', text: 'Customer service was incredible when I had a question. Will definitely shop here again.', rating: 5 },
-          ].map((t, i) => (
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="card p-6"
-            >
-              <Quote className="text-primary-200 dark:text-primary-800 mb-4" size={32} />
-              <div className="flex gap-0.5 mb-3">
-                {Array.from({ length: t.rating }).map((_, j) => (
-                  <Star key={j} size={16} className="text-warning-500" fill="currentColor" />
-                ))}
-              </div>
-              <p className="text-surface-700 dark:text-surface-300 mb-5 leading-relaxed">"{t.text}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white flex items-center justify-center font-semibold">
-                  {t.name[0]}
-                </div>
-                <div>
-                  <div className="font-semibold text-sm">{t.name}</div>
-                  <div className="text-xs text-surface-500">{t.role}</div>
+            {
+              name: 'Sarah K.',
+              text: 'The site is easy to shop and the products feel properly selected, not random.',
+            },
+            {
+              name: 'Mike R.',
+              text: 'Fast checkout, clean product pages, and the order arrived exactly as expected.',
+            },
+            {
+              name: 'Emily L.',
+              text: 'I found what I needed in two minutes. That is the kind of store I come back to.',
+            },
+          ].map((t) => (
+            <div key={t.name} className="rounded-lg border border-surface-200 bg-white p-6 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+              <Quote className="mb-4 text-primary-500" size={26} />
+              <p className="leading-7 text-surface-700 dark:text-surface-300">"{t.text}"</p>
+              <div className="mt-5 flex items-center justify-between">
+                <div className="font-bold">{t.name}</div>
+                <div className="flex text-warning-500">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} size={14} fill="currentColor" />
+                  ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* ===== NEWSLETTER ===== */}
       <section className="section-container pb-16">
         <Newsletter />
       </section>
@@ -229,85 +271,171 @@ export default function HomePage() {
   )
 }
 
-function Section({ title, subtitle, link, icon, children }: {
+function HeroProductStage({ products, loading }: { products: Product[]; loading: boolean }) {
+  const first = products[0]
+  const second = products[1]
+  const third = products[2]
+
+  if (loading) {
+    return <Skeleton className="h-[520px] rounded-lg" />
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 28 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.18 }}
+      className="perspective-scene relative mx-auto h-[520px] w-full max-w-[620px]"
+    >
+      <div className="absolute inset-x-8 bottom-6 h-16 rounded-[50%] bg-surface-950/10 blur-2xl dark:bg-black/50" />
+
+      <Link
+        to={first ? `/product/${first.slug}` : '/shop'}
+        className="hero-product-plane hero-product-plane-main group absolute left-[8%] top-[7%] z-30 block w-[66%] overflow-hidden rounded-lg border border-surface-200 bg-white shadow-2xl shadow-surface-950/20 dark:border-surface-800 dark:bg-surface-900"
+      >
+        <ProductStageImage product={first} label="Featured" />
+        <div className="p-5">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-300">
+            Featured
+          </div>
+          <div className="mt-2 line-clamp-2 text-xl font-black tracking-tight">{first?.name || 'Shop the latest edit'}</div>
+          <div className="mt-3 text-sm font-bold text-surface-600 dark:text-surface-300">
+            {first ? formatCurrency(first.sale_price ?? first.selling_price) : 'Browse products'}
+          </div>
+        </div>
+      </Link>
+
+      <Link
+        to={second ? `/product/${second.slug}` : '/shop'}
+        className="hero-product-plane hero-product-plane-side absolute right-[3%] top-[21%] z-20 block w-[43%] overflow-hidden rounded-lg border border-surface-200 bg-white shadow-xl shadow-surface-950/10 dark:border-surface-800 dark:bg-surface-900"
+      >
+        <ProductStageImage product={second} label="New" compact />
+      </Link>
+
+      <Link
+        to={third ? `/product/${third.slug}` : '/shop'}
+        className="hero-product-plane hero-product-plane-base absolute bottom-[10%] right-[16%] z-10 block w-[48%] overflow-hidden rounded-lg border border-surface-200 bg-white shadow-xl shadow-surface-950/10 dark:border-surface-800 dark:bg-surface-900"
+      >
+        <ProductStageImage product={third} label="Popular" compact />
+      </Link>
+    </motion.div>
+  )
+}
+
+function ProductStageImage({ product, label, compact = false }: { product?: Product; label: string; compact?: boolean }) {
+  const image = product?.images?.find((img) => img.is_featured)?.url || product?.images?.[0]?.url
+
+  return (
+    <div className={compact ? 'relative aspect-[4/3]' : 'relative aspect-[5/4]'}>
+      {image ? (
+        <img src={image} alt={product?.name || label} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-surface-100 text-surface-400 dark:bg-surface-800">
+          <Box size={compact ? 34 : 56} />
+        </div>
+      )}
+      <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-surface-900 shadow-sm backdrop-blur dark:bg-surface-950/90 dark:text-white">
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function ProductSection({
+  eyebrow,
+  title,
+  subtitle,
+  link,
+  children,
+}: {
+  eyebrow: string
   title: string
-  subtitle?: string
-  link?: string
-  icon?: React.ReactNode
+  subtitle: string
+  link: string
   children: React.ReactNode
 }) {
   return (
     <section className="section-container py-12">
-      <div className="flex items-end justify-between mb-8 gap-4">
+      <div className="mb-7 flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl lg:text-3xl font-bold flex items-center gap-2">
-            {icon} {title}
-          </h2>
-          {subtitle && <p className="text-surface-500 mt-1">{subtitle}</p>}
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-300">{eyebrow}</p>
+          <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">{title}</h2>
+          <p className="mt-2 text-sm text-surface-500 dark:text-surface-400">{subtitle}</p>
         </div>
-        {link && (
-          <Link to={link} className="text-sm font-semibold text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1 whitespace-nowrap">
-            View all <ArrowRight size={16} />
-          </Link>
-        )}
+        <Link to={link} className="hidden items-center gap-1 text-sm font-bold text-surface-700 hover:text-primary-600 dark:text-surface-300 sm:flex">
+          View all
+          <ArrowRight size={16} />
+        </Link>
       </div>
       {children}
     </section>
   )
 }
 
-function ProductGrid({ products, loading }: { products: any[] | undefined; loading: boolean }) {
+function ProductGrid({ products, loading }: { products: Product[] | undefined; loading: boolean }) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => <Skeleton key={i} variant="card" />)}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} variant="card" />
+        ))}
       </div>
     )
   }
+
   if (!products || products.length === 0) {
-    return <p className="text-surface-500 text-center py-8">No products available.</p>
+    return (
+      <div className="rounded-lg border border-dashed border-surface-300 py-10 text-center text-surface-500 dark:border-surface-700">
+        No products available yet.
+      </div>
+    )
   }
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {products.map((p, i) => (
+        <ProductCard key={p.id} product={p} index={i} />
+      ))}
     </div>
   )
 }
 
 function Newsletter() {
   const [email, setEmail] = useState('')
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
     toast.success('Thanks for subscribing!')
     setEmail('')
   }
+
   return (
-    <div className="card overflow-hidden">
-      <div className="grid lg:grid-cols-2">
-        <div className="p-8 lg:p-12 bg-gradient-to-br from-primary-50 to-white dark:from-surface-800 dark:to-surface-900">
-          <h2 className="text-2xl lg:text-3xl font-bold mb-3">Join our newsletter</h2>
-          <p className="text-surface-600 dark:text-surface-400 mb-6">
-            Subscribe to get the latest products, exclusive deals, and a 10% off welcome coupon.
-          </p>
-          <form onSubmit={submit} className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="input-field flex-1"
-            />
-            <button type="submit" className="btn-primary whitespace-nowrap">Subscribe</button>
-          </form>
-          <p className="text-xs text-surface-400 mt-3">By subscribing you agree to our Privacy Policy.</p>
-        </div>
-        <div className="hidden lg:flex items-center justify-center p-12 bg-primary-600 text-white">
-          <div className="text-center">
-            <div className="text-5xl font-bold mb-2">10%</div>
-            <div className="text-primary-100">Off your first order</div>
-          </div>
+    <div className="grid overflow-hidden rounded-lg border border-surface-200 bg-white shadow-sm dark:border-surface-800 dark:bg-surface-900 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="p-7 sm:p-10">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-300">Newsletter</p>
+        <h2 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">Get the good stuff first.</h2>
+        <p className="mt-3 max-w-xl leading-7 text-surface-600 dark:text-surface-300">
+          New drops, sharper deals, and a welcome code for your first order.
+        </p>
+        <form onSubmit={submit} className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="input-field flex-1 rounded-lg"
+          />
+          <button type="submit" className="rounded-lg bg-surface-950 px-5 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 dark:bg-white dark:text-surface-950">
+            Subscribe
+          </button>
+        </form>
+      </div>
+      <div className="flex items-center justify-center border-t border-surface-200 bg-surface-50 p-8 dark:border-surface-800 dark:bg-surface-950 lg:border-l lg:border-t-0">
+        <div className="text-center">
+          <div className="text-6xl font-black tracking-tight text-surface-950 dark:text-white">10%</div>
+          <div className="mt-2 text-sm font-bold uppercase tracking-[0.2em] text-surface-500">welcome code</div>
         </div>
       </div>
     </div>
