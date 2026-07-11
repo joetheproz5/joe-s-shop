@@ -52,10 +52,10 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.04, 0.4) }}
-      whileHover={{ y: -6, rotateX: 1.5, rotateY: -1.5 }}
-      className="card product-card-3d group flex flex-col"
+      whileHover={{ y: -4 }}
+      className="card group flex flex-col"
     >
-      <Link to={`/product/${product.slug}`} className="product-card-media relative block aspect-square overflow-hidden bg-surface-100 transition-transform duration-300 dark:bg-surface-800">
+      <Link to={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface-100 dark:bg-surface-800">
         {featuredImage ? (
           <img
             src={featuredImage}
