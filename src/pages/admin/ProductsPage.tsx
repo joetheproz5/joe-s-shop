@@ -14,12 +14,14 @@ import {
   Pencil,
   Plus,
   Search,
+  Star,
   Trash2,
 } from 'lucide-react'
 import { Button, Input, Modal, ModalBody, ModalFooter, Select } from '@/components/ui'
 import {
   bulkUpdateProducts,
   createProduct,
+  deleteProductImage,
   deleteProduct,
   duplicateProduct,
   exportProductsToCSV,
@@ -27,6 +29,7 @@ import {
   importProductsFromCSV,
   syncProductCategories,
   syncProductTags,
+  setFeaturedProductImage,
   updateProduct,
   uploadProductImages,
 } from '@/lib/api/products'
@@ -34,7 +37,7 @@ import { fetchAllCategories } from '@/lib/api/categories'
 import { fetchAllBrands } from '@/lib/api/brands'
 import { ADMIN_ITEMS_PER_PAGE, PRODUCT_STATUSES } from '@/lib/constants'
 import { formatCurrency, formatDate, getStockStatus, slugify } from '@/lib/utils'
-import type { Brand, Category, Product, ProductStatus } from '@/types'
+import type { Brand, Category, Product, ProductImage, ProductStatus } from '@/types'
 import { AdminMetricCard, AdminPageHeader, AdminToolbar, EmptyAdminState, StatusPill } from './AdminPrimitives'
 
 type ProductFormState = {
@@ -243,6 +246,37 @@ export default function ProductsPage() {
     onSuccess: () => {
       toast.success('Product archived')
       queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
+  const deleteImageMutation = useMutation({
+    mutationFn: deleteProductImage,
+    onSuccess: (_, deletedImage) => {
+      setEditingProduct((current) => {
+        if (!current) return current
+        const remaining = (current.images ?? []).filter((image) => image.id !== deletedImage.id)
+        if (deletedImage.is_featured && remaining.length > 0) {
+          const nextFeatured = [...remaining].sort((a, b) => a.sort_order - b.sort_order)[0].id
+          return { ...current, images: remaining.map((image) => ({ ...image, is_featured: image.id === nextFeatured })) }
+        }
+        return { ...current, images: remaining }
+      })
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+      toast.success('Image deleted')
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
+  const featureImageMutation = useMutation({
+    mutationFn: ({ productId, imageId }: { productId: string; imageId: string }) => setFeaturedProductImage(productId, imageId),
+    onSuccess: (_, { imageId }) => {
+      setEditingProduct((current) => current ? {
+        ...current,
+        images: (current.images ?? []).map((image) => ({ ...image, is_featured: image.id === imageId })),
+      } : current)
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] })
+      toast.success('Featured image updated')
     },
     onError: (error: Error) => toast.error(error.message),
   })
@@ -514,6 +548,10 @@ export default function ProductsPage() {
         imageFiles={imageFiles}
         setImageFiles={setImageFiles}
         editingProduct={editingProduct}
+        onDeleteImage={(image) => deleteImageMutation.mutate(image)}
+        onFeatureImage={(image) => featureImageMutation.mutate({ productId: image.product_id, imageId: image.id })}
+        deletingImageId={deleteImageMutation.isPending ? deleteImageMutation.variables?.id : undefined}
+        featuringImageId={featureImageMutation.isPending ? featureImageMutation.variables?.imageId : undefined}
         onSubmit={() => saveMutation.mutate()}
         isSaving={saveMutation.isPending}
       />
@@ -531,6 +569,10 @@ function ProductEditorModal({
   imageFiles,
   setImageFiles,
   editingProduct,
+  onDeleteImage,
+  onFeatureImage,
+  deletingImageId,
+  featuringImageId,
   onSubmit,
   isSaving,
 }: {
@@ -543,6 +585,10 @@ function ProductEditorModal({
   imageFiles: File[]
   setImageFiles: (files: File[]) => void
   editingProduct: Product | null
+  onDeleteImage: (image: ProductImage) => void
+  onFeatureImage: (image: ProductImage) => void
+  deletingImageId?: string
+  featuringImageId?: string
   onSubmit: () => void
   isSaving: boolean
 }) {
@@ -625,10 +671,52 @@ function ProductEditorModal({
           <label className="mb-1.5 block text-sm font-medium text-surface-800 dark:text-surface-200">
             Product images
           </label>
+          {editingProduct && (editingProduct.images?.length ?? 0) > 0 && (
+            <div className="mb-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wide text-surface-500">Uploaded images</span>
+                <span className="text-xs text-surface-400">{editingProduct.images?.length} total</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {[...(editingProduct.images ?? [])].sort((a, b) => a.sort_order - b.sort_order).map((image) => (
+                  <div key={image.id} className="group overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-900">
+                    <div className="relative aspect-square bg-surface-100 dark:bg-surface-800">
+                      <img src={image.url} alt={image.alt_text || editingProduct.name} className="h-full w-full object-cover" />
+                      {image.is_featured && <span className="absolute left-2 top-2 rounded-full bg-surface-950/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur">Featured</span>}
+                    </div>
+                    <div className="flex items-center gap-1 p-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="min-w-0 flex-1"
+                        leftIcon={<Star size={14} fill={image.is_featured ? 'currentColor' : 'none'} />}
+                        disabled={image.is_featured}
+                        loading={featuringImageId === image.id}
+                        onClick={() => onFeatureImage(image)}
+                      >
+                        {image.is_featured ? 'Featured' : 'Feature'}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        iconOnly
+                        leftIcon={<Trash2 size={14} />}
+                        loading={deletingImageId === image.id}
+                        onClick={() => onDeleteImage(image)}
+                        aria-label={`Delete ${image.alt_text || 'product image'}`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-surface-300 bg-surface-50 px-4 py-6 text-center transition hover:border-primary-400 hover:bg-primary-50 dark:border-surface-700 dark:bg-surface-800/50 dark:hover:bg-primary-950/20">
             <ImagePlus className="mb-2 text-surface-400" size={24} />
             <span className="text-sm font-medium">Upload multiple images</span>
-            <span className="mt-1 text-xs text-surface-500">{imageFiles.length ? `${imageFiles.length} files selected` : 'The first uploaded image becomes featured'}</span>
+            <span className="mt-1 text-xs text-surface-500">{imageFiles.length ? `${imageFiles.length} files selected: ${imageFiles.map((file) => file.name).join(', ')}` : 'PNG, JPG, WebP or GIF up to 10 MB each'}</span>
             <input
               type="file"
               accept="image/*"
