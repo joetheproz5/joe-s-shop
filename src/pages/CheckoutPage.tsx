@@ -22,7 +22,7 @@ const STEPS = [
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, getSubtotal, getTax, getShipping, getTotal, clearCart } = useCartStore()
+  const { items, getSubtotal, getTax, getShipping, getTotal, clearCart, updateQuantity } = useCartStore()
   const { user } = useAuth()
   const [step, setStep] = useState(0)
   const [orderNumber, setOrderNumber] = useState('')
@@ -50,6 +50,37 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setSubmitting(true)
     try {
+      const productIds = [...new Set(items.map((item) => item.product_id))]
+      const variantIds = [...new Set(items.map((item) => item.variant_id).filter((id): id is string => !!id))]
+      const { data: currentProducts, error: productsError } = await supabase
+        .from('products')
+        .select('id,name,stock_quantity')
+        .in('id', productIds)
+      if (productsError) throw new Error(`Could not verify product stock: ${productsError.message}`)
+
+      const currentVariants = variantIds.length > 0
+        ? await supabase.from('product_variants').select('id,product_id,stock_quantity').in('id', variantIds)
+        : { data: [], error: null }
+      if (currentVariants.error) throw new Error(`Could not verify variant stock: ${currentVariants.error.message}`)
+
+      const productStock = new Map((currentProducts ?? []).map((product) => [product.id, product]))
+      const variantStock = new Map((currentVariants.data ?? []).map((variant) => [variant.id, variant]))
+
+      for (const item of items) {
+        const currentProduct = productStock.get(item.product_id)
+        const currentVariant = item.variant_id ? variantStock.get(item.variant_id) : undefined
+        const available = currentVariant?.stock_quantity ?? currentProduct?.stock_quantity ?? 0
+        const name = item.product?.name || currentProduct?.name || 'This product'
+        if (!currentProduct || (item.variant_id && !currentVariant)) {
+          updateQuantity(item.product_id, item.variant_id, 0)
+          throw new Error(`${name} is no longer available and was removed from your cart.`)
+        }
+        if (item.quantity > available) {
+          updateQuantity(item.product_id, item.variant_id, available)
+          throw new Error(`${name} only has ${available} available. Your cart has been updated.`)
+        }
+      }
+
       const orderNum = generateOrderNumber()
       const shippingAddr = { ...shipping }
       const billingAddr = billing.sameAsShipping ? shippingAddr : { ...billing, sameAsShipping: undefined }
@@ -91,7 +122,7 @@ export default function CheckoutPage() {
       setStep(3)
       toast.success('Order placed successfully!')
     } catch (err) {
-      toast.error('Failed to place order. Please try again.')
+      toast.error(err instanceof Error ? err.message : 'Failed to place order. Please try again.')
       console.error(err)
     } finally {
       setSubmitting(false)

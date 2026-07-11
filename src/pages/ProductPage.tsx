@@ -61,24 +61,29 @@ export default function ProductPage() {
 
   const images = product.images || []
   const variants = product.variants || []
+  const activeVariant = variants.find((variant) => variant.id === selectedVariant)
+  const availableStock = Math.max(0, activeVariant?.stock_quantity ?? product.stock_quantity)
   const colors = [...new Set(variants.map((v) => v.color).filter(Boolean))] as string[]
   const sizes = [...new Set(variants.map((v) => v.size).filter(Boolean))] as string[]
   const onSale = product.sale_price != null && product.sale_price < product.selling_price
   const discount = onSale ? getDiscountPercentage(product.selling_price, product.sale_price!) : 0
-  const stock = getStockStatus(product.stock_quantity, product.low_stock_threshold)
+  const stock = getStockStatus(availableStock, product.low_stock_threshold)
   const currentPrice = product.sale_price ?? product.selling_price
   const savings = onSale ? product.selling_price - product.sale_price! : 0
   const tags = product.tags ?? []
 
   const handleAddToCart = () => {
-    const variant = variants.find((v) => v.id === selectedVariant)
-    addItem(product, variant || undefined, qty)
-    toast.success(`${product.name} added to cart`)
+    const added = addItem(product, activeVariant, qty)
+    if (added <= 0) {
+      toast.error(`Only ${availableStock} available`)
+      return false
+    }
+    toast.success(added === qty ? `${product.name} added to cart` : `Added ${added}; stock limit reached`)
+    return true
   }
 
   const handleBuyNow = () => {
-    handleAddToCart()
-    navigate('/cart')
+    if (handleAddToCart()) navigate('/cart')
   }
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -195,7 +200,7 @@ export default function ProductPage() {
               stock.status === 'out_of_stock' && 'bg-danger-100 dark:bg-danger-900/30 text-danger-700 dark:text-danger-300',
             )}>
               <span className={clsx('w-2 h-2 rounded-full', stock.status === 'in_stock' ? 'bg-success-500' : stock.status === 'low_stock' ? 'bg-warning-500' : 'bg-danger-500')} />
-              {stock.label}{stock.status === 'low_stock' && ` (${product.stock_quantity} left)`}
+              {stock.label}{stock.status !== 'out_of_stock' && ` (${availableStock} available)`}
             </span>
           </div>
 
@@ -210,6 +215,7 @@ export default function ProductPage() {
                     onClick={() => {
                       const v = variants.find((x) => x.color === c)
                       setSelectedVariant(v?.id || null)
+                      setQty((current) => Math.max(1, Math.min(current, v?.stock_quantity ?? product.stock_quantity)))
                     }}
                     className={clsx(
                       'rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all',
@@ -236,6 +242,7 @@ export default function ProductPage() {
                     onClick={() => {
                       const v = variants.find((x) => x.size === s)
                       setSelectedVariant(v?.id || null)
+                      setQty((current) => Math.max(1, Math.min(current, v?.stock_quantity ?? product.stock_quantity)))
                     }}
                     className={clsx(
                       'min-w-[3rem] rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all',
@@ -258,14 +265,14 @@ export default function ProductPage() {
                 <Minus size={16} />
               </button>
               <span className="w-12 text-center font-semibold">{qty}</span>
-              <button onClick={() => setQty((q) => q + 1)} className="p-3 hover:text-blue-600" aria-label="Increase">
+              <button onClick={() => setQty((q) => Math.min(availableStock, q + 1))} disabled={qty >= availableStock} className="p-3 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-30" aria-label="Increase">
                 <Plus size={16} />
               </button>
             </div>
-            <Button onClick={handleAddToCart} disabled={stock.status === 'out_of_stock'} size="lg" leftIcon={<ShoppingCart size={18} />} className="flex-1">
+            <Button onClick={handleAddToCart} disabled={availableStock <= 0} size="lg" leftIcon={<ShoppingCart size={18} />} className="flex-1">
               Add to Cart
             </Button>
-            <Button onClick={handleBuyNow} disabled={stock.status === 'out_of_stock'} size="lg" variant="secondary" leftIcon={<Zap size={18} />}>
+            <Button onClick={handleBuyNow} disabled={availableStock <= 0} size="lg" variant="secondary" leftIcon={<Zap size={18} />}>
               Buy Now
             </Button>
           </div>

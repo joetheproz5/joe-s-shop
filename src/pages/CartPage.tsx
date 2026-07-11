@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -22,6 +22,13 @@ export default function CartPage() {
   const tax = getTax()
   const shipping = getShipping()
   const total = getTotal() - couponDiscount
+
+  useEffect(() => {
+    items.forEach((item) => {
+      const available = Math.max(0, item.variant?.stock_quantity ?? item.product?.stock_quantity ?? 0)
+      if (item.quantity > available) updateQuantity(item.product_id, item.variant_id, available)
+    })
+  }, [items, updateQuantity])
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return
@@ -93,6 +100,7 @@ export default function CartPage() {
               const variant = item.variant
               const price = variant?.sale_price || variant?.price || product?.sale_price || product?.selling_price || 0
               const image = variant ? (product?.images?.[0]?.url) : (product?.images?.[0]?.url)
+              const available = Math.max(0, variant?.stock_quantity ?? product?.stock_quantity ?? 0)
 
               return (
                 <motion.div
@@ -119,6 +127,7 @@ export default function CartPage() {
                           </Link>
                           {variant?.color && <div className="text-xs text-surface-500 mt-0.5">Color: {variant.color}{variant.size ? ` / Size: ${variant.size}` : ''}</div>}
                           {!variant && product?.sku && <div className="text-xs text-surface-500 mt-0.5">SKU: {product.sku}</div>}
+                          <div className={available <= 5 ? 'mt-1 text-xs font-medium text-warning-600' : 'mt-1 text-xs text-surface-400'}>{available} available</div>
                         </div>
                         <button
                           onClick={() => { removeItem(product!.id, variant?.id); toast.success('Removed from cart') }}
@@ -134,7 +143,7 @@ export default function CartPage() {
                             <Minus size={14} />
                           </button>
                           <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(product!.id, variant?.id, item.quantity + 1)} className="p-2 hover:text-primary-600" aria-label="Increase">
+                          <button onClick={() => updateQuantity(product!.id, variant?.id, item.quantity + 1)} disabled={item.quantity >= available} className="p-2 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-30" aria-label="Increase">
                             <Plus size={14} />
                           </button>
                         </div>

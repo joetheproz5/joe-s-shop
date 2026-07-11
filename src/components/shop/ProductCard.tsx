@@ -30,8 +30,9 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
     e.preventDefault()
     e.stopPropagation()
     if (outOfStock) return
-    addItem(product)
-    toast.success(`${product.name} added to cart`)
+    const added = addItem(product)
+    if (added > 0) toast.success(`${product.name} added to cart`)
+    else toast.error(`Only ${product.stock_quantity} available`)
   }
 
   const handleWishlist = (e: React.MouseEvent) => {

@@ -8,7 +8,7 @@ interface CartStore {
   isHydrated: boolean
 
   // Local cart actions (for guests)
-  addItem: (product: Product, variant?: ProductVariant, quantity?: number) => void
+  addItem: (product: Product, variant?: ProductVariant, quantity?: number) => number
   removeItem: (productId: string, variantId?: string) => void
   updateQuantity: (productId: string, variantId: string | undefined, quantity: number) => void
   clearCart: () => void
@@ -32,21 +32,30 @@ export const useCartStore = create<CartStore>()(
       isHydrated: false,
 
       addItem: (product, variant, quantity = 1) => {
+        let addedQuantity = 0
         set((state) => {
-          const key = variant?.id || product.id
+          const available = Math.max(0, variant?.stock_quantity ?? product.stock_quantity)
+          const requested = Math.max(1, Math.floor(quantity))
+          if (available <= 0) return state
           const existing = state.items.find(
             (item) => item.product_id === product.id && item.variant_id === (variant?.id)
           )
 
           if (existing) {
+            const nextQuantity = Math.min(existing.quantity + requested, available)
+            addedQuantity = Math.max(0, nextQuantity - existing.quantity)
             return {
               items: state.items.map((item) =>
                 item.product_id === product.id && item.variant_id === variant?.id
-                  ? { ...item, quantity: item.quantity + quantity }
+                  ? { ...item, quantity: nextQuantity }
                   : item
               ),
             }
           }
+
+          const initialQuantity = Math.min(requested, available)
+          if (initialQuantity <= 0) return state
+          addedQuantity = initialQuantity
 
           return {
             items: [
@@ -56,7 +65,7 @@ export const useCartStore = create<CartStore>()(
                 user_id: '',
                 product_id: product.id,
                 variant_id: variant?.id,
-                quantity,
+                quantity: initialQuantity,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 product,
@@ -65,6 +74,7 @@ export const useCartStore = create<CartStore>()(
             ],
           }
         })
+        return addedQuantity
       },
 
       removeItem: (productId, variantId) => {
@@ -80,10 +90,19 @@ export const useCartStore = create<CartStore>()(
           get().removeItem(productId, variantId)
           return
         }
+        const target = get().items.find((item) => item.product_id === productId && item.variant_id === variantId)
+        const available = Math.max(0, target?.variant?.stock_quantity ?? target?.product?.stock_quantity ?? quantity)
+        if (available <= 0) {
+          get().removeItem(productId, variantId)
+          return
+        }
         set((state) => ({
           items: state.items.map((item) =>
             item.product_id === productId && item.variant_id === variantId
-              ? { ...item, quantity }
+              ? {
+                  ...item,
+                  quantity: Math.min(Math.max(1, Math.floor(quantity)), available),
+                }
               : item
           ),
         }))
