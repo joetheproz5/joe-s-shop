@@ -18,6 +18,7 @@ const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'))
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
+const AboutPage = lazy(() => import('@/pages/AboutPage'))
 const AccountLayout = lazy(() => import('@/pages/account/AccountLayout'))
 const ProfilePage = lazy(() => import('@/pages/account/ProfilePage'))
 const OrdersPage = lazy(() => import('@/pages/account/OrdersPage'))
@@ -84,7 +85,7 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/terms" element={<PlaceholderPage title="Terms of Service" />} />
           <Route path="/privacy" element={<PlaceholderPage title="Privacy Policy" />} />
-          <Route path="/about" element={<PlaceholderPage title="About Us" />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<PlaceholderPage title="Contact Us" />} />
         </Route>
 

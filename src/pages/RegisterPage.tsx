@@ -132,7 +132,13 @@ export default function RegisterPage() {
                 error={errors.password}
                 leftIcon={<Lock size={18} />}
                 rightIcon={
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-surface-400 hover:text-surface-600">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="rounded-md p-1 text-surface-400 transition-colors hover:text-surface-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:hover:text-surface-200"
+                    aria-label={showPassword ? 'Hide passwords' : 'Show passwords'}
+                    aria-pressed={showPassword}
+                  >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 }
