@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -30,59 +31,60 @@ export default function HomePage() {
   const { data: bestSellers, isLoading: bestLoading } = useBestSellers(4)
 
   const hero = {
-    title: settings?.hero_title || 'Buy better things, without digging through noise.',
+    title: settings?.hero_title || 'A modern shop with depth, motion, and taste.',
     subtitle:
       settings?.hero_subtitle ||
-      'A focused shop for useful tech, everyday style, home upgrades, fitness essentials, and books worth keeping.',
-    ctaText: settings?.hero_cta_text || 'Shop collection',
+      'Curated products across tech, style, home, fitness, and books, presented like a real premium storefront.',
+    ctaText: settings?.hero_cta_text || 'Shop the collection',
     ctaLink: settings?.hero_cta_link || '/shop',
   }
 
-  const topCats = (categories || []).filter((c) => !c.parent_id).slice(0, 5)
-  const heroProducts = (featured || bestSellers || arrivals || []).slice(0, 4)
+  const topCats = (categories || []).filter((c) => !c.parent_id).slice(0, 6)
+  const heroProducts = [...(featured || []), ...(bestSellers || []), ...(arrivals || [])]
+    .filter((product, index, list) => list.findIndex((p) => p.id === product.id) === index)
+    .slice(0, 6)
 
   return (
-    <div className="bg-[#f6f4ef] text-[#151515] dark:bg-surface-950 dark:text-white">
-      <EditorialHero hero={hero} products={heroProducts} loading={featLoading && bestLoading && arrLoading} />
-      <TrustBar />
-      <CategoryShelf categories={topCats} loading={catLoading} />
+    <div className="bg-[#f3f0e8] text-[#151411] dark:bg-[#0f1115] dark:text-white">
+      <AxisHero hero={hero} products={heroProducts} loading={featLoading && bestLoading && arrLoading} />
+      <ServiceRow />
+      <DepartmentGrid categories={topCats} loading={catLoading} />
 
       <ProductSection
-        label="Featured"
-        title="The front shelf"
-        subtitle="Selected products with strong utility, clean presentation, and easy buying paths."
+        kicker="Featured"
+        title="The curated shelf"
+        subtitle="Strong picks up front, built for fast scanning and confident buying."
         link="/shop?is_featured=true"
       >
         <ProductGrid products={featured} loading={featLoading} />
       </ProductSection>
 
-      <FeatureBand products={(bestSellers || featured || []).slice(0, 2)} />
+      <SplitFeature products={(bestSellers || featured || []).slice(0, 3)} />
 
       <ProductSection
-        label="Best sellers"
-        title="What people keep choosing"
-        subtitle="Reliable picks with the strongest traction across the catalog."
+        kicker="Best sellers"
+        title="The proven picks"
+        subtitle="The products customers keep choosing from the catalog."
         link="/shop?is_best_seller=true"
       >
         <ProductGrid products={bestSellers} loading={bestLoading} />
       </ProductSection>
 
       <ProductSection
-        label="New arrivals"
-        title="Fresh in the mix"
-        subtitle="Recently added products, ready to scan without the clutter."
+        kicker="New arrivals"
+        title="Fresh on the floor"
+        subtitle="New products with a clean layout and subtle motion."
         link="/shop?is_new_arrival=true"
       >
         <ProductGrid products={arrivals} loading={arrLoading} />
       </ProductSection>
 
-      <ReviewStrip />
-      <Newsletter />
+      <ProofAndNewsletter />
     </div>
   )
 }
 
-function EditorialHero({
+function AxisHero({
   hero,
   products,
   loading,
@@ -91,111 +93,119 @@ function EditorialHero({
   products: Product[]
   loading: boolean
 }) {
-  const primary = products[0]
+  const [activeIndex, setActiveIndex] = useState(0)
+  const active = products[activeIndex] || products[0]
 
   return (
-    <section className="relative overflow-hidden border-b border-black/10 bg-[#efe9de] dark:border-white/10 dark:bg-surface-950">
-      <div className="absolute inset-0 opacity-[0.18] dark:opacity-[0.08]">
-        <div className="premium-grid h-full w-full" />
-      </div>
+    <section className="axis-hero relative isolate overflow-hidden bg-[#151411] text-white">
+      <div className="axis-noise absolute inset-0" />
+      <div className="axis-light axis-light-one" />
+      <div className="axis-light axis-light-two" />
 
-      <div className="section-container relative grid min-h-[calc(100vh-72px)] items-center gap-12 py-16 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="max-w-2xl">
-          <motion.p
+      <div className="section-container relative grid min-h-[calc(100vh-72px)] items-center gap-14 py-16 lg:grid-cols-[0.88fr_1.12fr]">
+        <div className="relative z-10">
+          <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs font-black uppercase tracking-[0.28em] text-[#7b6045] dark:text-primary-300"
+            className="mb-6 inline-flex items-center gap-2 border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-black uppercase tracking-[0.24em] text-[#d8c7a5] backdrop-blur"
           >
-            {SITE_NAME} curated goods
-          </motion.p>
+            <span className="h-2 w-2 bg-[#d8c7a5]" />
+            {SITE_NAME} studio
+          </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="mt-5 text-5xl font-black leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl"
+            className="max-w-3xl text-5xl font-black leading-[0.9] tracking-tight sm:text-6xl lg:text-7xl"
           >
             {hero.title}
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mt-6 max-w-xl text-lg leading-8 text-[#5f5a52] dark:text-surface-300"
+            className="mt-6 max-w-xl text-lg leading-8 text-[#cbc5b7]"
           >
             {hero.subtitle}
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             className="mt-9 flex flex-col gap-3 sm:flex-row"
           >
             <Link
               to={hero.ctaLink}
-              className="inline-flex items-center justify-center gap-2 bg-[#151515] px-6 py-3 text-sm font-black text-white transition-transform hover:-translate-y-0.5 dark:bg-white dark:text-surface-950"
+              className="group inline-flex items-center justify-center gap-2 bg-[#f3f0e8] px-6 py-3 text-sm font-black text-[#151411] transition-transform hover:-translate-y-0.5"
             >
               {hero.ctaText}
-              <ArrowRight size={18} />
+              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               to="/shop?is_new_arrival=true"
-              className="inline-flex items-center justify-center gap-2 border border-black/15 bg-white/40 px-6 py-3 text-sm font-black text-[#151515] backdrop-blur transition-colors hover:bg-white/70 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-2 border border-white/15 bg-white/[0.05] px-6 py-3 text-sm font-black text-white backdrop-blur transition-colors hover:bg-white/[0.1]"
             >
               New arrivals
               <ChevronRight size={18} />
             </Link>
           </motion.div>
+
+          <div className="mt-10 grid max-w-xl grid-cols-3 border-y border-white/10">
+            {[
+              ['3D', 'product stage'],
+              ['Fast', 'catalog flow'],
+              ['Admin', 'managed stock'],
+            ].map(([value, label]) => (
+              <div key={label} className="border-r border-white/10 py-4 pr-4 last:border-r-0">
+                <div className="text-2xl font-black">{value}</div>
+                <div className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[#8f8879]">{label}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {loading ? (
-          <Skeleton className="h-[560px]" />
-        ) : (
-          <div className="hero-editorial-stage relative min-h-[560px]">
-            <Link
-              to={primary ? `/product/${primary.slug}` : '/shop'}
-              className="hero-editorial-card group absolute left-0 top-8 z-20 block w-[72%] overflow-hidden bg-white shadow-2xl shadow-black/20 dark:bg-surface-900"
-            >
-              <ProductImage product={primary} className="aspect-[4/5]" />
-              <div className="p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-[#7b6045] dark:text-primary-300">
-                      Featured pick
-                    </p>
-                    <h2 className="mt-2 line-clamp-2 text-2xl font-black leading-tight">
-                      {primary?.name || 'Explore the collection'}
-                    </h2>
-                  </div>
-                  <div className="text-right text-lg font-black">
-                    {primary ? formatCurrency(primary.sale_price ?? primary.selling_price) : ''}
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            <div className="absolute right-0 top-0 z-10 w-[42%] space-y-4 pt-20">
-              {products.slice(1, 4).map((product, index) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.slug}`}
-                  className="mini-product-card group flex gap-3 bg-white p-3 shadow-lg shadow-black/10 dark:bg-surface-900"
-                  style={{ transform: `translateX(${index % 2 === 0 ? 0 : -18}px)` }}
-                >
-                  <ProductImage product={product} className="h-24 w-24 shrink-0" />
-                  <div className="min-w-0 py-1">
-                    <div className="line-clamp-2 text-sm font-black leading-tight">{product.name}</div>
-                    <div className="mt-2 text-sm font-bold text-[#7b6045] dark:text-primary-300">
-                      {formatCurrency(product.sale_price ?? product.selling_price)}
+        <div className="relative z-10">
+          {loading ? (
+            <Skeleton className="h-[580px] bg-white/10" />
+          ) : (
+            <div className="axis-stage-wrap">
+              <div className="axis-orbit-shadow" />
+              <div className="axis-stage" aria-label="Featured product carousel">
+                {(products.length ? products : []).slice(0, 6).map((product, index) => (
+                  <Link
+                    key={product.id}
+                    to={`/product/${product.slug}`}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    className="axis-panel group"
+                    style={{ '--panel-index': index } as CSSProperties}
+                  >
+                    <ProductImage product={product} className="aspect-[4/5]" />
+                    <div className="p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8b6f45]">Featured</p>
+                      <h2 className="mt-2 line-clamp-2 text-lg font-black leading-tight">{product.name}</h2>
+                      <div className="mt-3 text-sm font-black text-[#151411]">
+                        {formatCurrency(product.sale_price ?? product.selling_price)}
+                      </div>
                     </div>
-                  </div>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="axis-display">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.22em] text-[#d8c7a5]">Currently staged</p>
+                  <h3 className="mt-2 line-clamp-2 text-xl font-black">{active?.name || 'Featured products'}</h3>
+                </div>
+                <Link to={active ? `/product/${active.slug}` : '/shop'} className="text-sm font-black text-[#d8c7a5]">
+                  View
                 </Link>
-              ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </section>
   )
@@ -205,34 +215,36 @@ function ProductImage({ product, className }: { product?: Product; className: st
   const image = product?.images?.find((img) => img.is_featured)?.url || product?.images?.[0]?.url
 
   return (
-    <div className={`relative overflow-hidden bg-[#ded7ca] dark:bg-surface-800 ${className}`}>
+    <div className={`relative overflow-hidden bg-[#ded6c7] dark:bg-surface-800 ${className}`}>
       {image ? (
         <img src={image} alt={product?.name || 'Product'} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center text-[#7b6045] dark:text-surface-400">
+        <div className="flex h-full w-full items-center justify-center text-[#806742] dark:text-surface-400">
           <Box size={44} />
         </div>
       )}
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),transparent_44%,rgba(0,0,0,0.12))]" />
+      <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.22),transparent_42%,rgba(0,0,0,0.18))]" />
     </div>
   )
 }
 
-function TrustBar() {
+function ServiceRow() {
   return (
-    <section className="border-b border-black/10 bg-[#151515] text-white dark:border-white/10">
-      <div className="section-container grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="border-b border-[#151411]/10 bg-[#f3f0e8] dark:border-white/10 dark:bg-[#0f1115]">
+      <div className="section-container grid sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { icon: Truck, label: 'Fast delivery', text: 'Free over $100' },
+          { icon: Truck, label: 'Fast shipping', text: 'Free over $100' },
           { icon: RotateCcw, label: 'Easy returns', text: '30-day window' },
           { icon: ShieldCheck, label: 'Secure checkout', text: 'Protected payments' },
-          { icon: BadgeCheck, label: 'Curated catalog', text: 'Useful picks only' },
+          { icon: BadgeCheck, label: 'Curated products', text: 'Picked with purpose' },
         ].map((item) => (
-          <div key={item.label} className="flex items-center gap-3 border-b border-white/10 py-5 sm:border-r sm:px-5 lg:border-b-0 first:sm:pl-0 last:border-r-0">
-            <item.icon size={22} className="text-[#d0b28a]" />
+          <div key={item.label} className="flex items-center gap-3 border-b border-[#151411]/10 py-5 sm:border-r sm:px-5 lg:border-b-0 first:sm:pl-0 last:border-r-0 dark:border-white/10">
+            <div className="flex h-11 w-11 items-center justify-center bg-[#151411] text-[#f3f0e8] dark:bg-[#f3f0e8] dark:text-[#151411]">
+              <item.icon size={20} />
+            </div>
             <div>
               <div className="font-black">{item.label}</div>
-              <div className="text-sm text-surface-400">{item.text}</div>
+              <div className="text-sm text-[#6a6255] dark:text-surface-400">{item.text}</div>
             </div>
           </div>
         ))}
@@ -241,47 +253,45 @@ function TrustBar() {
   )
 }
 
-function CategoryShelf({ categories, loading }: { categories: any[]; loading: boolean }) {
+function DepartmentGrid({ categories, loading }: { categories: any[]; loading: boolean }) {
   return (
     <section className="section-container py-16">
       <SectionHeading
-        label="Departments"
-        title="Shop the main shelves"
-        subtitle="Direct paths into the catalog without visual noise."
+        kicker="Departments"
+        title="Shop by category"
+        subtitle="Clean paths into the catalog, with enough depth to feel designed."
         link="/shop"
       />
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-52" />
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-48" />
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-5">
+        <div className="department-grid grid gap-4 md:grid-cols-3 lg:grid-cols-6">
           {categories.map((cat, index) => (
             <motion.div
               key={cat.id}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.04 }}
             >
               <Link
                 to={`/shop?category_id=${cat.id}`}
-                className="category-editorial-card group block h-52 border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-surface-900"
+                className="department-card group flex h-48 flex-col justify-between border border-[#151411]/10 bg-white p-4 dark:border-white/10 dark:bg-surface-900"
               >
-                <div className="flex h-24 items-center justify-center bg-[#f0eadf] text-4xl font-black text-[#7b6045] transition-transform group-hover:-translate-y-1 dark:bg-surface-800 dark:text-primary-300">
-                  {cat.image_url ? <img src={cat.image_url} alt={cat.name} className="h-full w-full object-cover" /> : cat.name[0]}
-                </div>
-                <div className="mt-5 flex items-end justify-between gap-3">
-                  <div>
-                    <div className="font-black leading-tight">{cat.name}</div>
-                    <div className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[#7b6045] dark:text-primary-300">
-                      {cat.product_count || 0} items
-                    </div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex h-16 w-16 items-center justify-center bg-[#151411] text-3xl font-black text-[#f3f0e8] transition-transform group-hover:rotate-3 dark:bg-[#f3f0e8] dark:text-[#151411]">
+                    {cat.image_url ? <img src={cat.image_url} alt={cat.name} className="h-full w-full object-cover" /> : cat.name[0]}
                   </div>
-                  <ArrowRight size={18} className="text-surface-400 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight size={18} className="text-[#8a806f] transition-transform group-hover:translate-x-1" />
+                </div>
+                <div>
+                  <div className="font-black leading-tight">{cat.name}</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[#8b6f45]">{cat.product_count || 0} items</div>
                 </div>
               </Link>
             </motion.div>
@@ -293,13 +303,13 @@ function CategoryShelf({ categories, loading }: { categories: any[]; loading: bo
 }
 
 function ProductSection({
-  label,
+  kicker,
   title,
   subtitle,
   link,
   children,
 }: {
-  label: string
+  kicker: string
   title: string
   subtitle: string
   link: string
@@ -307,47 +317,43 @@ function ProductSection({
 }) {
   return (
     <section className="section-container py-14">
-      <SectionHeading label={label} title={title} subtitle={subtitle} link={link} />
+      <SectionHeading kicker={kicker} title={title} subtitle={subtitle} link={link} />
       {children}
     </section>
   )
 }
 
-function FeatureBand({ products }: { products: Product[] }) {
-  const first = products[0]
-  const second = products[1]
-
+function SplitFeature({ products }: { products: Product[] }) {
   return (
-    <section className="bg-[#151515] text-white">
-      <div className="section-container grid gap-10 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+    <section className="overflow-hidden bg-[#151411] text-white">
+      <div className="section-container grid gap-10 py-16 lg:grid-cols-[0.75fr_1.25fr] lg:items-center">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#d0b28a]">Seasonal edit</p>
+          <p className="text-xs font-black uppercase tracking-[0.26em] text-[#d8c7a5]">Studio picks</p>
           <h2 className="mt-4 max-w-xl text-4xl font-black leading-tight tracking-tight sm:text-5xl">
-            A store should feel considered, not generated.
+            Premium does not mean noisy.
           </h2>
-          <p className="mt-5 max-w-xl leading-8 text-surface-300">
-            Clean product hierarchy, useful contrast, and small motion details that support shopping instead of shouting over it.
+          <p className="mt-5 max-w-xl leading-8 text-[#cbc5b7]">
+            The motion is in the product stage. The rest of the page stays disciplined: strong type, useful hierarchy, and fast buying.
           </p>
-          <Link to="/shop" className="mt-8 inline-flex items-center gap-2 bg-white px-6 py-3 text-sm font-black text-[#151515] transition-transform hover:-translate-y-0.5">
-            Browse all
+          <Link to="/shop" className="mt-8 inline-flex items-center gap-2 bg-[#f3f0e8] px-6 py-3 text-sm font-black text-[#151411] transition-transform hover:-translate-y-0.5">
+            Browse everything
             <ArrowRight size={18} />
           </Link>
         </div>
 
-        <div className="feature-stack relative min-h-[440px]">
-          {[first, second].filter(Boolean).map((product, index) => (
+        <div className="feature-rail grid gap-4 md:grid-cols-3">
+          {products.map((product, index) => (
             <Link
-              key={product!.id}
-              to={`/product/${product!.slug}`}
-              className={`feature-stack-card group absolute overflow-hidden bg-white text-[#151515] shadow-2xl shadow-black/30 ${
-                index === 0 ? 'left-0 top-0 z-20 w-[58%]' : 'bottom-0 right-0 z-10 w-[54%]'
-              }`}
+              key={product.id}
+              to={`/product/${product.slug}`}
+              className="feature-rail-card group overflow-hidden bg-[#f3f0e8] text-[#151411]"
+              style={{ '--rail-offset': `${index * 28}px` } as CSSProperties}
             >
               <ProductImage product={product} className="aspect-[4/5]" />
               <div className="p-4">
-                <div className="line-clamp-2 font-black">{product!.name}</div>
-                <div className="mt-2 text-sm font-bold text-[#7b6045]">
-                  {formatCurrency(product!.sale_price ?? product!.selling_price)}
+                <h3 className="line-clamp-2 font-black leading-tight">{product.name}</h3>
+                <div className="mt-2 text-sm font-black text-[#8b6f45]">
+                  {formatCurrency(product.sale_price ?? product.selling_price)}
                 </div>
               </div>
             </Link>
@@ -358,39 +364,7 @@ function FeatureBand({ products }: { products: Product[] }) {
   )
 }
 
-function ReviewStrip() {
-  return (
-    <section className="section-container py-16">
-      <div className="grid gap-4 lg:grid-cols-3">
-        {[
-          ['A cleaner catalog', 'The layout feels much closer to a real store. Products are the focus.'],
-          ['Good motion', 'The depth is subtle and useful instead of fighting the page.'],
-          ['Easy to scan', 'The sections make sense and the store feels more trustworthy.'],
-        ].map(([title, text], index) => (
-          <motion.div
-            key={title}
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.05 }}
-            className="border border-black/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-surface-900"
-          >
-            <Quote className="mb-5 text-[#7b6045] dark:text-primary-300" size={28} />
-            <h3 className="font-black">{title}</h3>
-            <p className="mt-3 leading-7 text-surface-600 dark:text-surface-300">"{text}"</p>
-            <div className="mt-5 flex text-warning-500">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} size={14} fill="currentColor" />
-              ))}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function Newsletter() {
+function ProofAndNewsletter() {
   const [email, setEmail] = useState('')
 
   const submit = (e: React.FormEvent) => {
@@ -401,13 +375,39 @@ function Newsletter() {
   }
 
   return (
-    <section className="section-container pb-16">
-      <div className="grid border border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-surface-900 lg:grid-cols-[1.1fr_0.9fr]">
+    <section className="section-container py-16">
+      <div className="grid gap-4 lg:grid-cols-3">
+        {[
+          ['Real store energy', 'Product first, not effects first.'],
+          ['3D that works', 'The hero stage has real perspective and rotating panels.'],
+          ['Built to shop', 'Clear categories, clean product grids, fast CTAs.'],
+        ].map(([title, text], index) => (
+          <motion.div
+            key={title}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.05 }}
+            className="border border-[#151411]/10 bg-white p-6 dark:border-white/10 dark:bg-surface-900"
+          >
+            <Quote className="mb-5 text-[#8b6f45]" size={28} />
+            <h3 className="font-black">{title}</h3>
+            <p className="mt-3 leading-7 text-[#6a6255] dark:text-surface-300">"{text}"</p>
+            <div className="mt-5 flex text-warning-500">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={14} fill="currentColor" />
+              ))}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-6 grid border border-[#151411]/10 bg-white dark:border-white/10 dark:bg-surface-900 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="p-8 sm:p-10">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#7b6045] dark:text-primary-300">Newsletter</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight">Get the better drops first.</h2>
-          <p className="mt-3 max-w-xl leading-7 text-surface-600 dark:text-surface-300">
-            New products, clean deals, and a first-order code when the next edit lands.
+          <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8b6f45]">Drop list</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight">Get new edits first.</h2>
+          <p className="mt-3 max-w-xl leading-7 text-[#6a6255] dark:text-surface-300">
+            Product drops, limited offers, and better picks without inbox clutter.
           </p>
           <form onSubmit={submit} className="mt-7 flex flex-col gap-3 sm:flex-row">
             <input
@@ -418,13 +418,13 @@ function Newsletter() {
               placeholder="you@example.com"
               className="input-field flex-1 rounded-none"
             />
-            <button type="submit" className="bg-[#151515] px-6 py-3 text-sm font-black text-white transition-transform hover:-translate-y-0.5 dark:bg-white dark:text-surface-950">
+            <button type="submit" className="bg-[#151411] px-6 py-3 text-sm font-black text-white transition-transform hover:-translate-y-0.5 dark:bg-white dark:text-surface-950">
               Join list
             </button>
           </form>
         </div>
-        <div className="flex items-center justify-center border-t border-black/10 bg-[#efe9de] p-8 dark:border-white/10 dark:bg-surface-950 lg:border-l lg:border-t-0">
-          <div className="newsletter-monogram flex h-40 w-40 items-center justify-center bg-[#151515] text-center text-4xl font-black leading-none text-white shadow-2xl shadow-black/20 dark:bg-white dark:text-surface-950">
+        <div className="newsletter-disc flex items-center justify-center border-t border-[#151411]/10 bg-[#d8c7a5] p-8 dark:border-white/10 lg:border-l lg:border-t-0">
+          <div className="newsletter-disc-inner flex h-44 w-44 items-center justify-center rounded-full bg-[#151411] text-center text-4xl font-black leading-none text-[#f3f0e8]">
             10%<br />OFF
           </div>
         </div>
@@ -446,7 +446,7 @@ function ProductGrid({ products, loading }: { products: Product[] | undefined; l
 
   if (!products || products.length === 0) {
     return (
-      <div className="border border-dashed border-black/20 bg-white py-12 text-center font-semibold text-surface-500 dark:border-white/20 dark:bg-surface-900">
+      <div className="border border-dashed border-[#151411]/20 bg-white py-12 text-center font-semibold text-[#6a6255] dark:border-white/20 dark:bg-surface-900">
         No products available yet.
       </div>
     )
@@ -462,12 +462,12 @@ function ProductGrid({ products, loading }: { products: Product[] | undefined; l
 }
 
 function SectionHeading({
-  label,
+  kicker,
   title,
   subtitle,
   link,
 }: {
-  label: string
+  kicker: string
   title: string
   subtitle: string
   link?: string
@@ -475,12 +475,12 @@ function SectionHeading({
   return (
     <div className="mb-8 flex items-end justify-between gap-5">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-[#7b6045] dark:text-primary-300">{label}</p>
+        <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8b6f45]">{kicker}</p>
         <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{title}</h2>
-        <p className="mt-3 max-w-2xl leading-7 text-surface-600 dark:text-surface-300">{subtitle}</p>
+        <p className="mt-3 max-w-2xl leading-7 text-[#6a6255] dark:text-surface-300">{subtitle}</p>
       </div>
       {link && (
-        <Link to={link} className="hidden shrink-0 items-center gap-2 text-sm font-black text-[#151515] transition-colors hover:text-[#7b6045] dark:text-surface-300 dark:hover:text-primary-300 sm:flex">
+        <Link to={link} className="hidden shrink-0 items-center gap-2 text-sm font-black text-[#151411] transition-colors hover:text-[#8b6f45] dark:text-surface-300 sm:flex">
           View all
           <ArrowRight size={16} />
         </Link>

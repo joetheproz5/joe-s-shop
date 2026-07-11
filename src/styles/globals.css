@@ -242,6 +242,145 @@
   .newsletter-monogram {
     animation: monogramFloat 5s ease-in-out infinite;
   }
+
+  .axis-hero {
+    min-height: calc(100vh - 72px);
+  }
+
+  .axis-noise {
+    opacity: 0.38;
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(216, 199, 165, 0.18), transparent 32%),
+      linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: auto, 54px 54px, 54px 54px;
+  }
+
+  .axis-light {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 9999px;
+    filter: blur(80px);
+    opacity: 0.34;
+    pointer-events: none;
+  }
+
+  .axis-light-one {
+    top: 8%;
+    right: 12%;
+    background: #d8c7a5;
+  }
+
+  .axis-light-two {
+    bottom: 0;
+    left: 42%;
+    background: #5b6c8f;
+    opacity: 0.22;
+  }
+
+  .axis-stage-wrap {
+    position: relative;
+    height: 590px;
+    perspective: 1400px;
+    transform-style: preserve-3d;
+  }
+
+  .axis-stage {
+    position: absolute;
+    inset: 18px 0 84px;
+    margin: auto;
+    width: min(440px, 76vw);
+    height: 430px;
+    transform-style: preserve-3d;
+    animation: axisSpin 22s linear infinite;
+  }
+
+  .axis-stage:hover {
+    animation-play-state: paused;
+  }
+
+  .axis-panel {
+    --panel-angle: calc(var(--panel-index) * 60deg);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 245px;
+    max-width: 58vw;
+    overflow: hidden;
+    background: #f3f0e8;
+    color: #151411;
+    backface-visibility: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+    transform: translate(-50%, -50%) rotateY(var(--panel-angle)) translateZ(315px);
+    transition: box-shadow 260ms ease, filter 260ms ease;
+  }
+
+  .axis-panel:hover {
+    box-shadow: 0 40px 100px rgba(216, 199, 165, 0.26);
+    filter: brightness(1.04);
+  }
+
+  .axis-orbit-shadow {
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    bottom: 58px;
+    height: 88px;
+    border-radius: 9999px;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6), transparent 64%);
+    transform: rotateX(72deg);
+  }
+
+  .axis-display {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    display: flex;
+    width: min(520px, 92vw);
+    transform: translateX(-50%);
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.07);
+    padding: 18px 20px;
+    backdrop-filter: blur(18px);
+  }
+
+  .department-grid {
+    perspective: 1100px;
+  }
+
+  .department-card {
+    transform-style: preserve-3d;
+    transition: transform 340ms ease, box-shadow 340ms ease;
+  }
+
+  .department-card:hover {
+    transform: translateY(-8px) rotateX(5deg) rotateY(-4deg);
+    box-shadow: 0 24px 60px rgba(21, 20, 17, 0.14);
+  }
+
+  .feature-rail {
+    perspective: 1200px;
+  }
+
+  .feature-rail-card {
+    transform: translateY(var(--rail-offset)) rotateY(-4deg);
+    transform-style: preserve-3d;
+    transition: transform 360ms ease, box-shadow 360ms ease;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  }
+
+  .feature-rail-card:hover {
+    transform: translateY(calc(var(--rail-offset) - 10px)) rotateY(0deg);
+    box-shadow: 0 38px 110px rgba(0, 0, 0, 0.38);
+  }
+
+  .newsletter-disc-inner {
+    animation: discFloat 5s ease-in-out infinite;
+  }
 }
 
 @layer utilities {
@@ -276,7 +415,9 @@
     .perspective-scene:hover .hero-product-plane-side,
     .perspective-scene:hover .hero-product-plane-base,
     .product-card-3d:hover .product-card-media,
-    .newsletter-monogram {
+    .newsletter-monogram,
+    .axis-stage,
+    .newsletter-disc-inner {
       animation: none;
       transform: none;
     }
@@ -288,6 +429,24 @@
     }
     50% {
       transform: translateY(-8px) rotate(1deg);
+    }
+  }
+
+  @keyframes axisSpin {
+    from {
+      transform: rotateX(-8deg) rotateY(0deg);
+    }
+    to {
+      transform: rotateX(-8deg) rotateY(-360deg);
+    }
+  }
+
+  @keyframes discFloat {
+    0%, 100% {
+      transform: translateY(0) rotate(-2deg);
+    }
+    50% {
+      transform: translateY(-9px) rotate(2deg);
     }
   }
 }
