@@ -54,8 +54,6 @@ type ProductFormState = {
   stock_quantity: string
   low_stock_threshold: string
   weight: string
-  colors: string
-  sizes: string
   seo_title: string
   seo_description: string
   status: ProductStatus
@@ -81,8 +79,6 @@ const defaultForm: ProductFormState = {
   stock_quantity: '0',
   low_stock_threshold: '5',
   weight: '',
-  colors: '',
-  sizes: '',
   seo_title: '',
   seo_description: '',
   status: 'draft',
@@ -116,8 +112,6 @@ function productToForm(product: Product): ProductFormState {
     stock_quantity: String(product.stock_quantity ?? 0),
     low_stock_threshold: String(product.low_stock_threshold ?? 5),
     weight: product.weight === undefined || product.weight === null ? '' : String(product.weight),
-    colors: product.colors?.join(', ') ?? '',
-    sizes: product.sizes?.join(', ') ?? '',
     seo_title: product.seo_title ?? '',
     seo_description: product.seo_description ?? '',
     status: product.status,
@@ -143,8 +137,6 @@ function formToPayload(form: ProductFormState): Partial<Product> {
     stock_quantity: Number(form.stock_quantity) || 0,
     low_stock_threshold: Number(form.low_stock_threshold) || 0,
     weight: form.weight ? Number(form.weight) : undefined,
-    colors: form.colors.split(',').map((color) => color.trim()).filter(Boolean),
-    sizes: form.sizes.split(',').map((size) => size.trim()).filter(Boolean),
     seo_title: form.seo_title.trim() || undefined,
     seo_description: form.seo_description.trim() || undefined,
     status: form.status,
@@ -607,8 +599,6 @@ function ProductEditorModal({
 
         <div className="grid gap-4 md:grid-cols-2">
           <Input label="Tags" value={form.tags} onChange={(event) => update('tags', event.target.value)} placeholder="premium, home, gift" />
-          <Input label="Colors" value={form.colors} onChange={(event) => update('colors', event.target.value)} placeholder="Black, White, Gold" />
-          <Input label="Sizes" value={form.sizes} onChange={(event) => update('sizes', event.target.value)} placeholder="S, M, L" />
           <Input label="SEO title" value={form.seo_title} onChange={(event) => update('seo_title', event.target.value)} />
         </div>
         <Input label="SEO description" asTextarea rows={3} value={form.seo_description} onChange={(event) => update('seo_description', event.target.value)} />

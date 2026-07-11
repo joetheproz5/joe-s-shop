@@ -6,6 +6,8 @@ import Footer from '@/components/layout/Footer'
 import MobileMenu from '@/components/layout/MobileMenu'
 import { QuickViewModal } from '@/components/shop/QuickViewModal'
 import { useUIStore } from '@/stores/uiStore'
+import { useAuth } from '@/context/AuthContext'
+import { hasAdminPermission, STAFF_ROLES, type AdminModule } from '@/lib/permissions'
 
 // Lazy-loaded pages
 import { lazy, Suspense } from 'react'
@@ -62,6 +64,11 @@ function StorefrontLayout() {
   )
 }
 
+function AdminModuleGuard({ module, children }: { module: AdminModule; children: React.ReactNode }) {
+  const { profile } = useAuth()
+  return hasAdminPermission(profile?.role, module) ? <>{children}</> : <Navigate to="/admin/dashboard" replace />
+}
+
 export default function App() {
   const mobileMenuOpen = useUIStore((s) => s.mobileMenuOpen)
 
@@ -113,9 +120,9 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* ===== Admin (requires admin role) ===== */}
+        {/* ===== Staff dashboard (module access is role-based) ===== */}
         <Route element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute allowedRoles={STAFF_ROLES}>
             <Suspense fallback={<PageLoader />}>
               <AdminLayout />
             </Suspense>
@@ -123,19 +130,19 @@ export default function App() {
         }>
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/products" element={<AdminProductsPage />} />
-          <Route path="/admin/categories" element={<AdminCategoriesPage />} />
-          <Route path="/admin/brands" element={<AdminBrandsPage />} />
-          <Route path="/admin/orders" element={<AdminOrdersPage />} />
-          <Route path="/admin/customers" element={<AdminCustomersPage />} />
-          <Route path="/admin/coupons" element={<AdminCouponsPage />} />
-          <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-          <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-          <Route path="/admin/inventory" element={<AdminInventoryPage />} />
-          <Route path="/admin/media" element={<AdminMediaPage />} />
-          <Route path="/admin/settings" element={<AdminSettingsPage />} />
-          <Route path="/admin/roles" element={<AdminRolesPage />} />
+          <Route path="/admin/dashboard" element={<AdminModuleGuard module="dashboard"><AdminDashboard /></AdminModuleGuard>} />
+          <Route path="/admin/products" element={<AdminModuleGuard module="products"><AdminProductsPage /></AdminModuleGuard>} />
+          <Route path="/admin/categories" element={<AdminModuleGuard module="categories"><AdminCategoriesPage /></AdminModuleGuard>} />
+          <Route path="/admin/brands" element={<AdminModuleGuard module="brands"><AdminBrandsPage /></AdminModuleGuard>} />
+          <Route path="/admin/orders" element={<AdminModuleGuard module="orders"><AdminOrdersPage /></AdminModuleGuard>} />
+          <Route path="/admin/customers" element={<AdminModuleGuard module="customers"><AdminCustomersPage /></AdminModuleGuard>} />
+          <Route path="/admin/coupons" element={<AdminModuleGuard module="coupons"><AdminCouponsPage /></AdminModuleGuard>} />
+          <Route path="/admin/reviews" element={<AdminModuleGuard module="reviews"><AdminReviewsPage /></AdminModuleGuard>} />
+          <Route path="/admin/analytics" element={<AdminModuleGuard module="analytics"><AdminAnalyticsPage /></AdminModuleGuard>} />
+          <Route path="/admin/inventory" element={<AdminModuleGuard module="inventory"><AdminInventoryPage /></AdminModuleGuard>} />
+          <Route path="/admin/media" element={<AdminModuleGuard module="media"><AdminMediaPage /></AdminModuleGuard>} />
+          <Route path="/admin/settings" element={<AdminModuleGuard module="settings"><AdminSettingsPage /></AdminModuleGuard>} />
+          <Route path="/admin/roles" element={<AdminModuleGuard module="roles"><AdminRolesPage /></AdminModuleGuard>} />
         </Route>
 
         {/* ===== 404 ===== */}

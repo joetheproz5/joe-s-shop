@@ -7,7 +7,7 @@ import { useCategories } from '@/hooks/useCategories'
 import { useBrands } from '@/hooks/useBrands'
 import { ProductCard } from '@/components/shop/ProductCard'
 import { Pagination, Skeleton, Button } from '@/components/ui'
-import { ITEMS_PER_PAGE, PRODUCT_COLORS } from '@/lib/constants'
+import { ITEMS_PER_PAGE } from '@/lib/constants'
 import { clsx } from '@/lib/utils'
 import type { Brand, Category, ProductFilters, SortParams } from '@/types'
 
@@ -32,7 +32,6 @@ export default function ShopPage() {
   const brandIds = [...searchParams.getAll('brand'), ...searchParams.getAll('brand_id')].filter(Boolean)
   const minPrice = searchParams.get('min_price') ? Number(searchParams.get('min_price')) : undefined
   const maxPrice = searchParams.get('max_price') ? Number(searchParams.get('max_price')) : undefined
-  const color = searchParams.get('color') || undefined
 
   const { data: categories } = useCategories()
   const { data: brands } = useBrands()
@@ -42,12 +41,11 @@ export default function ShopPage() {
     brand_id: brandIds[0],
     min_price: minPrice,
     max_price: maxPrice,
-    color,
     search,
     is_featured: searchParams.get('is_featured') === 'true' || undefined,
     is_new_arrival: searchParams.get('is_new_arrival') === 'true' || undefined,
     is_best_seller: searchParams.get('is_best_seller') === 'true' || undefined,
-  }), [categoryIds, brandIds, minPrice, maxPrice, color, search, searchParams])
+  }), [categoryIds, brandIds, minPrice, maxPrice, search, searchParams])
 
   const sort: SortParams = useMemo(() => {
     const s = SORTS.find((x) => x.value === sortValue) || SORTS[0]
@@ -78,7 +76,7 @@ export default function ShopPage() {
 
   const activeFilterCount = [
     ...categoryIds, ...brandIds,
-    minPrice, maxPrice, color, search,
+    minPrice, maxPrice, search,
     searchParams.get('is_featured'), searchParams.get('is_new_arrival'), searchParams.get('is_best_seller'),
   ].filter(Boolean).length
 
@@ -133,12 +131,10 @@ export default function ShopPage() {
             brandIds={brandIds}
             minPrice={minPrice}
             maxPrice={maxPrice}
-            color={color}
             search={search}
             onToggleCategory={(v) => toggleArrayParam('category', v)}
             onToggleBrand={(v) => toggleArrayParam('brand', v)}
             onPriceChange={(min, max) => { updateParam('min_price', min ? String(min) : null); updateParam('max_price', max ? String(max) : null) }}
-            onColorChange={(v) => updateParam('color', v)}
             onClear={clearFilters}
             activeCount={activeFilterCount}
             />
@@ -174,12 +170,10 @@ export default function ShopPage() {
                   brandIds={brandIds}
                   minPrice={minPrice}
                   maxPrice={maxPrice}
-                  color={color}
                   search={search}
                   onToggleCategory={(v) => toggleArrayParam('category', v)}
                   onToggleBrand={(v) => toggleArrayParam('brand', v)}
                   onPriceChange={(min, max) => { updateParam('min_price', min ? String(min) : null); updateParam('max_price', max ? String(max) : null) }}
-                  onColorChange={(v) => updateParam('color', v)}
                   onClear={clearFilters}
                   activeCount={activeFilterCount}
                 />
@@ -236,17 +230,15 @@ interface FilterPanelProps {
   brandIds: string[]
   minPrice?: number
   maxPrice?: number
-  color?: string
   search: string
   onToggleCategory: (value: string) => void
   onToggleBrand: (value: string) => void
   onPriceChange: (min: number, max: number) => void
-  onColorChange: (value: string) => void
   onClear: () => void
   activeCount: number
 }
 
-function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxPrice, color, onToggleCategory, onToggleBrand, onPriceChange, onColorChange, onClear, activeCount }: FilterPanelProps) {
+function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxPrice, onToggleCategory, onToggleBrand, onPriceChange, onClear, activeCount }: FilterPanelProps) {
   return (
     <div className="space-y-6">
       {activeCount > 0 && (
@@ -307,24 +299,6 @@ function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxP
         </div>
       </FilterGroup>
 
-      {/* Colors */}
-      <FilterGroup title="Color">
-        <div className="flex flex-wrap gap-2">
-          {PRODUCT_COLORS.map((c) => (
-            <button
-              key={c}
-              onClick={() => onColorChange(color === c ? '' : c)}
-              title={c}
-              className={clsx(
-                'w-8 h-8 rounded-full border-2 transition-all',
-                color === c ? 'scale-110 border-blue-600' : 'border-surface-200 dark:border-surface-700'
-              )}
-              style={{ backgroundColor: colorNameToHex(c) }}
-            />
-          ))}
-        </div>
-      </FilterGroup>
-
       <FilterGroup title="Rating">
         {[5, 4, 3].map((r) => (
           <button key={r} className="flex items-center gap-1 py-1 text-sm text-surface-500 hover:text-blue-600">
@@ -344,13 +318,4 @@ function FilterGroup({ title, children }: { title: string; children: React.React
       <div className="space-y-1">{children}</div>
     </div>
   )
-}
-
-function colorNameToHex(name: string): string {
-  const map: Record<string, string> = {
-    Black: '#000000', White: '#ffffff', Red: '#ef4444', Blue: '#3b82f6', Green: '#22c55e',
-    Yellow: '#eab308', Purple: '#a855f7', Orange: '#f97316', Pink: '#ec4899', Brown: '#92400e',
-    Gray: '#6b7280', Navy: '#1e3a8a', Beige: '#d4b896', Gold: '#fbbf24', Silver: '#cbd5e1', Teal: '#14b8a6',
-  }
-  return map[name] || '#cccccc'
 }

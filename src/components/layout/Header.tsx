@@ -18,7 +18,7 @@ const links = [
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme()
-  const { user, signOut, isAdmin } = useAuth()
+  const { user, signOut, isStaff } = useAuth()
   const itemCount = useCartStore((state) => state.getItemCount())
   const wishlistCount = useWishlistStore((state) => state.items.length)
   const { openMobileMenu, searchOpen, toggleSearch } = useUIStore()
@@ -62,7 +62,7 @@ export default function Header() {
           <Link to="/cart" className="relative grid h-10 w-10 place-items-center rounded-full text-surface-700 transition-colors hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-900" aria-label="Cart"><ShoppingBag size={19} strokeWidth={1.8} />{itemCount > 0 && <Count value={itemCount} />}</Link>
           <div ref={accountRef} className="relative hidden sm:block">
             <HeaderButton onClick={() => setAccountOpen((open) => !open)} label="Account"><User size={19} strokeWidth={1.8} /></HeaderButton>
-            <AnimatePresence>{accountOpen && <AccountMenu user={user} isAdmin={isAdmin} signOut={signOut} close={() => setAccountOpen(false)} />}</AnimatePresence>
+            <AnimatePresence>{accountOpen && <AccountMenu user={user} showDashboard={isStaff} signOut={signOut} close={() => setAccountOpen(false)} />}</AnimatePresence>
           </div>
           <HeaderButton onClick={openMobileMenu} label="Menu" className="lg:hidden"><Menu size={21} /></HeaderButton>
         </div>
@@ -91,13 +91,13 @@ function Count({ value }: { value: number }) {
   return <span className="absolute right-0 top-0 grid min-h-4 min-w-4 place-items-center rounded-full bg-blue-600 px-1 text-[9px] font-bold text-white">{value > 99 ? '99+' : value}</span>
 }
 
-function AccountMenu({ user, isAdmin, signOut, close }: { user: any; isAdmin: boolean; signOut: () => void; close: () => void }) {
+function AccountMenu({ user, showDashboard, signOut, close }: { user: any; showDashboard: boolean; signOut: () => void; close: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-surface-200 bg-white p-2 shadow-[0_20px_60px_rgba(0,0,0,.12)] dark:border-surface-800 dark:bg-surface-900">
       {user ? <>
         <div className="px-3 py-3"><p className="text-sm font-semibold">{user.name || 'Your account'}</p><p className="mt-0.5 truncate text-xs text-surface-500">{user.email}</p></div>
         <MenuLink to="/account" icon={User}>Account</MenuLink>
-        {isAdmin && <MenuLink to="/admin/dashboard" icon={LayoutDashboard}>Dashboard</MenuLink>}
+        {showDashboard && <MenuLink to="/admin/dashboard" icon={LayoutDashboard}>Dashboard</MenuLink>}
         <button onClick={() => { signOut(); close() }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"><LogOut size={16} /> Sign out</button>
       </> : <div className="p-2"><p className="px-2 pb-3 text-sm text-surface-500">Sign in to view orders, saved items, and more.</p><Link to="/login" className="btn-primary w-full rounded-full">Sign in</Link><Link to="/register" className="mt-2 flex justify-center py-2 text-sm font-semibold">Create account</Link></div>}
     </motion.div>

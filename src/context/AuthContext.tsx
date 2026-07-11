@@ -15,6 +15,7 @@ interface AuthContextType {
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>
   isAdmin: boolean
   isSuperAdmin: boolean
+  isStaff: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -128,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
   const isSuperAdmin = profile?.role === 'super_admin'
+  const isStaff = isAdmin || profile?.role === 'manager' || profile?.role === 'employee'
 
   return (
     <AuthContext.Provider
@@ -143,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile,
         isAdmin,
         isSuperAdmin,
+        isStaff,
       }}
     >
       {children}

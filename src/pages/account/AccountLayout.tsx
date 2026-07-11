@@ -12,7 +12,7 @@ const NAV = [
 ]
 
 export default function AccountLayout() {
-  const { profile, signOut, isAdmin } = useAuth()
+  const { profile, signOut, isStaff } = useAuth()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -68,7 +68,7 @@ export default function AccountLayout() {
                 {item.label}
               </NavLink>
             ))}
-            {isAdmin && (
+            {isStaff && (
               <NavLink
                 to="/admin"
                 className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800"

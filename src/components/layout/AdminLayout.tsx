@@ -29,6 +29,7 @@ import clsx from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
 import { useAuth } from '@/context/AuthContext';
 import Breadcrumbs, { BreadcrumbItem } from './Breadcrumbs';
+import { hasAdminPermission, type AdminModule } from '@/lib/permissions';
 
 interface SidebarSection {
   title: string;
@@ -36,6 +37,7 @@ interface SidebarSection {
     label: string;
     path: string;
     icon: React.ComponentType<{ className?: string }>;
+    module: AdminModule;
   }[];
 }
 
@@ -43,39 +45,39 @@ const sidebarSections: SidebarSection[] = [
   {
     title: 'Overview',
     items: [
-      { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+      { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard, module: 'dashboard' },
     ],
   },
   {
     title: 'Management',
     items: [
-      { label: 'Products', path: '/admin/products', icon: Package },
-      { label: 'Categories', path: '/admin/categories', icon: Grid3X3 },
-      { label: 'Brands', path: '/admin/brands', icon: Tag },
-      { label: 'Orders', path: '/admin/orders', icon: ShoppingBag },
-      { label: 'Customers', path: '/admin/customers', icon: Users },
+      { label: 'Products', path: '/admin/products', icon: Package, module: 'products' },
+      { label: 'Categories', path: '/admin/categories', icon: Grid3X3, module: 'categories' },
+      { label: 'Brands', path: '/admin/brands', icon: Tag, module: 'brands' },
+      { label: 'Orders', path: '/admin/orders', icon: ShoppingBag, module: 'orders' },
+      { label: 'Customers', path: '/admin/customers', icon: Users, module: 'customers' },
     ],
   },
   {
     title: 'Marketing',
     items: [
-      { label: 'Coupons', path: '/admin/coupons', icon: Ticket },
-      { label: 'Reviews', path: '/admin/reviews', icon: Star },
+      { label: 'Coupons', path: '/admin/coupons', icon: Ticket, module: 'coupons' },
+      { label: 'Reviews', path: '/admin/reviews', icon: Star, module: 'reviews' },
     ],
   },
   {
     title: 'Tools',
     items: [
-      { label: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
-      { label: 'Inventory', path: '/admin/inventory', icon: Warehouse },
-      { label: 'File Manager', path: '/admin/media', icon: FolderOpen },
-      { label: 'Settings', path: '/admin/settings', icon: Settings },
+      { label: 'Analytics', path: '/admin/analytics', icon: BarChart3, module: 'analytics' },
+      { label: 'Inventory', path: '/admin/inventory', icon: Warehouse, module: 'inventory' },
+      { label: 'File Manager', path: '/admin/media', icon: FolderOpen, module: 'media' },
+      { label: 'Settings', path: '/admin/settings', icon: Settings, module: 'settings' },
     ],
   },
   {
     title: 'Access',
     items: [
-      { label: 'Roles', path: '/admin/roles', icon: Shield },
+      { label: 'Roles', path: '/admin/roles', icon: Shield, module: 'roles' },
     ],
   },
 ];
@@ -101,7 +103,7 @@ function getBreadcrumbsFromPath(pathname: string): BreadcrumbItem[] {
 
 export default function AdminLayout() {
   const { sidebarOpen, sidebarCollapsed, toggleSidebar, toggleSidebarCollapse } = useUIStore();
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -137,6 +139,9 @@ export default function AdminLayout() {
   }, [sidebarOpen, toggleSidebar]);
 
   const breadcrumbs = getBreadcrumbsFromPath(location.pathname);
+  const visibleSidebarSections = sidebarSections
+    .map((section) => ({ ...section, items: section.items.filter((item) => hasAdminPermission(profile?.role, item.module)) }))
+    .filter((section) => section.items.length > 0);
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
@@ -226,7 +231,7 @@ export default function AdminLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {sidebarSections.map((section) => (
+          {visibleSidebarSections.map((section) => (
             <div key={section.title} className="mb-6">
               {!sidebarCollapsed && (
                 <h4 className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">

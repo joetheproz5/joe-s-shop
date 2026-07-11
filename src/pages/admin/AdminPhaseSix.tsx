@@ -55,6 +55,7 @@ import { deleteMedia, listMedia, uploadMedia } from '@/lib/api/media'
 import { fetchSettings, updateSettings } from '@/lib/api/settings'
 import { ORDER_STATUSES, COUPON_TYPES, REVIEW_STATUSES, ROLES } from '@/lib/constants'
 import { formatCurrency, formatDate, formatFileSize, getStockStatus } from '@/lib/utils'
+import { ADMIN_MODULES, hasAdminPermission, isStaffRole } from '@/lib/permissions'
 import type {
   Coupon,
   CouponType,
@@ -530,9 +531,6 @@ export function SettingsPage() {
 }
 
 export function RolesPage() {
-  const modules = ['dashboard', 'products', 'categories', 'brands', 'orders', 'customers', 'coupons', 'reviews', 'analytics', 'inventory', 'media', 'settings', 'roles']
-  const hasAdminAccess = (role: UserRole) => role === 'super_admin' || role === 'admin'
-
   return (
     <div className="space-y-6"><AdminPageHeader eyebrow="Access" title="Roles & Permissions" description="Role matrix for super admins, admins, managers, employees, and customers." />
       <div className="grid gap-4 md:grid-cols-5">
@@ -540,7 +538,7 @@ export function RolesPage() {
           <AdminMetricCard
             key={role.value}
             label={role.label}
-            value={hasAdminAccess(role.value) ? 'Admin' : 'Store only'}
+            value={role.value === 'super_admin' || role.value === 'admin' ? 'Admin' : isStaffRole(role.value) ? 'Staff' : 'Store only'}
             helper={role.description}
             tone={statusTone[role.value]}
             icon={<Shield size={19} />}
@@ -554,11 +552,11 @@ export function RolesPage() {
               <tr><th>Module</th>{ROLES.map((role) => <th key={role.value}>{role.label}</th>)}</tr>
             </thead>
             <tbody>
-              {modules.map((module) => (
+              {ADMIN_MODULES.map((module) => (
                 <tr key={module}>
                   <td className="font-semibold capitalize">{module}</td>
                   {ROLES.map((role) => {
-                    const allowed = hasAdminAccess(role.value)
+                    const allowed = hasAdminPermission(role.value, module)
                     return <td key={role.value}>{allowed ? <Check size={17} className="text-success-600" aria-label="Allowed" /> : <X size={17} className="text-surface-300" aria-label="Not allowed" />}</td>
                   })}
                 </tr>

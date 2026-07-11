@@ -15,7 +15,7 @@ const columns = [
 ]
 
 export default function Footer() {
-  const { isAdmin } = useAuth()
+  const { isStaff } = useAuth()
 
   return (
     <footer className="border-t border-surface-200 bg-[#f7f7f5] dark:border-surface-800 dark:bg-[#111]">
@@ -31,7 +31,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            {columns.map((column) => <div key={column.title}><h3 className="text-xs font-semibold uppercase tracking-[.16em] text-surface-400">{column.title}</h3><ul className="mt-5 space-y-3.5">{column.links.map(([label, path]) => <li key={label}><Link to={path} className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">{label}</Link></li>)}{column.title === 'Joe’s' && isAdmin && <li><Link to="/admin" className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">Admin</Link></li>}</ul></div>)}
+            {columns.map((column) => <div key={column.title}><h3 className="text-xs font-semibold uppercase tracking-[.16em] text-surface-400">{column.title}</h3><ul className="mt-5 space-y-3.5">{column.links.map(([label, path]) => <li key={label}><Link to={path} className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">{label}</Link></li>)}{column.title === 'Joe’s' && isStaff && <li><Link to="/admin" className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">Staff dashboard</Link></li>}</ul></div>)}
           </div>
         </div>
         <div className="mt-16 flex flex-col gap-4 border-t border-surface-200 pt-7 text-xs text-surface-400 sm:flex-row sm:items-center sm:justify-between dark:border-surface-800">

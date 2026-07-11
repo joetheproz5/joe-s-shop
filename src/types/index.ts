@@ -115,8 +115,6 @@ export interface Product {
   categories?: Category[]
   brand?: Brand
   tags?: string[]
-  colors?: string[]
-  sizes?: string[]
 }
 
 // ===== Cart =====

@@ -32,7 +32,7 @@ const categories = [
 export default function MobileMenu() {
   const { mobileMenuOpen, closeMobileMenu } = useUIStore();
   const { theme, toggleTheme } = useTheme();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isStaff } = useAuth();
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -198,7 +198,7 @@ export default function MobileMenu() {
                       <User className="h-5 w-5" />
                       <span>Profile</span>
                     </Link>
-                    {isAdmin && (
+                    {isStaff && (
                       <Link
                         to="/admin/dashboard"
                         onClick={closeMobileMenu}

@@ -50,12 +50,6 @@ export async function fetchProducts(
   if (filters.max_price !== undefined) {
     query = query.lte('selling_price', filters.max_price)
   }
-  if (filters.color) {
-    query = query.contains('colors', [filters.color])
-  }
-  if (filters.size) {
-    query = query.contains('sizes', [filters.size])
-  }
   if (filters.search) {
     query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,sku.ilike.%${filters.search}%`)
   }
@@ -220,8 +214,6 @@ export async function createProduct(data: Partial<Product>): Promise<Product> {
       is_featured: data.is_featured ?? false,
       is_new_arrival: data.is_new_arrival ?? false,
       is_best_seller: data.is_best_seller ?? false,
-      colors: data.colors,
-      sizes: data.sizes,
     })
     .select()
     .single()
