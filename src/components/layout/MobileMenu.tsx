@@ -22,11 +22,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useUIStore } from '@/stores/uiStore';
 
 const categories = [
-  { label: 'Electronics', path: '/categories/electronics' },
-  { label: 'Clothing', path: '/categories/clothing' },
-  { label: 'Home & Garden', path: '/categories/home-garden' },
-  { label: 'Sports', path: '/categories/sports' },
-  { label: 'Books', path: '/categories/books' },
+  { label: 'Electronics', path: '/shop?search=electronics' },
+  { label: 'Clothing', path: '/shop?search=clothing' },
+  { label: 'Home & Garden', path: '/shop?search=home' },
+  { label: 'Sports', path: '/shop?search=sports' },
+  { label: 'Books', path: '/shop?search=books' },
 ];
 
 export default function MobileMenu() {
@@ -49,7 +49,7 @@ export default function MobileMenu() {
   const navLinks = [
     { label: 'Home', path: '/', icon: Home },
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
-    { label: 'Categories', path: '/categories', icon: Grid3X3, hasSubmenu: true },
+    { label: 'Categories', path: '/shop', icon: Grid3X3, hasSubmenu: true },
     { label: 'About', path: '/about', icon: Info },
     { label: 'Contact', path: '/contact', icon: Phone },
   ];
@@ -74,14 +74,14 @@ export default function MobileMenu() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white shadow-2xl dark:bg-gray-900"
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white shadow-2xl dark:bg-surface-950"
           >
             <div className="flex h-full flex-col overflow-y-auto">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
                 <span className="flex items-center gap-2 text-lg font-bold text-surface-950 dark:text-white">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm text-white">J</span>
-                  Joe's Shop
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-950 text-xs text-white dark:bg-white dark:text-surface-950">J</span>
+                  Joe's
                 </span>
                 <button
                   onClick={closeMobileMenu}
@@ -170,7 +170,7 @@ export default function MobileMenu() {
 
                 {/* Wishlist link */}
                 <Link
-                  to="/wishlist"
+                  to="/account/wishlist"
                   onClick={closeMobileMenu}
                   className={clsx(
                     'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
@@ -188,7 +188,7 @@ export default function MobileMenu() {
                 {user ? (
                   <>
                     <Link
-                      to="/profile"
+                      to="/account"
                       onClick={closeMobileMenu}
                       className={clsx(
                         'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
@@ -199,7 +199,7 @@ export default function MobileMenu() {
                       <span>Profile</span>
                     </Link>
                     <Link
-                      to="/dashboard"
+                      to="/admin/dashboard"
                       onClick={closeMobileMenu}
                       className={clsx(
                         'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',

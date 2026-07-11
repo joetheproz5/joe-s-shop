@@ -1,236 +1,41 @@
-import { Link } from 'react-router-dom';
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Youtube,
-  Mail,
-  Phone,
-  MapPin,
-  Send,
-} from 'lucide-react';
-import clsx from '@/lib/utils';
+import { Link } from 'react-router-dom'
+import { Instagram, Mail, MapPin } from 'lucide-react'
 
-const quickLinks = [
-  { label: 'Home', path: '/' },
-  { label: 'Shop', path: '/shop' },
-  { label: 'Categories', path: '/categories' },
-  { label: 'New Arrivals', path: '/shop?filter=new' },
-  { label: 'Best Sellers', path: '/shop?filter=best-sellers' },
-  { label: 'Deals & Offers', path: '/shop?filter=deals' },
-];
-
-const customerService = [
-  { label: 'My Account', path: '/profile' },
-  { label: 'Order Tracking', path: '/orders' },
-  { label: 'Shipping Policy', path: '/shipping-policy' },
-  { label: 'Returns & Exchanges', path: '/returns' },
-  { label: 'FAQ', path: '/faq' },
-  { label: 'Size Guide', path: '/size-guide' },
-];
-
-const socialLinks = [
-  { label: 'Facebook', icon: Facebook, href: '#' },
-  { label: 'Twitter', icon: Twitter, href: '#' },
-  { label: 'Instagram', icon: Instagram, href: '#' },
-  { label: 'YouTube', icon: Youtube, href: '#' },
-];
-
-const paymentMethods = ['Visa', 'Mastercard', 'PayPal', 'Apple Pay', 'Google Pay', 'Stripe'];
+const columns = [
+  { title: 'Shop', links: [
+    ['All products', '/shop'], ['New arrivals', '/shop?is_new_arrival=true'], ['Best sellers', '/shop?is_best_seller=true'], ['Featured', '/shop?is_featured=true'],
+  ] },
+  { title: 'Support', links: [
+    ['My account', '/account'], ['Orders', '/account/orders'], ['Contact', '/contact'], ['Returns', '/contact'],
+  ] },
+  { title: 'Joe’s', links: [
+    ['Our story', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms'], ['Admin', '/admin'],
+  ] },
+]
 
 export default function Footer() {
   return (
-    <footer className="border-t border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-950">
-      {/* Main footer content */}
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-          {/* Column 1: Company info */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            {/* Logo */}
-            <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-surface-950 dark:text-white">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm text-white">J</span>
-              <span>Joe's Shop</span>
-            </Link>
-
-            <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Useful products, clear prices, fast shipping, and support when you need it.
-            </p>
-
-            {/* Contact info */}
-            <ul className="mt-6 space-y-3">
-              <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <MapPin className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                <span>123 Commerce Street, NY 10001</span>
-              </li>
-              <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Phone className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                <span>+1 (555) 123-4567</span>
-              </li>
-              <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <Mail className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                <span>hello@joesshop.com</span>
-              </li>
-            </ul>
-
-            {/* Social links */}
-            <div className="mt-6 flex items-center gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className={clsx(
-                    'flex h-9 w-9 items-center justify-center rounded-lg transition-all',
-                    'text-gray-500 hover:bg-blue-50 hover:text-blue-600',
-                    'dark:text-gray-400 dark:hover:bg-blue-950/30 dark:hover:text-blue-400'
-                  )}
-                >
-                  <social.icon className="h-4 w-4" />
-                </a>
-              ))}
+    <footer className="border-t border-surface-200 bg-[#f7f7f5] dark:border-surface-800 dark:bg-[#111]">
+      <div className="section-container py-16 sm:py-20">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
+          <div className="max-w-sm">
+            <Link to="/" className="inline-flex items-center gap-2.5 text-lg font-semibold tracking-[-.03em]"><span className="grid h-9 w-9 place-items-center rounded-full bg-surface-950 text-xs text-white dark:bg-white dark:text-surface-950">J</span>Joe's</Link>
+            <p className="mt-5 text-sm leading-6 text-surface-500 dark:text-surface-400">Thoughtfully selected products for modern life. Clear choices, honest value, and support that feels human.</p>
+            <div className="mt-6 flex gap-2">
+              <a href="mailto:hello@joesshop.com" aria-label="Email" className="grid h-10 w-10 place-items-center rounded-full border border-surface-300 hover:bg-white dark:border-surface-700 dark:hover:bg-surface-900"><Mail size={17} /></a>
+              <a href="#" aria-label="Instagram" className="grid h-10 w-10 place-items-center rounded-full border border-surface-300 hover:bg-white dark:border-surface-700 dark:hover:bg-surface-900"><Instagram size={17} /></a>
+              <span className="flex h-10 items-center gap-2 rounded-full border border-surface-300 px-4 text-xs text-surface-500 dark:border-surface-700"><MapPin size={14} /> New York</span>
             </div>
           </div>
-
-          {/* Column 2: Quick Links */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">
-              Quick Links
-            </h3>
-            <ul className="mt-4 space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    className={clsx(
-                      'text-sm transition-colors',
-                      'text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400'
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 3: Customer Service */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">
-              Customer Service
-            </h3>
-            <ul className="mt-4 space-y-3">
-              {customerService.map((link) => (
-                <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    className={clsx(
-                      'text-sm transition-colors',
-                      'text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400'
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 4: Newsletter */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">
-              Stay Updated
-            </h3>
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-              Subscribe to our newsletter for exclusive deals, new arrivals, and insider tips.
-            </p>
-            <form className="mt-4" onSubmit={(e) => e.preventDefault()}>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className={clsx(
-                    'w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-all',
-                    'border-gray-200 bg-white placeholder-gray-400',
-                    'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20',
-                    'dark:border-gray-700 dark:bg-gray-900 dark:placeholder-gray-500',
-                    'dark:focus:border-blue-400 dark:focus:ring-blue-400/20'
-                  )}
-                />
-                <button
-                  type="submit"
-                  className={clsx(
-                    'flex shrink-0 items-center justify-center rounded-lg px-4 py-2.5 transition-all',
-                    'bg-blue-600 text-white hover:bg-blue-700'
-                  )}
-                  aria-label="Subscribe"
-                >
-                  <Send className="h-4 w-4" />
-                </button>
-              </div>
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
-                By subscribing, you agree to our Privacy Policy.
-              </p>
-            </form>
-
-            {/* Trust badges */}
-            <div className="mt-6 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                Free shipping on orders over $50
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                30-day money-back guarantee
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                24/7 customer support
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            {columns.map((column) => <div key={column.title}><h3 className="text-xs font-semibold uppercase tracking-[.16em] text-surface-400">{column.title}</h3><ul className="mt-5 space-y-3.5">{column.links.map(([label, path]) => <li key={label}><Link to={path} className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">{label}</Link></li>)}</ul></div>)}
           </div>
         </div>
-      </div>
-
-      {/* Bottom bar */}
-      <div className="border-t border-gray-200 dark:border-gray-800">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6 lg:px-8">
-          {/* Copyright */}
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} Joe's Shop. All rights reserved.
-          </p>
-
-          {/* Payment methods */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {paymentMethods.map((method) => (
-              <span
-                key={method}
-                className={clsx(
-                  'rounded-md border px-2.5 py-1 text-xs font-medium',
-                  'border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-400'
-                )}
-              >
-                {method}
-              </span>
-            ))}
-          </div>
-
-          {/* Legal links */}
-          <div className="flex items-center gap-4">
-            <Link
-              to="/privacy"
-              className="text-sm text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              to="/terms"
-              className="text-sm text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-            >
-              Terms of Service
-            </Link>
-          </div>
+        <div className="mt-16 flex flex-col gap-4 border-t border-surface-200 pt-7 text-xs text-surface-400 sm:flex-row sm:items-center sm:justify-between dark:border-surface-800">
+          <p>© {new Date().getFullYear()} Joe's Shop. All rights reserved.</p>
+          <p>Secure checkout · Visa · Mastercard · PayPal · Apple Pay</p>
         </div>
       </div>
     </footer>
-  );
+  )
 }

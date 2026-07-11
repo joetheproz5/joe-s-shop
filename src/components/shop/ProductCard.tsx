@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Heart, ShoppingCart, Eye, Star } from 'lucide-react'
+import { Heart, ShoppingBag, Eye, Star } from 'lucide-react'
 import type { Product } from '@/types'
 import { useCartStore } from '@/stores/cartStore'
 import { useWishlistStore } from '@/stores/wishlistStore'
@@ -49,31 +49,29 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.04, 0.4) }}
-      whileHover={{ y: -2 }}
-      className="card group flex flex-col"
+      className="group flex min-w-0 flex-col"
     >
-      <Link to={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface-100 dark:bg-surface-800">
+      <Link to={`/product/${product.slug}`} className="relative block aspect-[.88] overflow-hidden rounded-[1.5rem] bg-[#f5f5f3] dark:bg-surface-900">
         {featuredImage ? (
           <img
             src={featuredImage}
             alt={product.name}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-surface-300">
-            <ShoppingCart size={48} />
+            <ShoppingBag size={42} strokeWidth={1.4} />
           </div>
         )}
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {onSale && <span className="badge-danger">-{discount}%</span>}
-          {product.is_new_arrival && <span className="badge-primary">New</span>}
-          {product.is_best_seller && <span className="badge-warning">Best Seller</span>}
+        <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+          {onSale && <span className="rounded-full bg-surface-950 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white dark:bg-white dark:text-surface-950">Save {discount}%</span>}
+          {product.is_new_arrival && <span className="rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-surface-900 backdrop-blur-md">New</span>}
         </div>
 
         {/* Wishlist button */}
@@ -81,10 +79,10 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
           onClick={handleWishlist}
           aria-label="Toggle wishlist"
           className={clsx(
-            'absolute top-3 right-3 w-9 h-9 rounded-lg backdrop-blur-md flex items-center justify-center transition-all',
+            'absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition-all',
             isInWishlist
               ? 'bg-danger-500 text-white'
-              : 'bg-white/80 dark:bg-surface-900/80 text-surface-700 dark:text-surface-300 hover:bg-white dark:hover:bg-surface-800'
+              : 'bg-white/80 text-surface-700 opacity-100 hover:bg-white sm:opacity-0 sm:group-hover:opacity-100 dark:bg-surface-950/80 dark:text-surface-200'
           )}
         >
           <Heart size={16} fill={isInWishlist ? 'currentColor' : 'none'} />
@@ -93,43 +91,43 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
         {/* Out of stock overlay */}
         {outOfStock && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <span className="badge bg-white text-surface-900 text-sm font-semibold">Out of Stock</span>
+            <span className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-surface-900">Out of stock</span>
           </div>
         )}
 
         {/* Hover actions */}
-        <div className="absolute bottom-0 inset-x-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex gap-2">
+        <div className="absolute inset-x-0 bottom-0 hidden translate-y-full gap-2 p-3 transition-transform duration-300 group-hover:translate-y-0 sm:flex">
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-blue-700 disabled:opacity-50"
+            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-surface-950 py-3 text-xs font-semibold text-white shadow-lg transition-colors hover:bg-blue-600 disabled:opacity-50 dark:bg-white dark:text-surface-950 dark:hover:bg-blue-500 dark:hover:text-white"
           >
-            <ShoppingCart size={16} /> Add
+            <ShoppingBag size={15} /> Add to bag
           </button>
           <button
             onClick={handleQuickView}
             aria-label="Quick view"
-            className="w-10 bg-white dark:bg-surface-900 text-surface-900 dark:text-white rounded-lg flex items-center justify-center shadow-lg hover:bg-surface-100 dark:hover:bg-surface-800"
+            className="flex w-11 items-center justify-center rounded-full bg-white text-surface-900 shadow-lg hover:bg-surface-100 dark:bg-surface-900 dark:text-white"
           >
             <Eye size={16} />
           </button>
         </div>
       </Link>
 
-      <div className="p-4 flex flex-col flex-1">
+      <div className="flex flex-1 flex-col px-1 pt-4">
         {product.brand && (
-          <span className="text-xs text-surface-500 mb-1">{product.brand.name}</span>
+          <span className="mb-1 text-[11px] font-semibold uppercase tracking-[.12em] text-surface-400">{product.brand.name}</span>
         )}
         <Link
           to={`/product/${product.slug}`}
-          className="line-clamp-2 font-medium leading-snug transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          className="line-clamp-2 text-sm font-semibold leading-snug tracking-[-.01em] transition-colors hover:text-blue-600 dark:hover:text-blue-400 sm:text-base"
         >
           {product.name}
         </Link>
 
         {variant === 'default' && (
-          <div className="flex items-center gap-1 mt-1.5 mb-2">
-            <Star size={13} className="text-warning-500" fill="currentColor" />
+          <div className="mb-2 mt-2 flex items-center gap-1">
+            <Star size={12} className="text-surface-800 dark:text-surface-200" fill="currentColor" />
             <span className="text-xs font-medium">{product.average_rating?.toFixed(1) || '0.0'}</span>
             <span className="text-xs text-surface-400">({product.review_count || 0})</span>
             {stock.status === 'low_stock' && (
@@ -138,8 +136,8 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
           </div>
         )}
 
-        <div className="flex items-baseline gap-2 mt-auto pt-2">
-          <span className="text-lg font-bold">{formatCurrency(product.sale_price ?? product.selling_price)}</span>
+        <div className="mt-auto flex items-baseline gap-2 pt-2">
+          <span className="text-sm font-semibold sm:text-base">{formatCurrency(product.sale_price ?? product.selling_price)}</span>
           {onSale && (
             <span className="text-sm text-surface-400 line-through">{formatCurrency(product.selling_price)}</span>
           )}

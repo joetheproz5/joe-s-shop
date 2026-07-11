@@ -1,432 +1,194 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import {
-  ArrowRight,
-  BadgeCheck,
-  ChevronRight,
-  Headphones,
-  Package,
-  RotateCcw,
-  ShieldCheck,
-  Sparkles,
-  Truck,
-} from 'lucide-react'
+import { ArrowRight, ChevronRight, Headphones, Package, RotateCcw, ShieldCheck, Truck } from 'lucide-react'
 import { useFeaturedProducts, useNewArrivals, useBestSellers } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { useSettings } from '@/hooks/useSettings'
 import { ProductCard } from '@/components/shop/ProductCard'
 import { Skeleton } from '@/components/ui'
-import { SITE_NAME } from '@/lib/constants'
 import { formatCurrency } from '@/lib/utils'
-import type { Product } from '@/types'
+import type { Category, Product } from '@/types'
 import toast from 'react-hot-toast'
-
-const accent = 'text-blue-600 dark:text-blue-400'
 
 export default function HomePage() {
   const { data: settings } = useSettings()
-  const { data: categories, isLoading: catLoading } = useCategories()
-  const { data: featured, isLoading: featLoading } = useFeaturedProducts(8)
-  const { data: arrivals, isLoading: arrLoading } = useNewArrivals(4)
+  const { data: categories, isLoading: categoriesLoading } = useCategories()
+  const { data: featured, isLoading: featuredLoading } = useFeaturedProducts(8)
+  const { data: arrivals, isLoading: arrivalsLoading } = useNewArrivals(4)
   const { data: bestSellers, isLoading: bestLoading } = useBestSellers(4)
 
-  const configuredTitle = settings?.hero_title?.trim()
-  const configuredSubtitle = settings?.hero_subtitle?.trim()
-  const hero = {
-    title:
-      configuredTitle && configuredTitle !== 'Premium Products for Modern Living'
-        ? configuredTitle
-        : 'Good products. Clear choices.',
-    subtitle:
-      configuredSubtitle && configuredSubtitle !== "Shop handpicked essentials from the world's best brands. Fast shipping, easy returns."
-        ? configuredSubtitle
-        : 'Useful finds across tech, home, style, fitness, and more. Easy to browse, easy to buy.',
-    ctaText: settings?.hero_cta_text || 'Shop all products',
-    ctaLink: settings?.hero_cta_link || '/shop',
-  }
-
-  const topCategories = (categories || []).filter((category) => !category.parent_id).slice(0, 6)
-  const heroProducts = [...(featured || []), ...(bestSellers || []), ...(arrivals || [])]
-    .filter((product, index, list) => list.findIndex((item) => item.id === product.id) === index)
-    .slice(0, 3)
+  const products = [...(featured || []), ...(bestSellers || []), ...(arrivals || [])]
+    .filter((product, index, all) => all.findIndex((item) => item.id === product.id) === index)
+  const heroTitle = settings?.hero_title?.trim()
+  const heroSubtitle = settings?.hero_subtitle?.trim()
 
   return (
-    <div className="bg-white text-surface-900 dark:bg-surface-950 dark:text-white">
-      <Announcement />
-      <Hero hero={hero} products={heroProducts} loading={featLoading && bestLoading && arrLoading} />
-      <CategoryStrip categories={topCategories} loading={catLoading} />
-
-      <ProductSection
-        label="Featured"
-        title="Popular right now"
-        description="Customer favorites and standout picks from across the store."
-        link="/shop?is_featured=true"
-      >
-        <ProductGrid products={featured} loading={featLoading} />
-      </ProductSection>
-
-      <PromoPanel products={(bestSellers || featured || []).slice(0, 2)} />
-
-      <ProductSection
-        label="Best sellers"
-        title="Tried, tested, and selling fast"
-        description="The products people keep coming back for."
-        link="/shop?is_best_seller=true"
-      >
-        <ProductGrid products={bestSellers} loading={bestLoading} />
-      </ProductSection>
-
-      <Benefits />
-
-      <ProductSection
-        label="Just in"
-        title="New this week"
-        description="A fresh selection of recently added products."
-        link="/shop?is_new_arrival=true"
-      >
-        <ProductGrid products={arrivals} loading={arrLoading} />
-      </ProductSection>
-
+    <div className="storefront-shell">
+      <PromoBar />
+      <Hero
+        title={heroTitle && heroTitle !== 'Premium Products for Modern Living' ? heroTitle : 'Designed for the way you live.'}
+        subtitle={heroSubtitle && !heroSubtitle.startsWith('Shop handpicked') ? heroSubtitle : 'Considered essentials. Remarkable quality. A simpler way to discover the things that make every day better.'}
+        ctaText={settings?.hero_cta_text || 'Shop the collection'}
+        ctaLink={settings?.hero_cta_link || '/shop'}
+        products={products}
+        loading={featuredLoading && arrivalsLoading && bestLoading}
+      />
+      <CategoryRail categories={(categories || []).slice(0, 6)} loading={categoriesLoading} />
+      <ProductShowcase
+        eyebrow="The latest"
+        title="New. Noteworthy."
+        description="Fresh arrivals selected for form, function, and staying power."
+        products={arrivals}
+        loading={arrivalsLoading}
+        href="/shop?is_new_arrival=true"
+      />
+      <EditorialStory products={products.slice(1, 3)} />
+      <ProductShowcase
+        eyebrow="Customer favorites"
+        title="Loved for a reason."
+        description="Our most popular pieces, chosen again and again."
+        products={bestSellers?.length ? bestSellers : featured}
+        loading={bestLoading && featuredLoading}
+        href="/shop?is_best_seller=true"
+      />
+      <ServiceStrip />
       <Newsletter />
     </div>
   )
 }
 
-function Announcement() {
+function PromoBar() {
   return (
-    <div className="border-b border-blue-100 bg-blue-50 text-blue-950 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-100">
-      <div className="section-container flex min-h-9 items-center justify-center gap-2 py-2 text-center text-xs font-semibold sm:text-sm">
-        <Truck size={15} />
-        Free shipping on orders over $100
-        <span className="hidden text-blue-300 sm:inline">|</span>
-        <Link to="/shop" className="hidden items-center gap-1 hover:text-blue-600 sm:inline-flex dark:hover:text-blue-300">
-          Shop now <ChevronRight size={14} />
+    <div className="bg-surface-950 text-white dark:bg-white dark:text-surface-950">
+      <div className="section-container flex min-h-10 items-center justify-center gap-2 text-center text-xs font-medium tracking-wide">
+        Complimentary delivery on orders over $100
+        <Link to="/shop" className="inline-flex items-center underline underline-offset-4 hover:no-underline">
+          Shop now <ChevronRight size={13} />
         </Link>
       </div>
     </div>
   )
 }
 
-function Hero({
-  hero,
-  products,
-  loading,
-}: {
-  hero: { title: string; subtitle: string; ctaText: string; ctaLink: string }
+function Hero({ title, subtitle, ctaText, ctaLink, products, loading }: {
+  title: string
+  subtitle: string
+  ctaText: string
+  ctaLink: string
   products: Product[]
   loading: boolean
 }) {
-  const mainProduct = products[0]
+  const lead = products[0]
+  const image = lead?.images?.find((item) => item.is_featured)?.url || lead?.images?.[0]?.url
 
   return (
-    <section className="border-b border-surface-200 bg-surface-50 dark:border-surface-800 dark:bg-surface-900/40">
-      <div className="section-container grid items-center gap-10 py-12 lg:grid-cols-[0.9fr_1.1fr] lg:py-16">
-        <div className="max-w-xl">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm dark:border-blue-800 dark:bg-surface-900 dark:text-blue-300"
-          >
-            <Sparkles size={14} />
-            New picks added every week
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.04 }}
-            className="max-w-2xl text-4xl font-bold leading-[1.08] tracking-tight text-surface-950 sm:text-5xl lg:text-6xl dark:text-white"
-          >
-            {hero.title}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="mt-5 max-w-lg text-base leading-7 text-surface-600 sm:text-lg dark:text-surface-300"
-          >
-            {hero.subtitle}
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
-            className="mt-7 flex flex-col gap-3 sm:flex-row"
-          >
-            <Link to={hero.ctaLink} className="btn-primary">
-              {hero.ctaText}
-              <ArrowRight size={17} />
-            </Link>
-            <Link to="/categories" className="btn-secondary">
-              Browse categories
-            </Link>
-          </motion.div>
-          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-surface-500 dark:text-surface-400">
-            <span className="inline-flex items-center gap-1.5"><BadgeCheck size={16} className="text-emerald-500" /> Quality checked</span>
-            <span className="inline-flex items-center gap-1.5"><RotateCcw size={16} className="text-emerald-500" /> 30-day returns</span>
+    <section className="relative overflow-hidden bg-[#f2f2f0] dark:bg-[#151515]">
+      <div className="absolute inset-0 opacity-60 [background:radial-gradient(circle_at_78%_30%,rgba(255,255,255,.9),transparent_38%)] dark:opacity-10" />
+      <div className="section-container relative grid min-h-[680px] items-center gap-8 py-16 lg:grid-cols-[0.86fr_1.14fr] lg:py-20">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7 }} className="relative z-10 max-w-2xl">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[.22em] text-surface-500 dark:text-surface-400">The Joe's collection</p>
+          <h1 className="text-balance text-5xl font-semibold leading-[.98] tracking-[-.055em] text-surface-950 sm:text-6xl lg:text-[5.4rem] dark:text-white">{title}</h1>
+          <p className="mt-7 max-w-xl text-lg leading-8 text-surface-600 sm:text-xl dark:text-surface-300">{subtitle}</p>
+          <div className="mt-9 flex flex-wrap items-center gap-4">
+            <Link to={ctaLink} className="btn-primary rounded-full px-7 py-3.5">{ctaText} <ArrowRight size={17} /></Link>
+            <Link to="/shop?is_best_seller=true" className="text-sm font-semibold text-surface-900 underline decoration-surface-400 underline-offset-8 transition-colors hover:text-blue-600 dark:text-white">Explore best sellers</Link>
           </div>
-        </div>
+        </motion.div>
 
-        {loading ? (
-          <Skeleton className="h-[480px] rounded-lg" />
-        ) : (
-          <div className="grid min-w-0 gap-3 sm:min-h-[420px] sm:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] sm:gap-4">
-            <Link
-              to={mainProduct ? `/product/${mainProduct.slug}` : '/shop'}
-              className="group relative min-w-0 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-surface-200 dark:bg-surface-900 dark:ring-surface-800"
-            >
-              <ProductImage product={mainProduct} className="h-full min-h-[340px] sm:min-h-[420px]" />
-              <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/95 p-4 shadow-lg backdrop-blur-sm dark:bg-surface-950/90">
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">Featured pick</p>
-                <div className="mt-1 flex items-end justify-between gap-3">
-                  <h2 className="line-clamp-2 font-semibold leading-snug">{mainProduct?.name || 'Explore all products'}</h2>
-                  {mainProduct && (
-                    <span className="shrink-0 text-sm font-bold">
-                      {formatCurrency(mainProduct.sale_price ?? mainProduct.selling_price)}
-                    </span>
-                  )}
-                </div>
+        <motion.div initial={{ opacity: 0, scale: .97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .8, delay: .12 }} className="relative flex min-h-[420px] items-center justify-center lg:min-h-[540px]">
+          {loading ? <Skeleton className="h-[480px] w-full rounded-[2.5rem]" /> : image ? (
+            <Link to={`/product/${lead.slug}`} className="group relative block h-[430px] w-full overflow-hidden rounded-[2rem] sm:h-[520px]">
+              <img src={image} alt={lead.name} className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.025]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-7 text-white sm:p-9">
+                <div><p className="text-xs font-semibold uppercase tracking-[.18em] text-white/70">Featured</p><h2 className="mt-2 text-2xl font-semibold tracking-tight">{lead.name}</h2></div>
+                <span className="shrink-0 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur-xl">{formatCurrency(lead.sale_price ?? lead.selling_price)}</span>
               </div>
             </Link>
-
-            <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-1 sm:gap-4">
-              {products.slice(1, 3).map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.slug}`}
-                  className="group min-w-0 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-surface-200 transition-shadow hover:shadow-md dark:bg-surface-900 dark:ring-surface-800"
-                >
-                  <ProductImage product={product} className="aspect-square" />
-                  <div className="p-3">
-                    <h3 className="line-clamp-1 text-sm font-semibold">{product.name}</h3>
-                    <p className="mt-1 text-sm font-bold text-blue-600 dark:text-blue-400">
-                      {formatCurrency(product.sale_price ?? product.selling_price)}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+          ) : (
+            <Link to="/shop" className="flex h-[430px] w-full items-center justify-center rounded-[2rem] bg-white/60 text-surface-400 sm:h-[520px] dark:bg-white/5"><Package size={54} /></Link>
+          )}
+        </motion.div>
       </div>
     </section>
   )
 }
 
-function ProductImage({ product, className }: { product?: Product; className: string }) {
-  const image = product?.images?.find((item) => item.is_featured)?.url || product?.images?.[0]?.url
-
+function CategoryRail({ categories, loading }: { categories: Category[]; loading: boolean }) {
   return (
-    <div className={`relative overflow-hidden bg-surface-100 dark:bg-surface-800 ${className}`}>
-      {image ? (
-        <img
-          src={image}
-          alt={product?.name || 'Product'}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center text-surface-400">
-          <Package size={42} />
-        </div>
-      )}
-    </div>
-  )
-}
-
-function CategoryStrip({ categories, loading }: { categories: any[]; loading: boolean }) {
-  return (
-    <section className="section-container py-12">
-      <SectionHeading
-        label="Categories"
-        title="Find what you need"
-        description="Jump straight into the department you want."
-        link="/categories"
-      />
-      {loading ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, index) => <Skeleton key={index} className="h-32 rounded-lg" />)}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map((category, index) => (
-            <motion.div
-              key={category.id}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.035 }}
-            >
-              <Link
-                to={`/shop?category_id=${category.id}`}
-                className="group flex h-32 flex-col justify-between rounded-lg border border-surface-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-surface-800 dark:bg-surface-900 dark:hover:border-blue-800"
-              >
-                <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-blue-50 text-lg font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
-                  {category.image_url ? <img src={category.image_url} alt="" className="h-full w-full object-cover" /> : category.name[0]}
-                </div>
-                <div className="flex items-end justify-between gap-2">
-                  <div>
-                    <div className="line-clamp-1 text-sm font-semibold">{category.name}</div>
-                    <div className="mt-0.5 text-xs text-surface-400">{category.product_count || 0} items</div>
-                  </div>
-                  <ChevronRight size={16} className="shrink-0 text-surface-400 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-600" />
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </section>
-  )
-}
-
-function ProductSection({ label, title, description, link, children }: {
-  label: string
-  title: string
-  description: string
-  link: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="section-container py-12">
-      <SectionHeading label={label} title={title} description={description} link={link} />
-      {children}
-    </section>
-  )
-}
-
-function PromoPanel({ products }: { products: Product[] }) {
-  return (
-    <section className="section-container py-6">
-      <div className="grid overflow-hidden rounded-lg bg-blue-600 text-white lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-12">
-          <p className="text-sm font-semibold text-blue-100">Smart picks, better prices</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Small upgrades that make a difference.</h2>
-          <p className="mt-4 max-w-lg leading-7 text-blue-100">
-            Browse everyday products chosen for usefulness, quality, and value.
-          </p>
-          <Link to="/shop" className="mt-7 inline-flex w-fit items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50">
-            Explore the collection <ArrowRight size={17} />
-          </Link>
-        </div>
-        <div className="grid min-h-64 grid-cols-2 gap-px bg-blue-500">
-          {products.map((product) => (
-            <Link key={product.id} to={`/product/${product.slug}`} className="group relative min-h-64 overflow-hidden bg-surface-100">
-              <ProductImage product={product} className="h-full" />
-              <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/95 p-3 text-surface-900 shadow-sm backdrop-blur-sm">
-                <h3 className="line-clamp-1 text-sm font-semibold">{product.name}</h3>
-                <p className="mt-1 text-sm font-bold text-blue-600">{formatCurrency(product.sale_price ?? product.selling_price)}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+    <section className="section-container py-20 sm:py-24">
+      <div className="mb-10 flex items-end justify-between">
+        <div><p className="eyebrow">Shop by collection</p><h2 className="section-title">Find your everyday.</h2></div>
+        <Link to="/shop" className="link-arrow hidden sm:inline-flex">View all <ArrowRight size={16} /></Link>
       </div>
-    </section>
-  )
-}
-
-function Benefits() {
-  const benefits = [
-    { icon: Truck, title: 'Fast delivery', text: 'Clear tracking from checkout to your door.' },
-    { icon: RotateCcw, title: 'Easy returns', text: 'A simple 30-day return window.' },
-    { icon: ShieldCheck, title: 'Secure checkout', text: 'Your payment details stay protected.' },
-    { icon: Headphones, title: 'Helpful support', text: 'Real help whenever you need it.' },
-  ]
-
-  return (
-    <section className="border-y border-surface-200 bg-surface-50 dark:border-surface-800 dark:bg-surface-900/50">
-      <div className="section-container grid sm:grid-cols-2 lg:grid-cols-4">
-        {benefits.map((benefit) => (
-          <div key={benefit.title} className="flex gap-3 border-b border-surface-200 py-7 sm:px-5 lg:border-b-0 lg:border-r dark:border-surface-800 first:sm:pl-0 last:border-r-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm ring-1 ring-surface-200 dark:bg-surface-900 dark:text-blue-400 dark:ring-surface-800">
-              <benefit.icon size={19} />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold">{benefit.title}</h3>
-              <p className="mt-1 text-sm leading-6 text-surface-500 dark:text-surface-400">{benefit.text}</p>
-            </div>
-          </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {loading ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-[.82] rounded-[1.5rem]" />) : categories.map((category, index) => (
+          <motion.div key={category.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * .04 }}>
+            <Link to={`/shop?category_id=${category.id}`} className="group block">
+              <div className="aspect-[.86] overflow-hidden rounded-[1.5rem] bg-surface-100 dark:bg-surface-900">
+                {category.image_url ? <img src={category.image_url} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center text-4xl font-semibold text-surface-300 dark:text-surface-700">{category.name.charAt(0)}</div>}
+              </div>
+              <div className="mt-4 flex items-center justify-between gap-2"><span className="text-sm font-semibold">{category.name}</span><ChevronRight size={15} className="text-surface-400 transition-transform group-hover:translate-x-1" /></div>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </section>
   )
 }
 
-function Newsletter() {
-  const [email, setEmail] = useState('')
-
-  const submit = (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!email) return
-    toast.success('You are on the list.')
-    setEmail('')
-  }
-
+function ProductShowcase({ eyebrow, title, description, products, loading, href }: { eyebrow: string; title: string; description: string; products?: Product[]; loading: boolean; href: string }) {
   return (
-    <section className="section-container py-14">
-      <div className="flex flex-col gap-7 rounded-lg border border-surface-200 bg-surface-50 p-7 sm:p-9 lg:flex-row lg:items-center lg:justify-between dark:border-surface-800 dark:bg-surface-900">
-        <div>
-          <p className={`text-sm font-semibold ${accent}`}>Stay in the loop</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">New products and worthwhile deals.</h2>
-          <p className="mt-2 text-surface-500 dark:text-surface-400">A useful email now and then. No clutter.</p>
+    <section className="section-container pb-24">
+      <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <div><p className="eyebrow">{eyebrow}</p><h2 className="section-title">{title}</h2><p className="mt-3 text-surface-500 dark:text-surface-400">{description}</p></div>
+        <Link to={href} className="link-arrow">Shop all <ArrowRight size={16} /></Link>
+      </div>
+      {loading ? <div className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} variant="card" />)}</div> : products?.length ? (
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4">{products.slice(0, 4).map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}</div>
+      ) : <div className="rounded-[1.5rem] bg-surface-50 py-16 text-center text-sm text-surface-500 dark:bg-surface-900">New products are arriving soon.</div>}
+    </section>
+  )
+}
+
+function EditorialStory({ products }: { products: Product[] }) {
+  const image = products[0]?.images?.[0]?.url
+  return (
+    <section className="section-container pb-24">
+      <div className="relative min-h-[560px] overflow-hidden rounded-[2rem] bg-[#1d3329] text-white">
+        {image && <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent" />
+        <div className="relative flex min-h-[560px] max-w-xl flex-col justify-end p-8 sm:p-14 lg:p-16">
+          <p className="text-xs font-semibold uppercase tracking-[.22em] text-white/70">Made to matter</p>
+          <h2 className="mt-5 text-4xl font-semibold leading-tight tracking-[-.04em] sm:text-5xl">Less noise. Better things.</h2>
+          <p className="mt-5 max-w-md text-lg leading-8 text-white/75">A collection built around useful design, lasting materials, and products that earn their place in your life.</p>
+          <Link to="/shop?is_featured=true" className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-surface-950 transition-transform hover:scale-[1.02]">Discover the edit <ArrowRight size={16} /></Link>
         </div>
-        <form onSubmit={submit} className="flex w-full max-w-lg flex-col gap-2 sm:flex-row">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Email address"
-            className="input-field flex-1"
-          />
-          <button type="submit" className="btn-primary shrink-0">Join the list</button>
-        </form>
       </div>
     </section>
   )
 }
 
-function ProductGrid({ products, loading }: { products: Product[] | undefined; loading: boolean }) {
-  if (loading) {
-    return (
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} variant="card" />)}
-      </div>
-    )
-  }
-
-  if (!products || products.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed border-surface-300 bg-surface-50 py-12 text-center text-sm font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900">
-        No products available yet.
-      </div>
-    )
-  }
-
-  return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {products.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
-    </div>
-  )
+function ServiceStrip() {
+  const services = [
+    { icon: Truck, title: 'Complimentary delivery', text: 'On every order over $100.' },
+    { icon: RotateCcw, title: 'Easy returns', text: '30 days to change your mind.' },
+    { icon: ShieldCheck, title: 'Secure by design', text: 'Protected payments and data.' },
+    { icon: Headphones, title: 'Here to help', text: 'Real support when you need it.' },
+  ]
+  return <section className="border-y border-surface-200 dark:border-surface-800"><div className="section-container grid sm:grid-cols-2 lg:grid-cols-4">{services.map((service) => <div key={service.title} className="flex gap-4 border-b border-surface-200 py-8 sm:px-5 lg:border-b-0 lg:border-r dark:border-surface-800 first:pl-0 last:border-r-0"><service.icon size={21} strokeWidth={1.6} /><div><h3 className="text-sm font-semibold">{service.title}</h3><p className="mt-1 text-sm text-surface-500 dark:text-surface-400">{service.text}</p></div></div>)}</div></section>
 }
 
-function SectionHeading({ label, title, description, link }: {
-  label: string
-  title: string
-  description: string
-  link?: string
-}) {
+function Newsletter() {
+  const [email, setEmail] = useState('')
+  const submit = (event: React.FormEvent) => { event.preventDefault(); if (!email) return; toast.success("You're on the list."); setEmail('') }
   return (
-    <div className="mb-7 flex items-end justify-between gap-5">
-      <div>
-        <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{label}</p>
-        <h2 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-surface-500 sm:text-base dark:text-surface-400">{description}</p>
+    <section className="section-container py-24">
+      <div className="rounded-[2rem] bg-surface-950 px-7 py-14 text-center text-white sm:px-12 sm:py-20 dark:bg-white dark:text-surface-950">
+        <p className="eyebrow !text-white/55 dark:!text-surface-500">Stay in the know</p><h2 className="mx-auto mt-3 max-w-2xl text-4xl font-semibold tracking-[-.04em] sm:text-5xl">Good things, occasionally.</h2><p className="mx-auto mt-4 max-w-xl text-white/60 dark:text-surface-500">New arrivals, thoughtful stories, and offers worth opening.</p>
+        <form onSubmit={submit} className="mx-auto mt-8 flex max-w-md rounded-full bg-white p-1.5 dark:bg-surface-100"><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" className="min-w-0 flex-1 bg-transparent px-4 text-sm text-surface-950 outline-none placeholder:text-surface-400" /><button className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">Subscribe</button></form>
       </div>
-      {link && (
-        <Link to={link} className="hidden shrink-0 items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 sm:flex dark:text-blue-400 dark:hover:text-blue-300">
-          View all <ArrowRight size={16} />
-        </Link>
-      )}
-    </div>
+    </section>
   )
 }

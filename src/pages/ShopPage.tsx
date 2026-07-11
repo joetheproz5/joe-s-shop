@@ -83,17 +83,15 @@ export default function ShopPage() {
   ].filter(Boolean).length
 
   return (
-    <div className="min-h-screen bg-surface-50/70 dark:bg-surface-950">
-      <div className="page-container py-10">
+    <div className="min-h-screen bg-white dark:bg-surface-950">
+      <div className="page-container py-12 sm:py-16">
       {/* Header */}
-      <div className="mb-8">
-        <nav className="mb-2 text-sm text-surface-500">
-          <span>Home</span> <span className="mx-1">/</span> <span className="text-surface-900 dark:text-surface-50">Shop</span>
-        </nav>
+      <div className="mb-12 border-b border-surface-200 pb-10 dark:border-surface-800">
+        <p className="eyebrow mb-3">The collection</p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">All products</h1>
-            <p className="mt-2 text-surface-500">{data?.total || 0} products, ready to browse.</p>
+            <h1 className="text-4xl font-semibold tracking-[-.045em] sm:text-6xl">Everything, considered.</h1>
+            <p className="mt-3 text-surface-500">{data?.total || 0} products selected for everyday life.</p>
           </div>
           <div className="flex items-center gap-3">
             {/* Sort */}
@@ -127,7 +125,7 @@ export default function ShopPage() {
       <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
         {/* Sidebar filters — desktop */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24 rounded-lg border border-surface-200 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+          <div className="sticky top-24 rounded-2xl border border-surface-200 bg-white p-6 dark:border-surface-800 dark:bg-surface-900">
             <FilterPanel
             categories={categories || []}
             brands={brands || []}
@@ -194,11 +192,11 @@ export default function ShopPage() {
         {/* Product grid */}
         <div>
           {isLoading ? (
-            <div className={clsx('grid gap-4', view === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1')}>
+            <div className={clsx('grid gap-x-4 gap-y-10', view === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1')}>
               {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} variant="card" />)}
             </div>
           ) : !data || data.data.length === 0 ? (
-            <div className="rounded-lg border border-surface-200 bg-white p-16 text-center dark:border-surface-800 dark:bg-surface-900">
+            <div className="rounded-[2rem] bg-surface-50 p-16 text-center dark:bg-surface-900">
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
                 <SlidersHorizontal className="text-surface-400" size={28} />
               </div>
@@ -208,7 +206,7 @@ export default function ShopPage() {
             </div>
           ) : (
             <>
-              <div className={clsx('grid gap-4', view === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1')}>
+              <div className={clsx('grid gap-x-4 gap-y-10', view === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1')}>
                 {data.data.map((p, i) => <ProductCard key={p.id} product={p} index={i} variant={view === 'list' ? 'compact' : 'default'} />)}
               </div>
               {data.totalPages > 1 && (
@@ -342,7 +340,7 @@ function FilterPanel({ categories, brands, categoryIds, brandIds, minPrice, maxP
 function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-surface-200 dark:border-surface-800 pb-5">
-      <h3 className="font-semibold text-sm uppercase tracking-wide text-surface-700 dark:text-surface-300 mb-3">{title}</h3>
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-[.16em] text-surface-500 dark:text-surface-400">{title}</h3>
       <div className="space-y-1">{children}</div>
     </div>
   )
