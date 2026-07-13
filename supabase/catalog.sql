@@ -117,7 +117,7 @@ insert into public.product_images (product_id, url, alt_text, sort_order, is_fea
   ('a2000000-0000-0000-0000-000000000003', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-s23-ultra.png', 'Samsung Galaxy S23 Ultra product image', 0, true),
   ('a2000000-0000-0000-0000-000000000004', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-s23-fe.jpg', 'Samsung Galaxy S23 FE product image', 0, true),
   ('a2000000-0000-0000-0000-000000000005', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-buds4.jpg', 'Samsung Galaxy Buds4 product image', 0, true),
-  ('a2000000-0000-0000-0000-000000000006', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-buds4-pro.jpg', 'Samsung Galaxy Buds4 Pro product image', 0, true),
+  ('a2000000-0000-0000-0000-000000000006', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-buds4-pro.png', 'Samsung Galaxy Buds4 Pro product image', 0, true),
   ('a2000000-0000-0000-0000-000000000007', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-watch8.jpg', 'Samsung Galaxy Watch8 product image', 0, true),
   ('a2000000-0000-0000-0000-000000000008', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-watch8-classic.jpg', 'Samsung Galaxy Watch8 Classic product image', 0, true),
   ('a2000000-0000-0000-0000-000000000009', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-watch-ultra.jpg', 'Samsung Galaxy Watch Ultra product image', 0, true),

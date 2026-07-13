@@ -58,7 +58,7 @@ export default function ShopPage() {
     const next = new URLSearchParams(searchParams)
     if (value === null || value === '') next.delete(key)
     else next.set(key, value)
-    next.delete('page')
+    if (key !== 'page') next.delete('page')
     setSearchParams(next)
   }
 
