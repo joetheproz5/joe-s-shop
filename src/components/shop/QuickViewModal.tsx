@@ -41,7 +41,7 @@ export function QuickViewModal() {
       toast.success(added === qty ? 'Added to cart' : `Added ${added}; stock limit reached`)
       closeQuickView()
     } else {
-      toast.error(`Only ${product.stock_quantity} available`)
+      toast.error('The requested quantity is not available')
     }
   }
 
@@ -97,8 +97,6 @@ export function QuickViewModal() {
                 </div>
                 <Button size="sm" onClick={handleAdd} disabled={product.stock_quantity <= 0} leftIcon={<ShoppingCart size={16} />} className="flex-1">{product.stock_quantity <= 0 ? 'Out of stock' : 'Add to Cart'}</Button>
               </div>
-              <p className="mt-2 text-xs text-surface-500">{product.stock_quantity} available</p>
-
               <Link to={`/product/${product.slug}`} className="block text-center text-sm text-primary-600 dark:text-primary-400 hover:underline mt-3">
                 View Full Details →
               </Link>

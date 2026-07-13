@@ -128,7 +128,6 @@ export default function CartPage() {
                           </Link>
                           {variant?.color && <div className="text-xs text-surface-500 mt-0.5">Color: {variant.color}{variant.size ? ` / Size: ${variant.size}` : ''}</div>}
                           {!variant && product?.sku && <div className="text-xs text-surface-500 mt-0.5">SKU: {product.sku}</div>}
-                          <div className={available <= 5 ? 'mt-1 text-xs font-medium text-warning-600' : 'mt-1 text-xs text-surface-400'}>{available} available</div>
                         </div>
                         <button
                           onClick={() => { removeItem(product!.id, variant?.id); toast.success('Removed from cart') }}

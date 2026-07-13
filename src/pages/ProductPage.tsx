@@ -77,7 +77,7 @@ export default function ProductPage() {
   const handleAddToCart = () => {
     const added = addItem(product, activeVariant, qty)
     if (added <= 0) {
-      toast.error(`Only ${availableStock} available`)
+      toast.error('The requested quantity is not available')
       return false
     }
     toast.success(added === qty ? `${product.name} added to cart` : `Added ${added}; stock limit reached`)
@@ -202,7 +202,7 @@ export default function ProductPage() {
               stock.status === 'out_of_stock' && 'bg-danger-100 dark:bg-danger-900/30 text-danger-700 dark:text-danger-300',
             )}>
               <span className={clsx('w-2 h-2 rounded-full', stock.status === 'in_stock' ? 'bg-success-500' : stock.status === 'low_stock' ? 'bg-warning-500' : 'bg-danger-500')} />
-              {stock.label}{stock.status !== 'out_of_stock' && ` (${availableStock} available)`}
+              {stock.label}
             </span>
           </div>
 
