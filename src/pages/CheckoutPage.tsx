@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  ChevronRight, Check, CreditCard, MapPin, ClipboardList, Package, Truck, ShieldCheck,
+  ChevronRight, Check, CreditCard, MapPin, ClipboardList, Package, Plus, Truck, ShieldCheck,
 } from 'lucide-react'
 import { useCartStore } from '@/stores/cartStore'
 import { useAuth } from '@/context/AuthContext'
 import { formatCurrency } from '@/lib/utils'
-import { Button, Input, Select } from '@/components/ui'
+import { Button, Input } from '@/components/ui'
 import { LebanonAddressFields } from '@/components/checkout/LebanonAddressFields'
 import { LebanesePhoneInput } from '@/components/checkout/LebanesePhoneInput'
 import { supabase } from '@/lib/supabase'
@@ -152,6 +152,7 @@ export default function CheckoutPage() {
 
     if (id === 'new') {
       setShipping(EMPTY_ADDRESS)
+      setSaveAddress(false)
       return
     }
 
@@ -277,50 +278,104 @@ export default function CheckoutPage() {
                     </p>
                   </div>
                 )}
-                {user && (loadingAddresses || savedAddresses.length > 0) && (
-                  <Select
-                    label="Saved address"
-                    value={selectedAddressId}
-                    onChange={chooseAddress}
-                    loading={loadingAddresses}
-                    clearable={false}
-                    options={[
-                      ...savedAddresses.map((address) => ({
-                        label: `${address.label}${address.is_default ? ' (Default)' : ''} - ${address.street_address_1}, ${address.city}`,
-                        value: address.id,
-                      })),
-                      { label: 'Use a new address', value: 'new' },
-                    ]}
-                  />
+                {user && loadingAddresses && (
+                  <div className="space-y-3" aria-label="Loading saved addresses">
+                    <div className="h-4 w-32 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
+                    <div className="h-24 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
+                  </div>
                 )}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <Input label="First name *" value={shipping.first_name} onChange={(e) => updateShipping('first_name', e.target.value)} placeholder="Rami" autoComplete="given-name" required />
-                  <Input label="Last name *" value={shipping.last_name} onChange={(e) => updateShipping('last_name', e.target.value)} placeholder="Haddad" autoComplete="family-name" required />
-                </div>
-                <Input label="Building, street, and area *" value={shipping.street_address_1} onChange={(e) => updateShipping('street_address_1', e.target.value)} placeholder="Building 12, Hamra Street" autoComplete="address-line1" required />
-                <Input label="Floor, apartment, or landmark (optional)" value={shipping.street_address_2} onChange={(e) => updateShipping('street_address_2', e.target.value)} placeholder="3rd floor, near the pharmacy" autoComplete="address-line2" />
-                <LebanonAddressFields key={selectedAddressId} value={shipping} onChange={updateShipping} required />
-                <LebanesePhoneInput
-                  label="Lebanese phone"
-                  value={shipping.phone}
-                  onChange={(value) => updateShipping('phone', value)}
-                  required={!user}
-                  error={shipping.phone && !shippingPhoneValid ? 'Enter a valid 7 or 8 digit Lebanese phone number.' : undefined}
-                />
 
-                {user && selectedAddressId === 'new' && (
-                  <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-200 p-3 dark:border-surface-700">
-                    <input
-                      type="checkbox"
-                      checked={saveAddress}
-                      onChange={(event) => setSaveAddress(event.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-surface-300 text-primary-600"
+                {user && !loadingAddresses && savedAddresses.length > 0 && (
+                  <section aria-labelledby="saved-addresses-heading">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <h3 id="saved-addresses-heading" className="text-sm font-semibold text-surface-900 dark:text-white">Saved addresses</h3>
+                      <span className="text-xs text-surface-500">Choose where to deliver</span>
+                    </div>
+                    <div className="overflow-hidden rounded-lg border border-surface-200 dark:border-surface-700" role="radiogroup" aria-label="Saved delivery addresses">
+                      {savedAddresses.map((address) => {
+                        const selected = selectedAddressId === address.id
+                        return (
+                          <label
+                            key={address.id}
+                            className={`flex cursor-pointer items-start gap-3 border-b border-surface-200 p-4 transition-colors last:border-b-0 dark:border-surface-700 ${selected ? 'bg-primary-50 dark:bg-primary-900/20' : 'hover:bg-surface-50 dark:hover:bg-surface-800/60'}`}
+                          >
+                            <input
+                              type="radio"
+                              name="shipping_address"
+                              value={address.id}
+                              checked={selected}
+                              onChange={() => chooseAddress(address.id)}
+                              className="mt-1 h-4 w-4 shrink-0 border-surface-300 text-primary-600"
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="flex flex-wrap items-center gap-2">
+                                <span className="text-sm font-semibold text-surface-900 dark:text-white">{address.label}</span>
+                                {address.is_default && <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[11px] font-semibold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">Default</span>}
+                              </span>
+                              <span className="mt-1 block text-sm text-surface-700 dark:text-surface-300">{address.first_name} {address.last_name}</span>
+                              <span className="mt-1 block text-sm leading-6 text-surface-500">
+                                {address.street_address_1}{address.street_address_2 ? `, ${address.street_address_2}` : ''}<br />
+                                {address.city}, {address.state}{address.postal_code ? ` ${address.postal_code}` : ''}
+                                {address.phone ? ` | ${address.phone}` : ''}
+                              </span>
+                            </span>
+                            {selected && <Check size={18} className="mt-0.5 shrink-0 text-primary-600" aria-hidden="true" />}
+                          </label>
+                        )
+                      })}
+                    </div>
+
+                    <label className={`mt-3 flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors ${selectedAddressId === 'new' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-surface-200 hover:border-primary-300 hover:bg-surface-50 dark:border-surface-700 dark:hover:bg-surface-800/60'}`}>
+                      <input
+                        type="radio"
+                        name="shipping_address"
+                        value="new"
+                        checked={selectedAddressId === 'new'}
+                        onChange={() => chooseAddress('new')}
+                        className="h-4 w-4 shrink-0 border-surface-300 text-primary-600"
+                      />
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-300"><Plus size={17} /></span>
+                      <span>
+                        <span className="block text-sm font-semibold text-surface-900 dark:text-white">Use a new address</span>
+                        <span className="mt-0.5 block text-xs text-surface-500">Enter different delivery details below.</span>
+                      </span>
+                    </label>
+                  </section>
+                )}
+
+                {(!user || (!loadingAddresses && (selectedAddressId === 'new' || savedAddresses.length === 0))) && (
+                  <section className="space-y-4" aria-labelledby={user ? 'new-address-heading' : undefined}>
+                    {user && <h3 id="new-address-heading" className="text-sm font-semibold text-surface-900 dark:text-white">New delivery address</h3>}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Input label="First name *" value={shipping.first_name} onChange={(e) => updateShipping('first_name', e.target.value)} placeholder="Rami" autoComplete="given-name" required />
+                      <Input label="Last name *" value={shipping.last_name} onChange={(e) => updateShipping('last_name', e.target.value)} placeholder="Haddad" autoComplete="family-name" required />
+                    </div>
+                    <Input label="Building, street, and area *" value={shipping.street_address_1} onChange={(e) => updateShipping('street_address_1', e.target.value)} placeholder="Building 12, Hamra Street" autoComplete="address-line1" required />
+                    <Input label="Floor, apartment, or landmark (optional)" value={shipping.street_address_2} onChange={(e) => updateShipping('street_address_2', e.target.value)} placeholder="3rd floor, near the pharmacy" autoComplete="address-line2" />
+                    <LebanonAddressFields key={selectedAddressId} value={shipping} onChange={updateShipping} required />
+                    <LebanesePhoneInput
+                      label="Lebanese phone"
+                      value={shipping.phone}
+                      onChange={(value) => updateShipping('phone', value)}
+                      required={!user}
+                      error={shipping.phone && !shippingPhoneValid ? 'Enter a valid 7 or 8 digit Lebanese phone number.' : undefined}
                     />
-                    <span>
-                      <span className="block text-sm font-medium">Save this address for next time</span>
-                      <span className="mt-0.5 block text-xs text-surface-500">It will appear in your account address book.</span>
-                    </span>
-                  </label>
+
+                    {user && (
+                      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-200 p-3 dark:border-surface-700">
+                        <input
+                          type="checkbox"
+                          checked={saveAddress}
+                          onChange={(event) => setSaveAddress(event.target.checked)}
+                          className="mt-0.5 h-4 w-4 rounded border-surface-300 text-primary-600"
+                        />
+                        <span>
+                          <span className="block text-sm font-medium">Save this address for next time</span>
+                          <span className="mt-0.5 block text-xs text-surface-500">It will appear here and in your account address book.</span>
+                        </span>
+                      </label>
+                    )}
+                  </section>
                 )}
 
                 {shippingCost === 0 ? (
