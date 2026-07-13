@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -7,10 +7,42 @@ import {
 import { useCartStore } from '@/stores/cartStore'
 import { useAuth } from '@/context/AuthContext'
 import { formatCurrency } from '@/lib/utils'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, Select } from '@/components/ui'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { getProductImage } from '@/lib/productImages'
+import type { Address } from '@/types'
+
+type CheckoutAddress = Pick<
+  Address,
+  'first_name' | 'last_name' | 'street_address_1' | 'street_address_2' | 'city' | 'state' | 'postal_code' | 'country' | 'phone'
+>
+
+const EMPTY_ADDRESS: CheckoutAddress = {
+  first_name: '', last_name: '', street_address_1: '', street_address_2: '',
+  city: '', state: '', postal_code: '', country: 'United States', phone: '',
+}
+
+function toCheckoutAddress(address: Address): CheckoutAddress {
+  return {
+    first_name: address.first_name,
+    last_name: address.last_name,
+    street_address_1: address.street_address_1,
+    street_address_2: address.street_address_2 || '',
+    city: address.city,
+    state: address.state,
+    postal_code: address.postal_code,
+    country: address.country,
+    phone: address.phone || '',
+  }
+}
+
+function addressesMatch(left: CheckoutAddress, right: CheckoutAddress) {
+  return Object.keys(EMPTY_ADDRESS).every((key) => {
+    const field = key as keyof CheckoutAddress
+    return String(left[field] || '').trim().toLowerCase() === String(right[field] || '').trim().toLowerCase()
+  })
+}
 
 const STEPS = [
   { key: 'shipping', label: 'Shipping', icon: MapPin },
@@ -51,13 +83,71 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(0)
   const [orderNumber, setOrderNumber] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState('new')
+  const [saveAddress, setSaveAddress] = useState(false)
+  const [loadingAddresses, setLoadingAddresses] = useState(true)
 
-  const [shipping, setShipping] = useState({
-    first_name: '', last_name: '', street_address_1: '', street_address_2: '',
-    city: '', state: '', postal_code: '', country: 'United States', phone: '',
-  })
+  const [shipping, setShipping] = useState<CheckoutAddress>(EMPTY_ADDRESS)
   const [billing, setBilling] = useState({ sameAsShipping: true, ...shipping })
   const paymentMethod = 'cash_on_delivery'
+
+  useEffect(() => {
+    let active = true
+
+    const loadAddresses = async () => {
+      if (!user?.id) {
+        if (active) setLoadingAddresses(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: true })
+
+      if (!active) return
+      setLoadingAddresses(false)
+
+      if (error) {
+        console.error('Failed to load saved addresses', error)
+        return
+      }
+
+      const addresses = (data || []) as Address[]
+      setSavedAddresses(addresses)
+      if (addresses[0]) {
+        setSelectedAddressId(addresses[0].id)
+        setShipping(toCheckoutAddress(addresses[0]))
+      }
+    }
+
+    loadAddresses()
+    return () => { active = false }
+  }, [user?.id])
+
+  const updateShipping = (field: keyof CheckoutAddress, value: string) => {
+    setShipping((current) => ({ ...current, [field]: value }))
+    setSelectedAddressId('new')
+  }
+
+  const chooseAddress = (value: string | string[] | null) => {
+    const id = typeof value === 'string' ? value : 'new'
+    setSelectedAddressId(id)
+
+    if (id === 'new') {
+      setShipping(EMPTY_ADDRESS)
+      return
+    }
+
+    const address = savedAddresses.find((item) => item.id === id)
+    if (address) {
+      setShipping(toCheckoutAddress(address))
+      setSaveAddress(false)
+    }
+  }
 
   const subtotal = getSubtotal()
   const tax = getTax()
@@ -100,10 +190,26 @@ export default function CheckoutPage() {
       const placedOrder = data?.[0]
       if (!placedOrder) throw new Error('The order could not be confirmed. Please try again.')
 
+      let addressSaved = true
+      const alreadySaved = savedAddresses.some((address) => addressesMatch(toCheckoutAddress(address), shippingAddr))
+      if (saveAddress && selectedAddressId === 'new' && !alreadySaved) {
+        const { error: addressError } = await supabase.from('addresses').insert({
+          ...shippingAddr,
+          user_id: user.id,
+          label: 'Home',
+          is_default: savedAddresses.length === 0,
+        })
+        if (addressError) {
+          addressSaved = false
+          console.error('Order placed but address could not be saved', addressError)
+        }
+      }
+
       setOrderNumber(placedOrder.order_number)
       clearCart()
       setStep(3)
       toast.success('Cash-on-delivery order placed successfully!')
+      if (!addressSaved) toast.error('Your order was placed, but the address could not be saved.')
     } catch (err) {
       toast.error(getCheckoutErrorMessage(err))
       console.error(err)
@@ -140,19 +246,50 @@ export default function CheckoutPage() {
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><MapPin size={24} /> Shipping Information</h2>
               <div className="card p-6 space-y-4">
+                {(loadingAddresses || savedAddresses.length > 0) && (
+                  <Select
+                    label="Saved address"
+                    value={selectedAddressId}
+                    onChange={chooseAddress}
+                    loading={loadingAddresses}
+                    clearable={false}
+                    options={[
+                      ...savedAddresses.map((address) => ({
+                        label: `${address.label}${address.is_default ? ' (Default)' : ''} - ${address.street_address_1}, ${address.city}`,
+                        value: address.id,
+                      })),
+                      { label: 'Use a new address', value: 'new' },
+                    ]}
+                  />
+                )}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Input label="First name *" value={shipping.first_name} onChange={(e) => setShipping({ ...shipping, first_name: e.target.value })} required />
-                  <Input label="Last name *" value={shipping.last_name} onChange={(e) => setShipping({ ...shipping, last_name: e.target.value })} required />
+                  <Input label="First name *" value={shipping.first_name} onChange={(e) => updateShipping('first_name', e.target.value)} required />
+                  <Input label="Last name *" value={shipping.last_name} onChange={(e) => updateShipping('last_name', e.target.value)} required />
                 </div>
-                <Input label="Street address *" value={shipping.street_address_1} onChange={(e) => setShipping({ ...shipping, street_address_1: e.target.value })} required />
-                <Input label="Apartment, suite, etc." value={shipping.street_address_2} onChange={(e) => setShipping({ ...shipping, street_address_2: e.target.value })} />
+                <Input label="Street address *" value={shipping.street_address_1} onChange={(e) => updateShipping('street_address_1', e.target.value)} required />
+                <Input label="Apartment, suite, etc." value={shipping.street_address_2} onChange={(e) => updateShipping('street_address_2', e.target.value)} />
                 <div className="grid sm:grid-cols-3 gap-4">
-                  <Input label="City *" value={shipping.city} onChange={(e) => setShipping({ ...shipping, city: e.target.value })} required />
-                  <Input label="State *" value={shipping.state} onChange={(e) => setShipping({ ...shipping, state: e.target.value })} required />
-                  <Input label="ZIP *" value={shipping.postal_code} onChange={(e) => setShipping({ ...shipping, postal_code: e.target.value })} required />
+                  <Input label="City *" value={shipping.city} onChange={(e) => updateShipping('city', e.target.value)} required />
+                  <Input label="State *" value={shipping.state} onChange={(e) => updateShipping('state', e.target.value)} required />
+                  <Input label="ZIP *" value={shipping.postal_code} onChange={(e) => updateShipping('postal_code', e.target.value)} required />
                 </div>
-                <Input label="Country" value={shipping.country} onChange={(e) => setShipping({ ...shipping, country: e.target.value })} />
-                <Input label="Phone" value={shipping.phone} onChange={(e) => setShipping({ ...shipping, phone: e.target.value })} placeholder="+1 (555) 000-0000" />
+                <Input label="Country" value={shipping.country} onChange={(e) => updateShipping('country', e.target.value)} />
+                <Input label="Phone" value={shipping.phone} onChange={(e) => updateShipping('phone', e.target.value)} placeholder="+1 (555) 000-0000" />
+
+                {selectedAddressId === 'new' && (
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-200 p-3 dark:border-surface-700">
+                    <input
+                      type="checkbox"
+                      checked={saveAddress}
+                      onChange={(event) => setSaveAddress(event.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-surface-300 text-primary-600"
+                    />
+                    <span>
+                      <span className="block text-sm font-medium">Save this address for next time</span>
+                      <span className="mt-0.5 block text-xs text-surface-500">It will appear in your account address book.</span>
+                    </span>
+                  </label>
+                )}
 
                 {shippingCost === 0 ? (
                   <div className="p-3 rounded-xl bg-success-50 dark:bg-success-900/20 text-sm text-success-700 dark:text-success-300 flex items-center gap-2">
