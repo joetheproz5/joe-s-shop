@@ -21,11 +21,14 @@ import {
   BarChart3,
   Check,
   CreditCard,
+  Eye,
   FileText,
   FolderOpen,
   Gift,
   History,
   ImagePlus,
+  Mail,
+  MapPin,
   Package,
   Pencil,
   Plus,
@@ -93,11 +96,144 @@ const statusTone: Record<string, 'primary' | 'success' | 'warning' | 'danger' | 
   super_admin: 'danger',
 }
 
+type InvoiceAddress = {
+  first_name?: string
+  last_name?: string
+  street_address_1?: string
+  street_address_2?: string
+  city?: string
+  state?: string
+  postal_code?: string
+  country?: string
+  phone?: string
+  email?: string
+}
+
+function getInvoiceCustomer(order: Order) {
+  const address = (order.shipping_address || {}) as InvoiceAddress
+  const profileName = order.user
+    ? `${order.user.first_name || ''} ${order.user.last_name || ''}`.trim()
+    : ''
+  const addressName = `${address.first_name || ''} ${address.last_name || ''}`.trim()
+
+  return {
+    address,
+    name: profileName || addressName || 'Guest customer',
+    email: order.guest_email || address.email || '',
+    phone: order.user?.phone || address.phone || '',
+  }
+}
+
+function InvoiceAddressBlock({ address }: { address: InvoiceAddress }) {
+  const region = [address.state, address.postal_code].filter(Boolean).join(' ')
+  const cityLine = [address.city, region].filter(Boolean).join(', ')
+  return (
+    <div className="invoice-address-lines text-sm leading-6 text-surface-600 dark:text-surface-300">
+      {address.street_address_1 && <div>{address.street_address_1}</div>}
+      {address.street_address_2 && <div>{address.street_address_2}</div>}
+      {cityLine && <div>{cityLine}</div>}
+      {address.country && <div>{address.country}</div>}
+    </div>
+  )
+}
+
+function OrderInvoice({ order, invoiceRef }: { order: Order; invoiceRef: React.RefObject<HTMLDivElement> }) {
+  const customer = getInvoiceCustomer(order)
+  const itemCount = (order.items || []).reduce((sum, item) => sum + item.quantity, 0)
+
+  return (
+    <div ref={invoiceRef} className="invoice-document bg-white p-1 text-surface-950 dark:bg-surface-900 dark:text-white">
+      <div className="invoice-header flex flex-col gap-5 border-b border-surface-200 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-surface-700">
+        <div>
+          <div className="invoice-brand text-xl font-bold">Joe's Shop</div>
+          <div className="invoice-subtitle mt-1 text-sm text-surface-500">Order invoice</div>
+        </div>
+        <div className="invoice-heading sm:text-right">
+          <div className="text-2xl font-bold">{order.order_number}</div>
+          <div className="mt-1 text-sm text-surface-500">Issued {formatDate(order.created_at, 'long')}</div>
+        </div>
+      </div>
+
+      <div className="invoice-meta-grid grid gap-5 border-b border-surface-200 py-6 sm:grid-cols-3 dark:border-surface-700">
+        <section className="invoice-section">
+          <div className="invoice-label mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-surface-500"><Mail size={14} /> Customer</div>
+          <div className="font-semibold">{customer.name}</div>
+          {customer.email && <div className="mt-1 break-all text-sm text-surface-600 dark:text-surface-300">{customer.email}</div>}
+          {customer.phone && <div className="mt-1 text-sm text-surface-600 dark:text-surface-300">{customer.phone}</div>}
+          {!customer.email && !customer.phone && <div className="mt-1 text-sm text-surface-500">Account customer</div>}
+        </section>
+        <section className="invoice-section">
+          <div className="invoice-label mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-surface-500"><MapPin size={14} /> Ship to</div>
+          <InvoiceAddressBlock address={customer.address} />
+        </section>
+        <section className="invoice-section">
+          <div className="invoice-label mb-2 text-xs font-semibold uppercase text-surface-500">Order details</div>
+          <dl className="invoice-detail-list space-y-1 text-sm">
+            <div className="flex justify-between gap-3"><dt className="text-surface-500">Status</dt><dd className="capitalize font-medium">{order.status}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-surface-500">Payment</dt><dd className="capitalize font-medium">{order.payment_method?.replace(/_/g, ' ') || 'Not set'}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-surface-500">Payment status</dt><dd className="capitalize font-medium">{order.payment_status}</dd></div>
+            <div className="flex justify-between gap-3"><dt className="text-surface-500">Shipping</dt><dd className="font-medium">{order.shipping_method || 'Standard'}</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <div className="invoice-items py-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="font-semibold">Order contents</h3>
+          <span className="text-sm text-surface-500">{itemCount} {itemCount === 1 ? 'item' : 'items'}</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="invoice-table w-full text-left text-sm">
+            <thead>
+              <tr className="border-y border-surface-200 text-xs uppercase text-surface-500 dark:border-surface-700">
+                <th className="py-3 pr-3">Item</th><th className="px-3 py-3">SKU</th><th className="px-3 py-3 text-center">Qty</th><th className="px-3 py-3 text-right">Unit price</th><th className="py-3 pl-3 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(order.items || []).length === 0 && (
+                <tr><td colSpan={5} className="py-8 text-center text-surface-500">No line items were recorded for this order.</td></tr>
+              )}
+              {(order.items || []).map((item) => (
+                <tr key={item.id} className="border-b border-surface-100 dark:border-surface-800">
+                  <td className="py-3 pr-3 font-medium">{item.product_name}</td>
+                  <td className="px-3 py-3 text-surface-500">{item.sku || '-'}</td>
+                  <td className="px-3 py-3 text-center">{item.quantity}</td>
+                  <td className="px-3 py-3 text-right">{formatCurrency(item.unit_price)}</td>
+                  <td className="py-3 pl-3 text-right font-semibold">{formatCurrency(item.total_price)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="invoice-summary ml-auto w-full max-w-sm border-t border-surface-200 pt-4 dark:border-surface-700">
+        <dl className="space-y-2 text-sm">
+          <div className="flex justify-between"><dt className="text-surface-500">Subtotal</dt><dd>{formatCurrency(order.subtotal)}</dd></div>
+          <div className="flex justify-between"><dt className="text-surface-500">Tax</dt><dd>{formatCurrency(order.tax)}</dd></div>
+          <div className="flex justify-between"><dt className="text-surface-500">Shipping</dt><dd>{order.shipping_cost === 0 ? 'Free' : formatCurrency(order.shipping_cost)}</dd></div>
+          {order.discount > 0 && <div className="flex justify-between"><dt className="text-surface-500">Discount</dt><dd>-{formatCurrency(order.discount)}</dd></div>}
+          <div className="invoice-total flex justify-between border-t border-surface-200 pt-3 text-lg font-bold dark:border-surface-700"><dt>Total</dt><dd>{formatCurrency(order.total)}</dd></div>
+        </dl>
+      </div>
+
+      {order.customer_note && (
+        <div className="invoice-note mt-6 border-t border-surface-200 pt-4 text-sm dark:border-surface-700">
+          <div className="invoice-label mb-1 text-xs font-semibold uppercase text-surface-500">Customer note</div>
+          <p>{order.customer_note}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function OrdersPage() {
   const queryClient = useQueryClient()
+  const invoiceRef = useRef<HTMLDivElement>(null)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<'all' | OrderStatus>('all')
   const [page, setPage] = useState(1)
+  const [viewingOrder, setViewingOrder] = useState<Order | null>(null)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
   const [nextStatus, setNextStatus] = useState<OrderStatus>('processing')
   const [nextPaymentStatus, setNextPaymentStatus] = useState<PaymentStatus>('pending')
@@ -139,6 +275,64 @@ export function OrdersPage() {
     setInternalNote(order.internal_note ?? '')
   }
 
+  const printInvoice = () => {
+    if (!viewingOrder || !invoiceRef.current) return
+    const printWindow = window.open('', '_blank', 'width=900,height=720')
+    if (!printWindow) {
+      toast.error('Allow pop-ups to print this invoice.')
+      return
+    }
+
+    printWindow.document.write(`<!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Invoice</title>
+          <style>
+            * { box-sizing: border-box; }
+            @page { size: A4; margin: 14mm; }
+            body { margin: 0; color: #202124; background: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 13px; }
+            .invoice-document { width: 100%; max-width: 800px; margin: 0 auto; }
+            .invoice-header { display: flex; justify-content: space-between; gap: 32px; padding-bottom: 22px; border-bottom: 1px solid #dadce0; }
+            .invoice-heading { text-align: right; }
+            .invoice-brand { font-size: 22px; font-weight: 700; }
+            .invoice-subtitle, .text-surface-500 { color: #5f6368; }
+            .text-surface-600, .dark\\:text-surface-300 { color: #3c4043; }
+            .invoice-heading .text-2xl { margin-top: 0; font-size: 23px; font-weight: 700; }
+            .invoice-meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; padding: 22px 0; border-bottom: 1px solid #dadce0; }
+            .invoice-label { color: #5f6368; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+            .invoice-label svg { display: none; }
+            .invoice-address-lines { line-height: 1.6; }
+            .invoice-detail-list { margin: 0; }
+            .invoice-detail-list > div, .invoice-summary dl > div { display: flex; justify-content: space-between; gap: 18px; margin: 7px 0; }
+            dt, dd { margin: 0; }
+            .invoice-items { padding: 22px 0; }
+            .invoice-items > div:first-child { display: flex; justify-content: space-between; align-items: center; }
+            .invoice-items h3 { margin: 0 0 10px; font-size: 15px; }
+            .invoice-table { width: 100%; border-collapse: collapse; }
+            .invoice-table th { padding: 10px 8px; border-top: 1px solid #dadce0; border-bottom: 1px solid #dadce0; color: #5f6368; font-size: 10px; text-transform: uppercase; }
+            .invoice-table td { padding: 11px 8px; border-bottom: 1px solid #f1f3f4; }
+            .invoice-table th:first-child, .invoice-table td:first-child { padding-left: 0; }
+            .invoice-table th:last-child, .invoice-table td:last-child { padding-right: 0; }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .font-medium, .font-semibold { font-weight: 600; }
+            .invoice-summary { width: 330px; margin-left: auto; padding-top: 14px; border-top: 1px solid #dadce0; }
+            .invoice-total { margin-top: 10px !important; padding-top: 12px; border-top: 1px solid #dadce0; font-size: 17px; font-weight: 700; }
+            .invoice-note { margin-top: 24px; padding-top: 14px; border-top: 1px solid #dadce0; }
+            .invoice-note p { margin: 5px 0 0; }
+            svg { width: 14px; height: 14px; }
+            @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+          </style>
+        </head>
+        <body>${invoiceRef.current.outerHTML}</body>
+      </html>`)
+    printWindow.document.close()
+    printWindow.focus()
+    window.setTimeout(() => printWindow.print(), 250)
+  }
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
@@ -176,7 +370,7 @@ export function OrdersPage() {
         <tbody>
           {orders.map((order) => (
             <tr key={order.id}>
-              <td><div className="font-semibold">{order.order_number}</div><div className="text-xs text-surface-500">{order.items?.length ?? 0} items</div></td>
+              <td><button type="button" onClick={() => setViewingOrder(order)} className="font-semibold text-primary-600 hover:underline">{order.order_number}</button><div className="text-xs text-surface-500">{order.items?.length ?? 0} items</div></td>
               <td>{order.user ? `${order.user.first_name} ${order.user.last_name}`.trim() || 'Customer' : order.guest_email || 'Guest'}</td>
               <td><StatusPill tone={statusTone[order.status]}>{order.status}</StatusPill></td>
               <td>
@@ -187,8 +381,8 @@ export function OrdersPage() {
               <td>{formatDate(order.created_at)}</td>
               <td>
                 <div className="flex justify-end gap-1">
-                  <Button size="sm" variant="ghost" iconOnly leftIcon={<Printer size={16} />} aria-label="Print invoice" onClick={() => window.print()} />
-                  <Button size="sm" variant="ghost" iconOnly leftIcon={<Pencil size={16} />} aria-label="Edit order" onClick={() => openOrder(order)} />
+                  <Button size="sm" variant="ghost" iconOnly leftIcon={<Eye size={16} />} aria-label="View order" title="View order" onClick={() => setViewingOrder(order)} />
+                  <Button size="sm" variant="ghost" iconOnly leftIcon={<Pencil size={16} />} aria-label="Edit order" title="Edit order" onClick={() => openOrder(order)} />
                 </div>
               </td>
             </tr>
@@ -196,6 +390,22 @@ export function OrdersPage() {
         </tbody>
       </AdminTable>
       <AdminPager page={page} totalPages={ordersQuery.data?.totalPages ?? 1} onPage={setPage} />
+      <Modal isOpen={!!viewingOrder} onClose={() => setViewingOrder(null)} title={viewingOrder ? `Order ${viewingOrder.order_number}` : 'Order details'} size="xl">
+        {viewingOrder && (
+          <>
+            <ModalBody className="p-6 sm:p-8">
+              <OrderInvoice order={viewingOrder} invoiceRef={invoiceRef} />
+            </ModalBody>
+            <ModalFooter className="justify-between">
+              <Button variant="secondary" onClick={() => setViewingOrder(null)}>Close</Button>
+              <div className="flex gap-2">
+                <Button variant="secondary" leftIcon={<Pencil size={16} />} onClick={() => { const order = viewingOrder; setViewingOrder(null); openOrder(order) }}>Edit order</Button>
+                <Button leftIcon={<Printer size={16} />} onClick={printInvoice}>Print invoice</Button>
+              </div>
+            </ModalFooter>
+          </>
+        )}
+      </Modal>
       <Modal isOpen={!!editingOrder} onClose={() => setEditingOrder(null)} title="Update order" size="lg">
         <ModalBody className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
