@@ -7,7 +7,10 @@ import { Toaster } from 'react-hot-toast'
 import App from './App'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
+import { installChunkRecovery } from './lib/chunkRecovery'
 import './styles/globals.css'
+
+installChunkRecovery()
 
 const queryClient = new QueryClient({
   defaultOptions: {
