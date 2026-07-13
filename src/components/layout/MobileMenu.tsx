@@ -7,6 +7,7 @@ import {
   ShoppingBag,
   Grid3X3,
   Info,
+  HelpCircle,
   Phone,
   Sun,
   Moon,
@@ -52,6 +53,7 @@ export default function MobileMenu() {
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
     { label: 'Categories', path: '/categories', icon: Grid3X3, hasSubmenu: true },
     { label: 'About', path: '/about', icon: Info },
+    { label: 'FAQ', path: '/faq', icon: HelpCircle },
     { label: 'Contact', path: '/contact', icon: Phone },
   ];
 

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { Eye, Heart, ShoppingCart, Star } from 'lucide-react'
 import type { Product } from '@/types'
 import { useCartStore } from '@/stores/cartStore'
@@ -15,7 +14,7 @@ interface ProductCardProps {
   index?: number
 }
 
-export function ProductCard({ product, variant = 'default', index = 0 }: ProductCardProps) {
+export function ProductCard({ product, variant = 'default' }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
   const toggleWishlist = useWishlistStore((state) => state.toggleItem)
   const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id))
@@ -50,10 +49,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
   }
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.035, 0.25), duration: 0.35 }}
+    <article
       className={clsx(
         'group min-w-0',
         variant === 'compact' && 'grid grid-cols-[112px_minmax(0,1fr)] gap-4 rounded-lg border border-surface-200 bg-white p-3 dark:border-surface-800 dark:bg-surface-900'
@@ -62,7 +58,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
       <Link
         to={`/product/${product.slug}`}
         className={clsx(
-          'relative block overflow-hidden rounded-lg bg-[#f3f6fa] dark:bg-surface-800',
+          'relative block overflow-hidden rounded-lg bg-white',
           variant === 'default' ? 'aspect-[4/5]' : 'aspect-square'
         )}
       >
@@ -71,7 +67,8 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
             src={image}
             alt={product.name}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035]"
+            decoding="async"
+            className="h-full w-full transform-gpu object-contain p-4 [backface-visibility:hidden] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-safe:will-change-transform group-hover:scale-[1.025] sm:p-6"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-surface-300">
@@ -103,7 +100,7 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
         )}
 
         {variant === 'default' && !outOfStock && (
-          <div className="absolute inset-x-3 bottom-3 flex translate-y-2 gap-2 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+          <div className="absolute inset-x-3 bottom-3 flex translate-y-2 transform-gpu gap-2 opacity-0 [backface-visibility:hidden] motion-safe:transition-[transform,opacity] motion-safe:duration-150 motion-safe:ease-out motion-safe:will-change-[transform,opacity] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
             <button
               onClick={handleAddToCart}
               className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[#0b57d0] px-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#0842a0]"
@@ -155,6 +152,6 @@ export function ProductCard({ product, variant = 'default', index = 0 }: Product
           </button>
         )}
       </div>
-    </motion.article>
+    </article>
   )
 }

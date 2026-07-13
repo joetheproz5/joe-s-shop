@@ -16,6 +16,7 @@ const HomePage = lazy(() => import('@/pages/HomePage'))
 const ShopPage = lazy(() => import('@/pages/ShopPage'))
 const CategoriesPage = lazy(() => import('@/pages/CategoriesPage'))
 const AboutPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.AboutPage })))
+const FAQPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.FAQPage })))
 const ContactPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.ContactPage })))
 const ShippingPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.ShippingPage })))
 const ReturnsPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.ReturnsPage })))
@@ -98,6 +99,7 @@ export default function App() {
           <Route path="/terms" element={<PlaceholderPage title="Terms of Service" />} />
           <Route path="/privacy" element={<PlaceholderPage title="Privacy Policy" />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/faq" element={<FAQPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/shipping-policy" element={<ShippingPage />} />
           <Route path="/returns" element={<ReturnsPage />} />

@@ -47,12 +47,16 @@ Functions live in `supabase/functions`.
 
 - `order-webhook`: accepts provider callbacks to update order and payment status.
 - `admin-alerts`: returns low-stock products, open orders, and pending reviews for authenticated staff.
+- `order-email`: sends order confirmations and status/payment updates to customers through Resend.
 
 Set function secrets:
 
 ```bash
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
 supabase secrets set ORDER_WEBHOOK_SECRET=...
+supabase secrets set RESEND_API_KEY=...
+supabase secrets set ORDER_EMAIL_FROM="Joe's Shop <orders@your-verified-domain.com>"
+supabase secrets set SITE_URL="https://joetheproz5.github.io/joe-s-shop"
 ```
 
 Deploy:
@@ -60,6 +64,7 @@ Deploy:
 ```bash
 supabase functions deploy order-webhook
 supabase functions deploy admin-alerts
+supabase functions deploy order-email --no-verify-jwt
 ```
 
 Example webhook call:

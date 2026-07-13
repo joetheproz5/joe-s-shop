@@ -61,7 +61,7 @@ export function QuickViewModal() {
           <div className="grid grid-cols-2 gap-6">
             {/* Image */}
             <div className="aspect-square rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800">
-              <img src={getProductImage(product)} alt={product.name} className="h-full w-full object-cover" />
+              <img src={getProductImage(product)} alt={product.name} className="h-full w-full object-contain bg-white p-6" />
             </div>
 
             {/* Info */}

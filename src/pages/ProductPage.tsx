@@ -125,7 +125,7 @@ export default function ProductPage() {
               <img
                 src={activeImageUrl}
                 alt={images[activeImage]?.alt_text || product.name}
-                className="w-full h-full object-cover transition-transform duration-200"
+                className="h-full w-full object-contain bg-white p-4 transition-transform duration-200 sm:p-8"
                 style={zoom.active ? { transform: `scale(2)`, transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
               />
             ) : (
@@ -148,7 +148,7 @@ export default function ProductPage() {
                     activeImage === i ? 'border-blue-600' : 'border-transparent opacity-70 hover:opacity-100'
                   )}
                 >
-                  <img src={getProductImage(product, i)} alt={img.alt_text || `view ${i + 1}`} className="h-full w-full object-cover" />
+                  <img src={getProductImage(product, i)} alt={img.alt_text || `view ${i + 1}`} className="h-full w-full object-contain bg-white p-1" />
                 </button>
               ))}
             </div>

@@ -45,6 +45,7 @@ import {
 import { Button, Input, Modal, ModalBody, ModalFooter, Select } from '@/components/ui'
 import { supabase } from '@/lib/supabase'
 import { fetchAdminOrders, updateOrderStatus, updatePaymentStatus } from '@/lib/api/orders'
+import { notifyOrderCustomer } from '@/lib/api/orderEmails'
 import { createCoupon, deleteCoupon, fetchCoupons, updateCoupon } from '@/lib/api/coupons'
 import { deleteReview, fetchAdminReviews, updateReviewStatus } from '@/lib/api/reviews'
 import {
@@ -195,7 +196,18 @@ function OrderInvoice({ order, invoiceRef }: { order: Order; invoiceRef: React.R
               )}
               {(order.items || []).map((item) => (
                 <tr key={item.id} className="border-b border-surface-100 dark:border-surface-800">
-                  <td className="py-3 pr-3 font-medium">{item.product_name}</td>
+                  <td className="py-3 pr-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-surface-200 bg-white p-1 dark:border-surface-700">
+                        {item.product_image ? (
+                          <img src={item.product_image} alt="" className="h-full w-full object-contain" />
+                        ) : (
+                          <Package size={18} className="text-surface-400" />
+                        )}
+                      </div>
+                      <span className="font-medium">{item.product_name}</span>
+                    </div>
+                  </td>
                   <td className="px-3 py-3 text-surface-500">{item.sku || '-'}</td>
                   <td className="px-3 py-3 text-center">{item.quantity}</td>
                   <td className="px-3 py-3 text-right">{formatCurrency(item.unit_price)}</td>
@@ -259,11 +271,14 @@ export function OrdersPage() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!editingOrder) return
+      const customerChanged = nextStatus !== editingOrder.status || nextPaymentStatus !== editingOrder.payment_status
       await updateOrderStatus(editingOrder.id, nextStatus, internalNote.trim())
       await updatePaymentStatus(editingOrder.id, nextPaymentStatus)
+      return customerChanged ? notifyOrderCustomer(editingOrder.id, 'status_updated') : { sent: true }
     },
-    onSuccess: () => {
+    onSuccess: (emailResult) => {
       toast.success('Order updated')
+      if (emailResult && !emailResult.sent) toast.error('Order updated, but the customer email could not be sent.')
       setEditingOrder(null)
       queryClient.invalidateQueries({ queryKey: ['admin-orders-page'] })
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
@@ -274,10 +289,12 @@ export function OrdersPage() {
   const detailUpdateMutation = useMutation({
     mutationFn: async () => {
       if (!viewingOrder) return
+      const customerChanged = detailStatus !== viewingOrder.status || detailPaymentStatus !== viewingOrder.payment_status
       await updateOrderStatus(viewingOrder.id, detailStatus, detailInternalNote.trim())
       await updatePaymentStatus(viewingOrder.id, detailPaymentStatus)
+      return customerChanged ? notifyOrderCustomer(viewingOrder.id, 'status_updated') : { sent: true }
     },
-    onSuccess: () => {
+    onSuccess: (emailResult) => {
       setViewingOrder((order) => order ? {
         ...order,
         status: detailStatus,
@@ -285,6 +302,7 @@ export function OrdersPage() {
         internal_note: detailInternalNote.trim() || undefined,
       } : order)
       toast.success('Order status updated')
+      if (emailResult && !emailResult.sent) toast.error('Status saved, but the customer email could not be sent.')
       queryClient.invalidateQueries({ queryKey: ['admin-orders-page'] })
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
       queryClient.invalidateQueries({ queryKey: ['admin-recent-orders'] })
@@ -353,6 +371,7 @@ export function OrdersPage() {
             .invoice-table { width: 100%; border-collapse: collapse; }
             .invoice-table th { padding: 10px 8px; border-top: 1px solid #dadce0; border-bottom: 1px solid #dadce0; color: #5f6368; font-size: 10px; text-transform: uppercase; }
             .invoice-table td { padding: 11px 8px; border-bottom: 1px solid #f1f3f4; }
+            .invoice-table img { width: 42px; height: 42px; object-fit: contain; }
             .invoice-table th:first-child, .invoice-table td:first-child { padding-left: 0; }
             .invoice-table th:last-child, .invoice-table td:last-child { padding-right: 0; }
             .text-center { text-align: center; }
@@ -409,8 +428,20 @@ export function OrdersPage() {
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order.id}>
-              <td><button type="button" onClick={() => viewOrder(order)} className="font-semibold text-primary-600 hover:underline">{order.order_number}</button><div className="text-xs text-surface-500">{order.items?.length ?? 0} items</div></td>
+            <tr
+              key={order.id}
+              tabIndex={0}
+              role="button"
+              onClick={() => viewOrder(order)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  viewOrder(order)
+                }
+              }}
+              className="cursor-pointer transition-colors hover:bg-surface-50 focus-visible:bg-primary-50 focus-visible:outline-none dark:hover:bg-surface-800/60 dark:focus-visible:bg-primary-950/20"
+            >
+              <td><span className="font-semibold text-primary-600">{order.order_number}</span><div className="text-xs text-surface-500">{order.items?.length ?? 0} items</div></td>
               <td>{order.user ? `${order.user.first_name} ${order.user.last_name}`.trim() || 'Customer' : order.guest_email || 'Guest'}</td>
               <td><StatusPill tone={statusTone[order.status]}>{order.status}</StatusPill></td>
               <td>
@@ -420,7 +451,7 @@ export function OrdersPage() {
               <td className="font-semibold">{formatCurrency(order.total)}</td>
               <td>{formatDate(order.created_at)}</td>
               <td>
-                <div className="flex justify-end gap-1">
+                <div className="flex justify-end gap-1" onClick={(event) => event.stopPropagation()}>
                   <Button size="sm" variant="ghost" iconOnly leftIcon={<Eye size={16} />} aria-label="View order" title="View order" onClick={() => viewOrder(order)} />
                   <Button size="sm" variant="ghost" iconOnly leftIcon={<Pencil size={16} />} aria-label="Edit order" title="Edit order" onClick={() => openOrder(order)} />
                 </div>

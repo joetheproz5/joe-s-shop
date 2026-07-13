@@ -41,6 +41,7 @@ const navLinks = [
     ],
   },
   { label: 'About', path: '/about' },
+  { label: 'FAQ', path: '/faq' },
   { label: 'Contact', path: '/contact' },
 ];
 

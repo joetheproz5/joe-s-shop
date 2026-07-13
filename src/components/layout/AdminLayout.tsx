@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Package,
@@ -30,6 +31,15 @@ import { useUIStore } from '@/stores/uiStore';
 import { useAuth } from '@/context/AuthContext';
 import Breadcrumbs, { BreadcrumbItem } from './Breadcrumbs';
 import { hasAdminPermission, type AdminModule } from '@/lib/permissions';
+import { supabase } from '@/lib/supabase';
+
+type AdminAlerts = {
+  orders: Array<{ id: string; order_number: string; total: number; created_at: string }>;
+  products: Array<{ id: string; name: string; stock_quantity: number }>;
+  reviews: Array<{ id: string; title: string; rating: number }>;
+};
+
+const EMPTY_ALERTS: AdminAlerts = { orders: [], products: [], reviews: [] };
 
 interface SidebarSection {
   title: string;
@@ -107,6 +117,48 @@ export default function AdminLayout() {
   const location = useLocation();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  const alertsQuery = useQuery({
+    queryKey: ['admin-notifications'],
+    queryFn: async (): Promise<AdminAlerts> => {
+      const [orders, products, reviews] = await Promise.all([
+        supabase
+          .from('orders')
+          .select('id, order_number, total, created_at')
+          .in('status', ['pending', 'paid', 'processing'])
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('products')
+          .select('id, name, stock_quantity')
+          .eq('status', 'active')
+          .lte('stock_quantity', 10)
+          .order('stock_quantity', { ascending: true })
+          .limit(5),
+        supabase
+          .from('reviews')
+          .select('id, title, rating')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(5),
+      ]);
+
+      const error = orders.error || products.error || reviews.error;
+      if (error) throw error;
+      return {
+        orders: orders.data || [],
+        products: products.data || [],
+        reviews: reviews.data || [],
+      };
+    },
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+
+  const alerts = alertsQuery.data || EMPTY_ALERTS;
+  const alertCount = alerts.orders.length + alerts.products.length + alerts.reviews.length;
 
   const isActive = (path: string) => {
     if (path === '/admin/dashboard') return location.pathname === '/admin' || location.pathname === '/admin/dashboard';
@@ -137,6 +189,18 @@ export default function AdminLayout() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [sidebarOpen, toggleSidebar]);
+
+  useEffect(() => {
+    const closeNotifications = (event: MouseEvent) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', closeNotifications);
+    return () => document.removeEventListener('mousedown', closeNotifications);
+  }, []);
+
+  useEffect(() => setNotificationsOpen(false), [location.pathname]);
 
   const breadcrumbs = getBreadcrumbsFromPath(location.pathname);
   const visibleSidebarSections = sidebarSections
@@ -358,13 +422,61 @@ export default function AdminLayout() {
             </button>
 
             {/* Notifications */}
-            <button
-              className="relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-violet-500" />
-            </button>
+            <div className="relative" ref={notificationsRef}>
+              <button
+                onClick={() => setNotificationsOpen((open) => !open)}
+                className="relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                aria-label="Notifications"
+                aria-expanded={notificationsOpen}
+              >
+                <Bell className="h-5 w-5" />
+                {alertCount > 0 && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-violet-500" />}
+              </button>
+              <AnimatePresence>
+                {notificationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                    transition={{ duration: 0.14 }}
+                    className="absolute right-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900"
+                  >
+                    <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">Operations</p>
+                        <p className="text-xs text-gray-500">Live store alerts</p>
+                      </div>
+                      <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-950/40 dark:text-violet-300">{alertCount}</span>
+                    </div>
+                    <div className="max-h-[28rem] overflow-y-auto p-2">
+                      {alertsQuery.isLoading && <p className="px-3 py-8 text-center text-sm text-gray-500">Loading alerts...</p>}
+                      {alertsQuery.isError && <p className="px-3 py-8 text-center text-sm text-red-600">Could not load alerts.</p>}
+                      {!alertsQuery.isLoading && !alertsQuery.isError && alertCount === 0 && (
+                        <p className="px-3 py-8 text-center text-sm text-gray-500">Everything is caught up.</p>
+                      )}
+                      {alerts.orders.map((order) => (
+                        <Link key={`order-${order.id}`} to="/admin/orders" className="flex gap-3 rounded-lg px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <ShoppingBag className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+                          <div className="min-w-0"><p className="truncate text-sm font-medium">Order {order.order_number} needs attention</p><p className="text-xs text-gray-500">${Number(order.total).toFixed(2)}</p></div>
+                        </Link>
+                      ))}
+                      {alerts.products.map((product) => (
+                        <Link key={`product-${product.id}`} to="/admin/inventory" className="flex gap-3 rounded-lg px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <Warehouse className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                          <div className="min-w-0"><p className="truncate text-sm font-medium">Low stock: {product.name}</p><p className="text-xs text-gray-500">{product.stock_quantity} remaining</p></div>
+                        </Link>
+                      ))}
+                      {alerts.reviews.map((review) => (
+                        <Link key={`review-${review.id}`} to="/admin/reviews" className="flex gap-3 rounded-lg px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <Star className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                          <div className="min-w-0"><p className="truncate text-sm font-medium">Review awaiting moderation</p><p className="truncate text-xs text-gray-500">{review.rating}/5 | {review.title}</p></div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* User avatar dropdown */}
             <div className="relative ml-1">

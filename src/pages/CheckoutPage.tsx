@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { getProductImage } from '@/lib/productImages'
 import { isValidLebanesePhone, LEBANON_COUNTRY, normalizeLebanonLocation } from '@/lib/lebanon'
+import { notifyOrderCustomer } from '@/lib/api/orderEmails'
 import type { Address } from '@/types'
 
 type CheckoutAddress = Pick<
@@ -201,6 +202,8 @@ export default function CheckoutPage() {
       const placedOrder = data?.[0]
       if (!placedOrder) throw new Error('The order could not be confirmed. Please try again.')
 
+      const emailResult = await notifyOrderCustomer(placedOrder.order_id, 'placed')
+
       let addressSaved = true
       const alreadySaved = savedAddresses.some((address) => addressesMatch(toCheckoutAddress(address), shippingAddr))
       if (saveAddress && user?.id && selectedAddressId === 'new' && !alreadySaved) {
@@ -221,6 +224,7 @@ export default function CheckoutPage() {
       setStep(3)
       toast.success('Cash-on-delivery order placed successfully!')
       if (!addressSaved) toast.error('Your order was placed, but the address could not be saved.')
+      if (!emailResult.sent) toast.error('Your order was placed, but the confirmation email could not be sent.')
     } catch (err) {
       toast.error(getCheckoutErrorMessage(err))
       console.error(err)

@@ -48,7 +48,12 @@ insert into public.products (id, name, slug, short_description, description, sku
   ('a2000000-0000-0000-0000-000000000008', 'Samsung Galaxy Watch8 Classic', 'samsung-galaxy-watch8-classic', '46mm Galaxy smartwatch with a rotating bezel and Quick Button.', 'Galaxy Watch8 Classic combines a 46mm cushion-shaped case with a rotating bezel, Quick Button, Super AMOLED display, 64GB of storage, and personalized health insights.', 'SAM-WATCH8C-46', 'b1000000-0000-0000-0000-000000000002', 0, 499.99, 18, 5, 'active', false, true, false, 'Samsung Galaxy Watch8 Classic | Joe''s Shop', '46mm Galaxy smartwatch with a rotating bezel and Quick Button.'),
   ('a2000000-0000-0000-0000-000000000009', 'Samsung Galaxy Watch Ultra', 'samsung-galaxy-watch-ultra', 'Durable titanium Galaxy watch with dual-frequency GPS and extended battery life.', 'Galaxy Watch Ultra is Samsung''s most durable smartwatch, with a titanium cushion design, dual-frequency GPS, 10ATM water resistance, 64GB storage, and advanced fitness tracking.', 'SAM-WATCHU', 'b1000000-0000-0000-0000-000000000002', 0, 649.99, 13, 5, 'active', false, true, false, 'Samsung Galaxy Watch Ultra | Joe''s Shop', 'Durable titanium Galaxy watch with dual-frequency GPS and extended battery life.'),
   ('a2000000-0000-0000-0000-000000000010', 'Samsung USB-C to USB-C Cable', 'samsung-usb-c-to-usb-c-cable', 'Official 1.8-meter 3A USB-C cable for charging and data transfer.', 'Samsung''s 1.8-meter USB-C to USB-C cable supports up to 3A charging and reliable data transfer for compatible Galaxy phones, tablets, earbuds, and other USB-C devices.', 'SAM-EP-DX310', 'b1000000-0000-0000-0000-000000000002', 0, 14.99, 70, 5, 'active', false, false, false, 'Samsung USB-C to USB-C Cable | Joe''s Shop', 'Official 1.8-meter 3A USB-C cable for charging and data transfer.'),
-  ('a2000000-0000-0000-0000-000000000011', 'Samsung Galaxy Watch Fast Charger', 'samsung-galaxy-watch-fast-charger', 'Official USB-C magnetic fast charger for Galaxy Watch5 and later.', 'The Samsung Galaxy Watch Fast Charger uses a compact magnetic charging puck and USB-C connection for fast charging on Galaxy Watch5 series and later models.', 'SAM-EP-OL300', 'b1000000-0000-0000-0000-000000000002', 0, 39.99, 38, 5, 'active', false, false, false, 'Samsung Galaxy Watch Fast Charger | Joe''s Shop', 'Official USB-C magnetic fast charger for Galaxy Watch5 and later.');
+  ('a2000000-0000-0000-0000-000000000011', 'Samsung Galaxy Watch Fast Charger', 'samsung-galaxy-watch-fast-charger', 'Official USB-C magnetic fast charger for Galaxy Watch5 and later.', 'The Samsung Galaxy Watch Fast Charger uses a compact magnetic charging puck and USB-C connection for fast charging on Galaxy Watch5 series and later models.', 'SAM-EP-OL300', 'b1000000-0000-0000-0000-000000000002', 0, 39.99, 38, 5, 'active', false, false, false, 'Samsung Galaxy Watch Fast Charger | Joe''s Shop', 'Official USB-C magnetic fast charger for Galaxy Watch5 and later.'),
+  ('a2000000-0000-0000-0000-000000000012', 'Samsung Galaxy S26', 'samsung-galaxy-s26', 'Compact 6.3-inch Galaxy flagship with a 50MP camera and Galaxy AI.', 'Galaxy S26 combines a 6.3-inch Dynamic AMOLED 2X display, a 50MP wide camera, Snapdragon 8 Elite Gen 5 for Galaxy, a 4,300mAh battery, and deeply integrated Galaxy AI features.', 'SAM-S26-256', 'b1000000-0000-0000-0000-000000000002', 0, 899.99, 32, 5, 'active', true, true, true, 'Samsung Galaxy S26 | Joe''s Shop', 'Compact 6.3-inch Galaxy flagship with a 50MP camera and Galaxy AI.'),
+  ('a2000000-0000-0000-0000-000000000013', 'Samsung Galaxy S26+', 'samsung-galaxy-s26-plus', 'Large 6.7-inch Galaxy flagship with a 50MP camera and 4,900mAh battery.', 'Galaxy S26+ pairs a 6.7-inch Dynamic AMOLED 2X display with a 50MP wide camera, Snapdragon 8 Elite Gen 5 for Galaxy, a 4,900mAh battery, and advanced Galaxy AI tools.', 'SAM-S26P-256', 'b1000000-0000-0000-0000-000000000002', 0, 1099.99, 24, 5, 'active', false, true, false, 'Samsung Galaxy S26+ | Joe''s Shop', 'Large 6.7-inch Galaxy flagship with a 50MP camera and 4,900mAh battery.'),
+  ('a2000000-0000-0000-0000-000000000014', 'Samsung Galaxy S26 Ultra', 'samsung-galaxy-s26-ultra', '6.9-inch Galaxy Ultra with a 200MP camera, S Pen, and built-in Privacy Display.', 'Galaxy S26 Ultra features a 6.9-inch display with built-in Privacy Display, a 200MP wide camera, integrated S Pen, Snapdragon 8 Elite Gen 5 for Galaxy, and a 5,000mAh battery.', 'SAM-S26U-256', 'b1000000-0000-0000-0000-000000000002', 0, 1299.99, 20, 5, 'active', true, true, true, 'Samsung Galaxy S26 Ultra | Joe''s Shop', '6.9-inch Galaxy Ultra with a 200MP camera, S Pen, and built-in Privacy Display.'),
+  ('a2000000-0000-0000-0000-000000000015', 'Samsung Galaxy Z Fold7', 'samsung-galaxy-z-fold7', 'Slim foldable with an expansive 8-inch main display and 200MP camera.', 'Galaxy Z Fold7 opens to an expansive 8-inch main display and combines a wider cover screen, 200MP wide camera, Snapdragon 8 Elite for Galaxy, 4,400mAh battery, and foldable-optimized Galaxy AI.', 'SAM-ZFOLD7-256', 'b1000000-0000-0000-0000-000000000002', 0, 1999.99, 12, 5, 'active', true, true, false, 'Samsung Galaxy Z Fold7 | Joe''s Shop', 'Slim foldable with an expansive 8-inch main display and 200MP camera.'),
+  ('a2000000-0000-0000-0000-000000000016', 'Samsung Galaxy Z Flip7', 'samsung-galaxy-z-flip7', 'Pocketable Galaxy foldable with a flexible main display and 50MP camera.', 'Galaxy Z Flip7 folds into a compact pocketable design while offering a large edge-to-edge cover screen, a flexible main display, 50MP wide camera, and Galaxy AI experiences designed for the Flip form factor.', 'SAM-ZFLIP7-256', 'b1000000-0000-0000-0000-000000000002', 0, 1099.99, 18, 5, 'active', false, true, false, 'Samsung Galaxy Z Flip7 | Joe''s Shop', 'Pocketable Galaxy foldable with a flexible main display and 50MP camera.');
 
 insert into public.product_categories (product_id, category_id) values
   ('a1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001'),
@@ -80,7 +85,12 @@ insert into public.product_categories (product_id, category_id) values
   ('a2000000-0000-0000-0000-000000000008', 'c1000000-0000-0000-0000-000000000004'),
   ('a2000000-0000-0000-0000-000000000009', 'c1000000-0000-0000-0000-000000000004'),
   ('a2000000-0000-0000-0000-000000000010', 'c1000000-0000-0000-0000-000000000005'),
-  ('a2000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000005');
+  ('a2000000-0000-0000-0000-000000000011', 'c1000000-0000-0000-0000-000000000005'),
+  ('a2000000-0000-0000-0000-000000000012', 'c1000000-0000-0000-0000-000000000001'),
+  ('a2000000-0000-0000-0000-000000000013', 'c1000000-0000-0000-0000-000000000001'),
+  ('a2000000-0000-0000-0000-000000000014', 'c1000000-0000-0000-0000-000000000001'),
+  ('a2000000-0000-0000-0000-000000000015', 'c1000000-0000-0000-0000-000000000001'),
+  ('a2000000-0000-0000-0000-000000000016', 'c1000000-0000-0000-0000-000000000001');
 
 insert into public.product_images (product_id, url, alt_text, sort_order, is_featured) values
   ('a1000000-0000-0000-0000-000000000001', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/iphone-17.png', 'iPhone 17 product image', 0, true),
@@ -112,7 +122,12 @@ insert into public.product_images (product_id, url, alt_text, sort_order, is_fea
   ('a2000000-0000-0000-0000-000000000008', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-watch8-classic.jpg', 'Samsung Galaxy Watch8 Classic product image', 0, true),
   ('a2000000-0000-0000-0000-000000000009', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-watch-ultra.jpg', 'Samsung Galaxy Watch Ultra product image', 0, true),
   ('a2000000-0000-0000-0000-000000000010', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/usb-c-cable.jpg', 'Samsung USB-C to USB-C Cable product image', 0, true),
-  ('a2000000-0000-0000-0000-000000000011', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/watch-charger.jpg', 'Samsung Galaxy Watch Fast Charger product image', 0, true);
+  ('a2000000-0000-0000-0000-000000000011', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/watch-charger.jpg', 'Samsung Galaxy Watch Fast Charger product image', 0, true),
+  ('a2000000-0000-0000-0000-000000000012', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-s26.jpg', 'Samsung Galaxy S26 product image', 0, true),
+  ('a2000000-0000-0000-0000-000000000013', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-s26-plus.jpg', 'Samsung Galaxy S26+ product image', 0, true),
+  ('a2000000-0000-0000-0000-000000000014', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-s26-ultra.jpg', 'Samsung Galaxy S26 Ultra product image', 0, true),
+  ('a2000000-0000-0000-0000-000000000015', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-z-fold7.jpg', 'Samsung Galaxy Z Fold7 product image', 0, true),
+  ('a2000000-0000-0000-0000-000000000016', 'https://joetheproz5.github.io/joe-s-shop/catalog/samsung/galaxy-z-flip7.jpg', 'Samsung Galaxy Z Flip7 product image', 0, true);
 
 insert into public.product_tags (product_id, tag) values
   ('a1000000-0000-0000-0000-000000000001', 'apple'),
@@ -174,6 +189,16 @@ insert into public.product_tags (product_id, tag) values
   ('a2000000-0000-0000-0000-000000000010', 'samsung'),
   ('a2000000-0000-0000-0000-000000000010', 'charging-cables'),
   ('a2000000-0000-0000-0000-000000000011', 'samsung'),
-  ('a2000000-0000-0000-0000-000000000011', 'charging-cables');
+  ('a2000000-0000-0000-0000-000000000011', 'charging-cables'),
+  ('a2000000-0000-0000-0000-000000000012', 'samsung'),
+  ('a2000000-0000-0000-0000-000000000012', 'smartphones'),
+  ('a2000000-0000-0000-0000-000000000013', 'samsung'),
+  ('a2000000-0000-0000-0000-000000000013', 'smartphones'),
+  ('a2000000-0000-0000-0000-000000000014', 'samsung'),
+  ('a2000000-0000-0000-0000-000000000014', 'smartphones'),
+  ('a2000000-0000-0000-0000-000000000015', 'samsung'),
+  ('a2000000-0000-0000-0000-000000000015', 'smartphones'),
+  ('a2000000-0000-0000-0000-000000000016', 'samsung'),
+  ('a2000000-0000-0000-0000-000000000016', 'smartphones');
 
 commit;

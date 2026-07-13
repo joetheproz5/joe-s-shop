@@ -125,7 +125,7 @@ export default function CartPage() {
                   <div className="flex gap-4">
                     <Link to={`/product/${product?.slug}`} className="w-24 h-24 rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800 flex-shrink-0">
                       {image ? (
-                        <img src={image} alt={product?.name || 'Product'} className="w-full h-full object-cover" />
+                        <img src={image} alt={product?.name || 'Product'} className="h-full w-full object-contain bg-white p-2" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center"><ShoppingBag className="text-surface-300" size={24} /></div>
                       )}

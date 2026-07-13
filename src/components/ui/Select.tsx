@@ -322,7 +322,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
     const hasError = !!error
 
     return (
-      <div ref={containerRef} className={clsx('w-full', className)} onKeyDown={handleKeyDown}>
+      <div ref={containerRef} className={clsx('relative w-full', className)} onKeyDown={handleKeyDown}>
         {label && (
           <label
             htmlFor={selectId}
