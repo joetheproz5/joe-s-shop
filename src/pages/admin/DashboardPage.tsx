@@ -6,24 +6,34 @@ import {
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell, Legend,
 } from 'recharts'
 import { supabase } from '@/lib/supabase'
+import { fetchDashboardStats, fetchOrderStatusData, fetchSalesData } from '@/lib/api/analytics'
 import { formatCurrency, formatDate, formatNumber } from '@/lib/utils'
 import { ORDER_STATUSES } from '@/lib/constants'
 import { Skeleton } from '@/components/ui'
 import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
 
 export default function DashboardPage() {
-  const { data: stats, isLoading } = useDashboardStats()
+  const statsQuery = useDashboardStats()
+  const salesQuery = useSalesData()
+  const orderStatusQuery = useOrderStatusData()
+  const stats = statsQuery.data
+  const hasLiveDataError = statsQuery.isError || salesQuery.isError || orderStatusQuery.isError
 
   const cards = [
-    { label: 'Total Revenue', value: formatCurrency(stats?.total_revenue || 0), change: stats?.revenue_change, icon: DollarSign, color: 'primary' },
-    { label: 'Total Orders', value: formatNumber(stats?.total_orders || 0), change: stats?.orders_change, icon: ShoppingCart, color: 'success' },
-    { label: 'Customers', value: formatNumber(stats?.total_customers || 0), change: stats?.customers_change, icon: Users, color: 'warning' },
-    { label: 'Products', value: formatNumber(stats?.total_products || 0), change: stats?.products_change, icon: Package, color: 'danger' },
+    { label: 'Total Revenue', value: statsQuery.isError ? '--' : formatCurrency(stats?.total_revenue ?? 0), change: stats?.revenue_change, icon: DollarSign, color: 'primary' as const },
+    { label: 'Total Orders', value: statsQuery.isError ? '--' : formatNumber(stats?.total_orders ?? 0), change: stats?.orders_change, icon: ShoppingCart, color: 'success' as const },
+    { label: 'Customers', value: statsQuery.isError ? '--' : formatNumber(stats?.total_customers ?? 0), change: stats?.customers_change, icon: Users, color: 'warning' as const },
+    { label: 'Active Products', value: statsQuery.isError ? '--' : formatNumber(stats?.total_products ?? 0), change: stats?.products_change, icon: Package, color: 'danger' as const },
   ]
+
+  const retryLiveData = () => {
+    statsQuery.refetch()
+    salesQuery.refetch()
+    orderStatusQuery.refetch()
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -32,9 +42,16 @@ export default function DashboardPage() {
         <p className="text-surface-500 text-sm mt-1">Welcome back! Here's what's happening with your store.</p>
       </div>
 
+      {hasLiveDataError && (
+        <div className="flex flex-col gap-3 rounded-lg border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700 sm:flex-row sm:items-center sm:justify-between dark:border-danger-900/50 dark:bg-danger-950/20 dark:text-danger-300">
+          <span>Some live dashboard data could not be loaded. Check your connection or Supabase permissions.</span>
+          <button type="button" onClick={retryLiveData} className="shrink-0 font-semibold hover:underline">Try again</button>
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {isLoading
+        {statsQuery.isLoading
           ? [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28" />)
           : cards.map((card, i) => (
               <motion.div
@@ -49,7 +66,7 @@ export default function DashboardPage() {
                     <p className="text-sm text-surface-500">{card.label}</p>
                     <p className="text-2xl font-bold mt-1">{card.value}</p>
                   </div>
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-${card.color}-50 dark:bg-${card.color}-900/20 text-${card.color}-600 dark:text-${card.color}-400`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${statToneClasses[card.color]}`}>
                     <card.icon size={20} />
                   </div>
                 </div>
@@ -69,54 +86,66 @@ export default function DashboardPage() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Revenue Overview</h3>
-            <span className="text-xs text-surface-500">Last 7 months</span>
+            <span className="text-xs text-surface-500">Last 30 days</span>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={salesData}>
-              <defs>
-                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#5c7cfa" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#5c7cfa" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-surface-200 dark:stroke-surface-700" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} className="text-surface-500" />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '0.75rem',
-                  border: '1px solid rgba(0,0,0,0.05)',
-                  fontSize: '13px',
-                }}
-              />
-              <Area type="monotone" dataKey="revenue" stroke="#5c7cfa" strokeWidth={2} fill="url(#revGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {salesQuery.isLoading ? (
+            <Skeleton className="h-[300px]" />
+          ) : salesQuery.isError ? (
+            <ChartMessage message="Revenue data is unavailable." />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={salesQuery.data || []}>
+                <defs>
+                  <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0b57d0" stopOpacity={0.24} />
+                    <stop offset="95%" stopColor="#0b57d0" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-surface-200 dark:stroke-surface-700" />
+                <XAxis dataKey="date" tickFormatter={formatChartDate} tick={{ fontSize: 11 }} minTickGap={24} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => formatCompactCurrency(Number(value))} width={58} />
+                <Tooltip
+                  formatter={(value) => [formatCurrency(Number(value)), 'Revenue']}
+                  labelFormatter={(value) => formatFullChartDate(String(value))}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid rgba(0,0,0,0.08)', fontSize: '13px' }}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#0b57d0" strokeWidth={2} fill="url(#revGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </motion.div>
 
         {/* Orders by status */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card p-5">
           <h3 className="font-semibold mb-4">Orders by Status</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={orderStatusData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={90}
-                paddingAngle={2}
-              >
-                {orderStatusData.map((entry, i) => (
-                  <Cell key={i} fill={pieColors[i % pieColors.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
+          {orderStatusQuery.isLoading ? (
+            <Skeleton className="h-[300px]" />
+          ) : orderStatusQuery.isError ? (
+            <ChartMessage message="Order status data is unavailable." />
+          ) : orderStatusQuery.data?.length ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={orderStatusQuery.data}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={90}
+                  paddingAngle={2}
+                >
+                  {orderStatusQuery.data.map((entry) => (
+                    <Cell key={entry.status} fill={orderStatusColors[entry.status] || '#6b7280'} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [formatNumber(Number(value)), 'Orders']} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <ChartMessage message="No orders yet." />
+          )}
         </motion.div>
       </div>
 
@@ -130,14 +159,15 @@ export default function DashboardPage() {
 }
 
 function RecentOrders() {
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading, isError } = useQuery({
     queryKey: ['admin-recent-orders'],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .select('id, order_number, status, total, created_at, user:profiles(first_name, last_name)')
         .order('created_at', { ascending: false })
         .limit(5)
+      if (error) throw new Error(error.message)
       return data || []
     },
   })
@@ -152,6 +182,8 @@ function RecentOrders() {
       </div>
       {isLoading ? (
         [1, 2, 3].map((i) => <Skeleton key={i} className="h-14 mb-2" />)
+      ) : isError ? (
+        <ChartMessage message="Recent orders are unavailable." compact />
       ) : orders && orders.length > 0 ? (
         <div className="space-y-2">
           {orders.map((o: any) => {
@@ -160,7 +192,7 @@ function RecentOrders() {
               <div key={o.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-800/50">
                 <div>
                   <div className="font-medium text-sm">{o.order_number}</div>
-                  <div className="text-xs text-surface-500">{o.user?.first_name} {o.user?.last_name} • {formatDate(o.created_at)}</div>
+                  <div className="text-xs text-surface-500">{o.user?.first_name} {o.user?.last_name} | {formatDate(o.created_at)}</div>
                 </div>
                 <div className="flex items-center gap-3">
                   {status && <span className={`badge-${status.color} text-xs`}>{status.label}</span>}
@@ -181,17 +213,35 @@ function RecentOrders() {
 }
 
 function LowStockAlerts() {
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading, isError } = useQuery({
     queryKey: ['admin-low-stock'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('products')
-        .select('id, name, slug, stock_quantity, low_stock_threshold')
-        .eq('status', 'active')
-        .lte('stock_quantity', 10)
-        .order('stock_quantity', { ascending: true })
-        .limit(5)
-      return data || []
+      const allProducts: Array<{
+        id: string
+        name: string
+        slug: string
+        stock_quantity: number
+        low_stock_threshold: number
+      }> = []
+      let offset = 0
+
+      while (true) {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, slug, stock_quantity, low_stock_threshold')
+          .eq('status', 'active')
+          .order('stock_quantity', { ascending: true })
+          .range(offset, offset + 999)
+        if (error) throw new Error(error.message)
+        allProducts.push(...(data || []))
+        if (!data || data.length < 1000) break
+        offset += 1000
+      }
+
+      return allProducts
+        .filter((product) => product.stock_quantity <= product.low_stock_threshold)
+        .sort((a, b) => a.stock_quantity - b.stock_quantity)
+        .slice(0, 5)
     },
   })
 
@@ -207,6 +257,8 @@ function LowStockAlerts() {
       </div>
       {isLoading ? (
         [1, 2, 3].map((i) => <Skeleton key={i} className="h-14 mb-2" />)
+      ) : isError ? (
+        <ChartMessage message="Inventory alerts are unavailable." compact />
       ) : products && products.length > 0 ? (
         <div className="space-y-2">
           {products.map((p: any) => (
@@ -235,45 +287,60 @@ function LowStockAlerts() {
 function useDashboardStats() {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
-    queryFn: async () => {
-      // Aggregate from multiple queries
-      const [ordersRes, productsRes, customersRes] = await Promise.all([
-        supabase.from('orders').select('total, created_at'),
-        supabase.from('products').select('id', { count: 'exact', head: true }),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      ])
-      const totalRevenue = (ordersRes.data || []).reduce((sum: number, o: any) => sum + Number(o.total || 0), 0)
-      return {
-        total_revenue: totalRevenue,
-        total_orders: ordersRes.data?.length || 0,
-        total_products: productsRes.count || 0,
-        total_customers: customersRes.count || 0,
-        revenue_change: 12.5,
-        orders_change: 8.3,
-        customers_change: 15.2,
-        products_change: 0,
-      }
-    },
+    queryFn: fetchDashboardStats,
+    staleTime: 30_000,
   })
 }
 
-// Demo chart data (in production these come from the API)
-const salesData = [
-  { month: 'Jan', revenue: 12500, orders: 45 },
-  { month: 'Feb', revenue: 15200, orders: 52 },
-  { month: 'Mar', revenue: 18900, orders: 68 },
-  { month: 'Apr', revenue: 16700, orders: 61 },
-  { month: 'May', revenue: 22300, orders: 78 },
-  { month: 'Jun', revenue: 28100, orders: 92 },
-  { month: 'Jul', revenue: 31500, orders: 105 },
-]
+function useSalesData() {
+  return useQuery({
+    queryKey: ['admin-dashboard-sales', 'month'],
+    queryFn: () => fetchSalesData('month'),
+    staleTime: 30_000,
+  })
+}
 
-const orderStatusData = [
-  { name: 'Pending', value: 12 },
-  { name: 'Processing', value: 18 },
-  { name: 'Shipped', value: 24 },
-  { name: 'Delivered', value: 156 },
-  { name: 'Cancelled', value: 5 },
-]
+function useOrderStatusData() {
+  return useQuery({
+    queryKey: ['admin-dashboard-order-status'],
+    queryFn: fetchOrderStatusData,
+    staleTime: 30_000,
+  })
+}
 
-const pieColors = ['#fcc419', '#5c7cfa', '#4c6ef5', '#20c997', '#fa5252']
+function ChartMessage({ message, compact = false }: { message: string; compact?: boolean }) {
+  return (
+    <div className={`flex items-center justify-center text-center text-sm text-surface-500 ${compact ? 'h-28' : 'h-[300px]'}`}>
+      {message}
+    </div>
+  )
+}
+
+function formatChartDate(value: string) {
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(`${value}T00:00:00`))
+}
+
+function formatFullChartDate(value: string) {
+  return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(`${value}T00:00:00`))
+}
+
+function formatCompactCurrency(value: number) {
+  return `$${new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(value)}`
+}
+
+const statToneClasses = {
+  primary: 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400',
+  success: 'bg-success-50 text-success-600 dark:bg-success-900/20 dark:text-success-400',
+  warning: 'bg-warning-50 text-warning-600 dark:bg-warning-900/20 dark:text-warning-400',
+  danger: 'bg-danger-50 text-danger-600 dark:bg-danger-900/20 dark:text-danger-400',
+}
+
+const orderStatusColors: Record<string, string> = {
+  pending: '#f59f00',
+  paid: '#0b57d0',
+  processing: '#4c6ef5',
+  shipped: '#7048e8',
+  delivered: '#12b886',
+  cancelled: '#fa5252',
+  refunded: '#868e96',
+}

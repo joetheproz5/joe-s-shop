@@ -1,5 +1,46 @@
 import { supabase } from '@/lib/supabase'
 import type { DashboardStats, SalesDataPoint, Product } from '@/types'
+import { ORDER_STATUSES } from '@/lib/constants'
+
+const ANALYTICS_PAGE_SIZE = 1000
+
+function percentageChange(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? 0 : 100
+  return Math.round((((current - previous) / previous) * 100) * 100) / 100
+}
+
+async function fetchRevenueTotals(currentPeriodStart: string, previousPeriodStart: string) {
+  let offset = 0
+  let total = 0
+  let current = 0
+  let previous = 0
+  const currentPeriodStartMs = Date.parse(currentPeriodStart)
+  const previousPeriodStartMs = Date.parse(previousPeriodStart)
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('total, created_at')
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + ANALYTICS_PAGE_SIZE - 1)
+
+    if (error) throw new Error(error.message)
+
+    for (const order of data || []) {
+      const amount = Number(order.total || 0)
+      const createdAt = Date.parse(order.created_at)
+      total += amount
+      if (createdAt >= currentPeriodStartMs) current += amount
+      else if (createdAt >= previousPeriodStartMs) previous += amount
+    }
+
+    if (!data || data.length < ANALYTICS_PAGE_SIZE) break
+    offset += ANALYTICS_PAGE_SIZE
+  }
+
+  return { total, current, previous }
+}
 
 // ─────────────────────────────────────────────
 // Dashboard Stats
@@ -10,73 +51,63 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
   const startOfPeriod = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfLastPeriod = new Date(now.getFullYear(), now.getMonth() - 1, 1)
 
-  // Current period totals
-  const [revenueRes, ordersRes, customersRes, productsRes] = await Promise.all([
-    supabase
-      .from('orders')
-      .select('total')
-      .gte('created_at', startOfPeriod.toISOString())
-      .not('status', 'in', '("cancelled","refunded")'),
-    supabase
-      .from('orders')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', startOfPeriod.toISOString()),
-    supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('role', 'customer'),
-    supabase
-      .from('products')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'active'),
+  const currentStart = startOfPeriod.toISOString()
+  const previousStart = startOfLastPeriod.toISOString()
+
+  const [
+    revenue,
+    totalOrdersRes,
+    currentOrdersRes,
+    previousOrdersRes,
+    totalCustomersRes,
+    currentCustomersRes,
+    previousCustomersRes,
+    totalProductsRes,
+    currentProductsRes,
+    previousProductsRes,
+  ] = await Promise.all([
+    fetchRevenueTotals(currentStart, previousStart),
+    supabase.from('orders').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).gte('created_at', currentStart),
+    supabase.from('orders').select('id', { count: 'exact', head: true }).gte('created_at', previousStart).lt('created_at', currentStart),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'customer'),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'customer').gte('created_at', currentStart),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'customer').gte('created_at', previousStart).lt('created_at', currentStart),
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('created_at', currentStart),
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('created_at', previousStart).lt('created_at', currentStart),
   ])
 
-  // Previous period totals for change calculation
-  const [prevRevenueRes, prevOrdersRes, prevCustomersRes] = await Promise.all([
-    supabase
-      .from('orders')
-      .select('total')
-      .gte('created_at', startOfLastPeriod.toISOString())
-      .lt('created_at', startOfPeriod.toISOString())
-      .not('status', 'in', '("cancelled","refunded")'),
-    supabase
-      .from('orders')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', startOfLastPeriod.toISOString())
-      .lt('created_at', startOfPeriod.toISOString()),
-    supabase
-      .from('profiles')
-      .select('id, created_at')
-      .gte('created_at', startOfLastPeriod.toISOString())
-      .lt('created_at', startOfPeriod.toISOString())
-      .eq('role', 'customer'),
-  ])
+  const responses = [
+    totalOrdersRes,
+    currentOrdersRes,
+    previousOrdersRes,
+    totalCustomersRes,
+    currentCustomersRes,
+    previousCustomersRes,
+    totalProductsRes,
+    currentProductsRes,
+    previousProductsRes,
+  ]
+  const failedResponse = responses.find((response) => response.error)
+  if (failedResponse?.error) throw new Error(failedResponse.error.message)
 
-  const totalRevenue = revenueRes.data?.reduce((sum, o) => sum + (o.total || 0), 0) ?? 0
-  const prevRevenue = prevRevenueRes.data?.reduce((sum, o) => sum + (o.total || 0), 0) ?? 0
-
-  const totalOrders = ordersRes.count ?? 0
-  const prevOrders = prevOrdersRes.count ?? 0
-
-  const totalCustomers = customersRes.count ?? 0
-  const newCustomers = prevCustomersRes.data?.length ?? 0
-
-  const totalProducts = productsRes.count ?? 0
-
-  const revenueChange = prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : 0
-  const ordersChange = prevOrders > 0 ? ((totalOrders - prevOrders) / prevOrders) * 100 : 0
-  const customersChange = newCustomers > 0 ? (newCustomers / Math.max(totalCustomers - newCustomers, 1)) * 100 : 0
-  const productsChange = 0 // No meaningful "change" for static count
+  const currentOrders = currentOrdersRes.count ?? 0
+  const previousOrders = previousOrdersRes.count ?? 0
+  const currentCustomers = currentCustomersRes.count ?? 0
+  const previousCustomers = previousCustomersRes.count ?? 0
+  const currentProducts = currentProductsRes.count ?? 0
+  const previousProducts = previousProductsRes.count ?? 0
 
   return {
-    total_revenue: totalRevenue,
-    total_orders: totalOrders,
-    total_customers: totalCustomers,
-    total_products: totalProducts,
-    revenue_change: Math.round(revenueChange * 100) / 100,
-    orders_change: Math.round(ordersChange * 100) / 100,
-    customers_change: Math.round(customersChange * 100) / 100,
-    products_change: productsChange,
+    total_revenue: revenue.total,
+    total_orders: totalOrdersRes.count ?? 0,
+    total_customers: totalCustomersRes.count ?? 0,
+    total_products: totalProductsRes.count ?? 0,
+    revenue_change: percentageChange(revenue.current, revenue.previous),
+    orders_change: percentageChange(currentOrders, previousOrders),
+    customers_change: percentageChange(currentCustomers, previousCustomers),
+    products_change: percentageChange(currentProducts, previousProducts),
   }
 }
 
@@ -98,20 +129,29 @@ export async function fetchSalesData(
     startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate() + 1)
   }
 
-  const { data, error } = await supabase
-    .from('orders')
-    .select('created_at, total, id')
-    .gte('created_at', startDate.toISOString())
-    .lt('created_at', now.toISOString())
-    .not('status', 'in', '("cancelled","refunded")')
-    .order('created_at', { ascending: true })
+  const orders: Array<{ created_at: string; total: number; id: string }> = []
+  let offset = 0
 
-  if (error) throw new Error(error.message)
+  while (true) {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('created_at, total, id')
+      .gte('created_at', startDate.toISOString())
+      .lt('created_at', now.toISOString())
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: true })
+      .range(offset, offset + ANALYTICS_PAGE_SIZE - 1)
+
+    if (error) throw new Error(error.message)
+    orders.push(...(data || []))
+    if (!data || data.length < ANALYTICS_PAGE_SIZE) break
+    offset += ANALYTICS_PAGE_SIZE
+  }
 
   // Group by date
   const grouped = new Map<string, { revenue: number; orders: number }>()
 
-  for (const order of data || []) {
+  for (const order of orders) {
     const date = order.created_at.split('T')[0]
     const existing = grouped.get(date) || { revenue: 0, orders: 0 }
     existing.revenue += order.total || 0
@@ -134,6 +174,42 @@ export async function fetchSalesData(
   }
 
   return result
+}
+
+export interface OrderStatusDataPoint {
+  status: string
+  name: string
+  value: number
+}
+
+export async function fetchOrderStatusData(): Promise<OrderStatusDataPoint[]> {
+  const counts = new Map<string, number>()
+  let offset = 0
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('status')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + ANALYTICS_PAGE_SIZE - 1)
+
+    if (error) throw new Error(error.message)
+
+    for (const order of data || []) {
+      counts.set(order.status, (counts.get(order.status) || 0) + 1)
+    }
+
+    if (!data || data.length < ANALYTICS_PAGE_SIZE) break
+    offset += ANALYTICS_PAGE_SIZE
+  }
+
+  return ORDER_STATUSES
+    .map((status) => ({
+      status: status.value,
+      name: status.label,
+      value: counts.get(status.value) || 0,
+    }))
+    .filter((status) => status.value > 0)
 }
 
 // ─────────────────────────────────────────────
