@@ -44,7 +44,7 @@
       "name": "Smartwatches",
       "slug": "smartwatches",
       "description": "Apple Watch and Samsung Galaxy Watch models.",
-      "image": "/catalog/apple/watch-series-11.jpg",
+      "image": "/catalog/apple/watch-series-11.png",
       "sort_order": 4
     },
     {
@@ -227,7 +227,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000003",
       "selling_price": 129,
       "stock_quantity": 48,
-      "image": "/catalog/apple/airpods-4.jpg",
+      "image": "/catalog/apple/airpods-4.png",
       "source_url": "https://www.apple.com/airpods-4/",
       "is_best_seller": true
     },
@@ -242,7 +242,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000003",
       "selling_price": 179,
       "stock_quantity": 38,
-      "image": "/catalog/apple/airpods-4.jpg",
+      "image": "/catalog/apple/airpods-4.png",
       "source_url": "https://www.apple.com/airpods-4/"
     },
     {
@@ -288,7 +288,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000004",
       "selling_price": 399,
       "stock_quantity": 26,
-      "image": "/catalog/apple/watch-series-11.jpg",
+      "image": "/catalog/apple/watch-series-11.png",
       "source_url": "https://www.apple.com/apple-watch-series-11/",
       "is_featured": true,
       "is_new_arrival": true
@@ -304,7 +304,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000004",
       "selling_price": 249,
       "stock_quantity": 30,
-      "image": "/catalog/apple/watch-se-3.jpg",
+      "image": "/catalog/apple/watch-se-3.png",
       "source_url": "https://www.apple.com/apple-watch-se/",
       "is_new_arrival": true
     },
@@ -319,7 +319,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000004",
       "selling_price": 799,
       "stock_quantity": 12,
-      "image": "/catalog/apple/watch-ultra-3.jpg",
+      "image": "/catalog/apple/watch-ultra-3.png",
       "source_url": "https://www.apple.com/apple-watch-ultra/",
       "is_new_arrival": true
     },
@@ -363,7 +363,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000001",
       "selling_price": 799.99,
       "stock_quantity": 30,
-      "image": "/catalog/samsung/galaxy-s23-series.jpg",
+      "image": "/catalog/samsung/galaxy-s23.png",
       "source_url": "https://news.samsung.com/us/samsung-new-galaxy-s23-series-take-passions-further-designed-premium-experience-today-beyond-unpacked-2023/",
       "is_best_seller": true
     },
@@ -378,7 +378,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000001",
       "selling_price": 999.99,
       "stock_quantity": 22,
-      "image": "/catalog/samsung/galaxy-s23-series.jpg",
+      "image": "/catalog/samsung/galaxy-s23-plus.png",
       "source_url": "https://news.samsung.com/us/samsung-new-galaxy-s23-series-take-passions-further-designed-premium-experience-today-beyond-unpacked-2023/"
     },
     {
@@ -392,7 +392,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000001",
       "selling_price": 1199.99,
       "stock_quantity": 20,
-      "image": "/catalog/samsung/galaxy-s23-ultra.jpg",
+      "image": "/catalog/samsung/galaxy-s23-ultra.png",
       "source_url": "https://news.samsung.com/us/samsung-new-galaxy-s23-series-take-passions-further-designed-premium-experience-today-beyond-unpacked-2023/",
       "is_featured": true,
       "is_best_seller": true
