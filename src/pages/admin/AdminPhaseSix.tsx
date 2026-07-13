@@ -234,6 +234,9 @@ export function OrdersPage() {
   const [status, setStatus] = useState<'all' | OrderStatus>('all')
   const [page, setPage] = useState(1)
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null)
+  const [detailStatus, setDetailStatus] = useState<OrderStatus>('pending')
+  const [detailPaymentStatus, setDetailPaymentStatus] = useState<PaymentStatus>('pending')
+  const [detailInternalNote, setDetailInternalNote] = useState('')
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
   const [nextStatus, setNextStatus] = useState<OrderStatus>('processing')
   const [nextPaymentStatus, setNextPaymentStatus] = useState<PaymentStatus>('pending')
@@ -256,7 +259,7 @@ export function OrdersPage() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!editingOrder) return
-      await updateOrderStatus(editingOrder.id, nextStatus, internalNote.trim() || undefined)
+      await updateOrderStatus(editingOrder.id, nextStatus, internalNote.trim())
       await updatePaymentStatus(editingOrder.id, nextPaymentStatus)
     },
     onSuccess: () => {
@@ -267,6 +270,43 @@ export function OrdersPage() {
     },
     onError: (error: Error) => toast.error(error.message),
   })
+
+  const detailUpdateMutation = useMutation({
+    mutationFn: async () => {
+      if (!viewingOrder) return
+      await updateOrderStatus(viewingOrder.id, detailStatus, detailInternalNote.trim())
+      await updatePaymentStatus(viewingOrder.id, detailPaymentStatus)
+    },
+    onSuccess: () => {
+      setViewingOrder((order) => order ? {
+        ...order,
+        status: detailStatus,
+        payment_status: detailPaymentStatus,
+        internal_note: detailInternalNote.trim() || undefined,
+      } : order)
+      toast.success('Order status updated')
+      queryClient.invalidateQueries({ queryKey: ['admin-orders-page'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-recent-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-order-status'] })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+
+  const viewOrder = (order: Order) => {
+    setViewingOrder(order)
+    setDetailStatus(order.status)
+    setDetailPaymentStatus(order.payment_status)
+    setDetailInternalNote(order.internal_note ?? '')
+  }
+
+  const changeDetailStatus = (value: string | string[] | null) => {
+    const next = (value as OrderStatus | null) ?? 'pending'
+    setDetailStatus(next)
+    if (next === 'paid') setDetailPaymentStatus('paid')
+    if (next === 'refunded') setDetailPaymentStatus('refunded')
+  }
 
   const openOrder = (order: Order) => {
     setEditingOrder(order)
@@ -370,7 +410,7 @@ export function OrdersPage() {
         <tbody>
           {orders.map((order) => (
             <tr key={order.id}>
-              <td><button type="button" onClick={() => setViewingOrder(order)} className="font-semibold text-primary-600 hover:underline">{order.order_number}</button><div className="text-xs text-surface-500">{order.items?.length ?? 0} items</div></td>
+              <td><button type="button" onClick={() => viewOrder(order)} className="font-semibold text-primary-600 hover:underline">{order.order_number}</button><div className="text-xs text-surface-500">{order.items?.length ?? 0} items</div></td>
               <td>{order.user ? `${order.user.first_name} ${order.user.last_name}`.trim() || 'Customer' : order.guest_email || 'Guest'}</td>
               <td><StatusPill tone={statusTone[order.status]}>{order.status}</StatusPill></td>
               <td>
@@ -381,7 +421,7 @@ export function OrdersPage() {
               <td>{formatDate(order.created_at)}</td>
               <td>
                 <div className="flex justify-end gap-1">
-                  <Button size="sm" variant="ghost" iconOnly leftIcon={<Eye size={16} />} aria-label="View order" title="View order" onClick={() => setViewingOrder(order)} />
+                  <Button size="sm" variant="ghost" iconOnly leftIcon={<Eye size={16} />} aria-label="View order" title="View order" onClick={() => viewOrder(order)} />
                   <Button size="sm" variant="ghost" iconOnly leftIcon={<Pencil size={16} />} aria-label="Edit order" title="Edit order" onClick={() => openOrder(order)} />
                 </div>
               </td>
@@ -395,12 +435,41 @@ export function OrdersPage() {
           <>
             <ModalBody className="p-6 sm:p-8">
               <OrderInvoice order={viewingOrder} invoiceRef={invoiceRef} />
+              <section className="mt-8 border-t border-surface-200 pt-6 dark:border-surface-700">
+                <div className="mb-4">
+                  <h3 className="font-semibold">Update order</h3>
+                  <p className="mt-1 text-sm text-surface-500">Change fulfillment and payment status without leaving this order.</p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Select
+                    label="Order status"
+                    value={detailStatus}
+                    onChange={changeDetailStatus}
+                    options={ORDER_STATUSES.map((item) => ({ label: item.label, value: item.value }))}
+                    clearable={false}
+                  />
+                  <Select
+                    label="Payment status"
+                    value={detailPaymentStatus}
+                    onChange={(value) => setDetailPaymentStatus((value as PaymentStatus | null) ?? 'pending')}
+                    options={['pending', 'paid', 'failed', 'refunded'].map((item) => ({ label: item.charAt(0).toUpperCase() + item.slice(1), value: item }))}
+                    clearable={false}
+                  />
+                </div>
+                <Input className="mt-4" label="Internal note" asTextarea rows={3} value={detailInternalNote} onChange={(event) => setDetailInternalNote(event.target.value)} />
+              </section>
             </ModalBody>
             <ModalFooter className="justify-between">
               <Button variant="secondary" onClick={() => setViewingOrder(null)}>Close</Button>
               <div className="flex gap-2">
-                <Button variant="secondary" leftIcon={<Pencil size={16} />} onClick={() => { const order = viewingOrder; setViewingOrder(null); openOrder(order) }}>Edit order</Button>
-                <Button leftIcon={<Printer size={16} />} onClick={printInvoice}>Print invoice</Button>
+                <Button variant="secondary" leftIcon={<Printer size={16} />} onClick={printInvoice}>Print invoice</Button>
+                <Button
+                  loading={detailUpdateMutation.isPending}
+                  disabled={detailStatus === viewingOrder.status && detailPaymentStatus === viewingOrder.payment_status && detailInternalNote === (viewingOrder.internal_note ?? '')}
+                  onClick={() => detailUpdateMutation.mutate()}
+                >
+                  Save status
+                </Button>
               </div>
             </ModalFooter>
           </>

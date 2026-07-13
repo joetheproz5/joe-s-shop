@@ -202,7 +202,7 @@ export async function updateOrderStatus(
     updates.refunded_at = new Date().toISOString()
     updates.payment_status = 'refunded'
   }
-  if (internalNote) updates.internal_note = internalNote
+  if (internalNote !== undefined) updates.internal_note = internalNote || null
 
   const { data, error } = await supabase
     .from('orders')
