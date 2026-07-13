@@ -112,7 +112,8 @@ export default function OrderDetailPage() {
 
           <div className="card p-5">
             <div className="flex items-center gap-2 mb-3"><CreditCard size={18} className="text-surface-400" /><h3 className="font-semibold">Payment</h3></div>
-            <p className="text-sm capitalize">{order.payment_status}</p>
+            <p className="text-sm capitalize">{order.payment_method?.replace(/_/g, ' ') || 'Payment method not recorded'}</p>
+            <p className="mt-1 text-xs capitalize text-surface-500">Status: {order.payment_status}</p>
           </div>
         </div>
       </div>

@@ -191,6 +191,8 @@ export interface Order {
   order_number: string
   status: OrderStatus
   payment_status: PaymentStatus
+  payment_method?: 'cash_on_delivery' | 'credit_card' | 'paypal' | 'bank_transfer'
+  stock_deducted?: boolean
   subtotal: number
   tax: number
   shipping_cost: number

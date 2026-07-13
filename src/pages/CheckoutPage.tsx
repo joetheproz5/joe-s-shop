@@ -9,8 +9,6 @@ import { useAuth } from '@/context/AuthContext'
 import { formatCurrency } from '@/lib/utils'
 import { Button, Input } from '@/components/ui'
 import { supabase } from '@/lib/supabase'
-import { generateOrderNumber } from '@/lib/utils'
-import type { Address } from '@/types'
 import toast from 'react-hot-toast'
 import { getProductImage } from '@/lib/productImages'
 
@@ -21,9 +19,34 @@ const STEPS = [
   { key: 'confirmation', label: 'Confirmation', icon: Package },
 ]
 
+const PAYMENT_METHODS = [
+  { value: 'cash_on_delivery', label: 'Cash on delivery', description: 'Pay when your order arrives.', available: true },
+  { value: 'credit_card', label: 'Credit or debit card', description: 'Coming soon', available: false },
+  { value: 'paypal', label: 'PayPal', description: 'Coming soon', available: false },
+  { value: 'bank_transfer', label: 'Bank transfer', description: 'Coming soon', available: false },
+] as const
+
+function getCheckoutErrorMessage(error: unknown) {
+  const message = error instanceof Error
+    ? error.message
+    : typeof error === 'object' && error && 'message' in error
+      ? String(error.message)
+      : ''
+
+  if (/place_cash_on_delivery_order|schema cache|PGRST202/i.test(message)) {
+    return 'Checkout needs the Supabase migration 003_cash_on_delivery_checkout.sql before orders can be placed.'
+  }
+
+  if (/row-level security|permission denied|42501/i.test(message)) {
+    return 'Your account is not allowed to place this order. Sign out, sign back in, and try again.'
+  }
+
+  return message || 'Failed to place order. Please try again.'
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, getSubtotal, getTax, getShipping, getTotal, clearCart, updateQuantity } = useCartStore()
+  const { items, getSubtotal, getTax, getShipping, getTotal, clearCart } = useCartStore()
   const { user } = useAuth()
   const [step, setStep] = useState(0)
   const [orderNumber, setOrderNumber] = useState('')
@@ -34,7 +57,7 @@ export default function CheckoutPage() {
     city: '', state: '', postal_code: '', country: 'United States', phone: '',
   })
   const [billing, setBilling] = useState({ sameAsShipping: true, ...shipping })
-  const [paymentMethod, setPaymentMethod] = useState('credit_card')
+  const paymentMethod = 'cash_on_delivery'
 
   const subtotal = getSubtotal()
   const tax = getTax()
@@ -49,81 +72,40 @@ export default function CheckoutPage() {
   }
 
   const handlePlaceOrder = async () => {
+    if (!user?.id) {
+      toast.error('Sign in before placing your order.')
+      navigate('/login', { state: { from: '/checkout' } })
+      return
+    }
+
     setSubmitting(true)
     try {
-      const productIds = [...new Set(items.map((item) => item.product_id))]
-      const variantIds = [...new Set(items.map((item) => item.variant_id).filter((id): id is string => !!id))]
-      const { data: currentProducts, error: productsError } = await supabase
-        .from('products')
-        .select('id,name,stock_quantity')
-        .in('id', productIds)
-      if (productsError) throw new Error(`Could not verify product stock: ${productsError.message}`)
-
-      const currentVariants = variantIds.length > 0
-        ? await supabase.from('product_variants').select('id,product_id,stock_quantity').in('id', variantIds)
-        : { data: [], error: null }
-      if (currentVariants.error) throw new Error(`Could not verify variant stock: ${currentVariants.error.message}`)
-
-      const productStock = new Map((currentProducts ?? []).map((product) => [product.id, product]))
-      const variantStock = new Map((currentVariants.data ?? []).map((variant) => [variant.id, variant]))
-
-      for (const item of items) {
-        const currentProduct = productStock.get(item.product_id)
-        const currentVariant = item.variant_id ? variantStock.get(item.variant_id) : undefined
-        const available = currentVariant?.stock_quantity ?? currentProduct?.stock_quantity ?? 0
-        const name = item.product?.name || currentProduct?.name || 'This product'
-        if (!currentProduct || (item.variant_id && !currentVariant)) {
-          updateQuantity(item.product_id, item.variant_id, 0)
-          throw new Error(`${name} is no longer available and was removed from your cart.`)
-        }
-        if (item.quantity > available) {
-          updateQuantity(item.product_id, item.variant_id, available)
-          throw new Error(`${name} only has ${available} available. Your cart has been updated.`)
-        }
-      }
-
-      const orderNum = generateOrderNumber()
       const shippingAddr = { ...shipping }
       const billingAddr = billing.sameAsShipping ? shippingAddr : { ...billing, sameAsShipping: undefined }
+      const orderItems = items.map((item) => ({
+        product_id: item.product_id,
+        variant_id: item.variant_id || null,
+        quantity: item.quantity,
+      }))
 
-      const { data: order, error } = await supabase.from('orders').insert({
-        user_id: user?.id,
-        order_number: orderNum,
-        status: 'pending',
-        payment_status: 'pending',
-        subtotal, tax, shipping_cost: shippingCost, discount: 0, total,
-        shipping_method: 'Standard',
-        shipping_address: shippingAddr,
-        billing_address: billingAddr,
-        payment_method: paymentMethod,
-      }).select().single()
-
-      if (error) throw error
-
-      // Insert order items
-      const orderItems = items.map((item) => {
-        const price = item.variant?.sale_price || item.variant?.price || item.product?.sale_price || item.product?.selling_price || 0
-        return {
-          order_id: order.id,
-          product_id: item.product_id,
-          variant_id: item.variant_id || null,
-          product_name: item.product?.name || 'Product',
-          product_image: item.product ? getProductImage(item.product) : '',
-          sku: item.variant?.sku || item.product?.sku || '',
-          quantity: item.quantity,
-          unit_price: price,
-          total_price: price * item.quantity,
-        }
+      const { data, error } = await supabase.rpc('place_cash_on_delivery_order', {
+        p_shipping_address: shippingAddr,
+        p_billing_address: billingAddr,
+        p_items: orderItems,
+        p_shipping_method: 'Standard',
       })
-      const { error: itemsErr } = await supabase.from('order_items').insert(orderItems)
-      if (itemsErr) throw itemsErr
 
-      setOrderNumber(orderNum)
+      if (error) throw new Error(getCheckoutErrorMessage(error))
+
+      const placedOrder = data?.[0]
+      if (!placedOrder) throw new Error('The order could not be confirmed. Please try again.')
+
+      setOrderNumber(placedOrder.order_number)
       clearCart()
       setStep(3)
-      toast.success('Order placed successfully!')
+      toast.success('Cash-on-delivery order placed successfully!')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to place order. Please try again.')
+      toast.error(getCheckoutErrorMessage(err))
       console.error(err)
     } finally {
       setSubmitting(false)
@@ -219,14 +201,27 @@ export default function CheckoutPage() {
                 <div>
                   <label className="text-sm font-semibold mb-3 block">Payment Method</label>
                   <div className="grid sm:grid-cols-2 gap-3">
-                    {['credit_card', 'paypal', 'bank_transfer', 'cash_on_delivery'].map((m) => (
-                      <label key={m} className={`flex items-center gap-3 cursor-pointer p-4 border rounded-xl transition-colors ${paymentMethod === m ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-surface-300 dark:border-surface-700 hover:border-surface-400'}`}>
-                        <input type="radio" name="payment_method" checked={paymentMethod === m} onChange={() => setPaymentMethod(m)} className="w-4 h-4 text-primary-600" />
-                        <span className="text-sm font-medium capitalize">{m.replace(/_/g, ' ')}</span>
+                    {PAYMENT_METHODS.map((method) => (
+                      <label
+                        key={method.value}
+                        className={`flex items-start gap-3 border p-4 ${method.available ? 'cursor-pointer' : 'cursor-not-allowed opacity-55'} ${paymentMethod === method.value ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-surface-300 dark:border-surface-700'}`}
+                      >
+                        <input
+                          type="radio"
+                          name="payment_method"
+                          checked={paymentMethod === method.value}
+                          disabled={!method.available}
+                          readOnly
+                          className="mt-0.5 h-4 w-4 text-primary-600"
+                        />
+                        <span>
+                          <span className="block text-sm font-medium">{method.label}</span>
+                          <span className="mt-1 block text-xs text-surface-500">{method.description}</span>
+                        </span>
                       </label>
                     ))}
                   </div>
-                  <p className="text-xs text-surface-400 mt-2 flex items-center gap-1"><ShieldCheck size={12} /> Payments are secured with 256-bit encryption</p>
+                  <p className="mt-3 flex items-center gap-1.5 text-xs text-surface-500"><ShieldCheck size={13} /> No payment is charged online. Pay the courier when the order arrives.</p>
                 </div>
               </div>
               <div className="flex justify-between mt-6">
@@ -257,7 +252,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{item.product?.name}</div>
-                        <div className="text-xs text-surface-500">Qty: {item.quantity} × {formatCurrency(price)}</div>
+                        <div className="text-xs text-surface-500">Qty: {item.quantity} x {formatCurrency(price)}</div>
                       </div>
                       <div className="font-semibold">{formatCurrency(price * item.quantity)}</div>
                     </div>
@@ -295,7 +290,7 @@ export default function CheckoutPage() {
               <div className="flex justify-between mt-6">
                 <button onClick={() => setStep(1)} className="btn-secondary">&larr; Back</button>
                 <Button size="lg" onClick={handlePlaceOrder} loading={submitting} leftIcon={<ShieldCheck size={18} />}>
-                  Place Order — {formatCurrency(total)}
+                  Place COD Order - {formatCurrency(total)}
                 </Button>
               </div>
             </div>

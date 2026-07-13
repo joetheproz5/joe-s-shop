@@ -365,6 +365,8 @@ export type Database = {
           order_number: string
           status: string
           payment_status: string
+          payment_method: string
+          stock_deducted: boolean
           subtotal: number
           tax: number
           shipping_cost: number
@@ -390,6 +392,8 @@ export type Database = {
           order_number?: string
           status?: string
           payment_status?: string
+          payment_method?: string
+          stock_deducted?: boolean
           subtotal?: number
           tax?: number
           shipping_cost?: number
@@ -523,6 +527,15 @@ export type Database = {
       slugify: { Args: { raw: string }; Returns: string }
       is_staff: { Args: Record<string, never>; Returns: boolean }
       generate_order_number: { Args: Record<string, never>; Returns: string }
+      place_cash_on_delivery_order: {
+        Args: {
+          p_shipping_address: Record<string, unknown>
+          p_billing_address: Record<string, unknown>
+          p_items: Array<{ product_id: string; variant_id: string | null; quantity: number }>
+          p_shipping_method?: string
+        }
+        Returns: Array<{ order_id: string; order_number: string }>
+      }
     }
     Enums: {
       product_status: 'active' | 'draft' | 'archived' | 'hidden'
