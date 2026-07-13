@@ -9,10 +9,11 @@ import { useAuth } from '@/context/AuthContext'
 import { formatCurrency } from '@/lib/utils'
 import { Button, Input, Select } from '@/components/ui'
 import { LebanonAddressFields } from '@/components/checkout/LebanonAddressFields'
+import { LebanesePhoneInput } from '@/components/checkout/LebanesePhoneInput'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { getProductImage } from '@/lib/productImages'
-import { LEBANESE_PHONE_PLACEHOLDER, LEBANON_COUNTRY, normalizeLebanonLocation } from '@/lib/lebanon'
+import { isValidLebanesePhone, LEBANON_COUNTRY, normalizeLebanonLocation } from '@/lib/lebanon'
 import type { Address } from '@/types'
 
 type CheckoutAddress = Pick<
@@ -165,8 +166,9 @@ export default function CheckoutPage() {
   const shippingCost = getShipping()
   const total = getTotal()
 
-  const hasGuestContact = !!user || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim()) && !!shipping.phone.trim())
-  const canProceedShipping = shipping.first_name && shipping.last_name && shipping.street_address_1 && shipping.city && shipping.state && hasGuestContact
+  const shippingPhoneValid = !shipping.phone || isValidLebanesePhone(shipping.phone)
+  const hasGuestContact = !!user || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim()) && isValidLebanesePhone(shipping.phone))
+  const canProceedShipping = shipping.first_name && shipping.last_name && shipping.street_address_1 && shipping.city && shipping.state && shippingPhoneValid && hasGuestContact
 
   if (items.length === 0 && step < 3) {
     navigate('/cart')
@@ -294,7 +296,13 @@ export default function CheckoutPage() {
                 <Input label="Building, street, and area *" value={shipping.street_address_1} onChange={(e) => updateShipping('street_address_1', e.target.value)} placeholder="Building 12, Hamra Street" autoComplete="address-line1" required />
                 <Input label="Floor, apartment, or landmark (optional)" value={shipping.street_address_2} onChange={(e) => updateShipping('street_address_2', e.target.value)} placeholder="3rd floor, near the pharmacy" autoComplete="address-line2" />
                 <LebanonAddressFields key={selectedAddressId} value={shipping} onChange={updateShipping} required />
-                <Input label={`Lebanese phone${user ? '' : ' *'}`} type="tel" inputMode="tel" autoComplete="tel" value={shipping.phone} onChange={(e) => updateShipping('phone', e.target.value)} placeholder={LEBANESE_PHONE_PLACEHOLDER} required={!user} />
+                <LebanesePhoneInput
+                  label="Lebanese phone"
+                  value={shipping.phone}
+                  onChange={(value) => updateShipping('phone', value)}
+                  required={!user}
+                  error={shipping.phone && !shippingPhoneValid ? 'Enter a valid 7 or 8 digit Lebanese phone number.' : undefined}
+                />
 
                 {user && selectedAddressId === 'new' && (
                   <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-200 p-3 dark:border-surface-700">

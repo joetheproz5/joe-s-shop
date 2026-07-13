@@ -1,5 +1,28 @@
 export const LEBANON_COUNTRY = 'Lebanon'
-export const LEBANESE_PHONE_PLACEHOLDER = '+961 71 234 567'
+export const LEBANESE_PHONE_PLACEHOLDER = '71 234 567'
+
+export function getLebaneseSubscriberNumber(value: string): string {
+  let digits = value.replace(/\D/g, '')
+  if (digits.startsWith('961')) digits = digits.slice(3)
+  if (digits.startsWith('0')) digits = digits.slice(1)
+  return digits.slice(0, 8)
+}
+
+export function toLebanesePhoneNumber(value: string): string {
+  const subscriberNumber = getLebaneseSubscriberNumber(value)
+  return subscriberNumber ? `+961${subscriberNumber}` : ''
+}
+
+export function isValidLebanesePhone(value: string): boolean {
+  const trimmedValue = value.trim()
+  if (!/^\+?[\d\s()-]+$/.test(trimmedValue)) return false
+
+  const digits = trimmedValue.replace(/\D/g, '')
+  if (digits.length > 8 && !digits.startsWith('961')) return false
+
+  const subscriberNumber = getLebaneseSubscriberNumber(value)
+  return subscriberNumber.length >= 7 && subscriberNumber.length <= 8
+}
 
 export const LEBANON_LOCATIONS = {
   Akkar: [

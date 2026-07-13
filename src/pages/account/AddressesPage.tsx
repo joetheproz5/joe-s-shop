@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { Button, Input, Modal } from '@/components/ui'
 import { LebanonAddressFields } from '@/components/checkout/LebanonAddressFields'
-import { LEBANESE_PHONE_PLACEHOLDER, LEBANON_COUNTRY, normalizeLebanonLocation } from '@/lib/lebanon'
+import { LebanesePhoneInput } from '@/components/checkout/LebanesePhoneInput'
+import { isValidLebanesePhone, LEBANON_COUNTRY, normalizeLebanonLocation } from '@/lib/lebanon'
 import type { Address } from '@/types'
 import toast from 'react-hot-toast'
 
@@ -89,6 +90,10 @@ export default function AddressesPage() {
       toast.error('Select a governorate and city before saving.')
       return
     }
+    if (form.phone && !isValidLebanesePhone(form.phone)) {
+      toast.error('Enter a valid 7 or 8 digit Lebanese phone number.')
+      return
+    }
     saveMutation.mutate()
   }
 
@@ -151,7 +156,11 @@ export default function AddressesPage() {
           <Input label="Building, street, and area" value={form.street_address_1} onChange={(e) => setForm({ ...form, street_address_1: e.target.value })} placeholder="Building 12, Hamra Street" required />
           <Input label="Floor, apartment, or landmark (optional)" value={form.street_address_2} onChange={(e) => setForm({ ...form, street_address_2: e.target.value })} placeholder="3rd floor, near the pharmacy" />
           <LebanonAddressFields key={editing || 'new'} value={form} onChange={updateLocation} required />
-          <Input label="Lebanese phone" type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={LEBANESE_PHONE_PLACEHOLDER} />
+          <LebanesePhoneInput
+            value={form.phone}
+            onChange={(phone) => setForm({ ...form, phone })}
+            error={form.phone && !isValidLebanesePhone(form.phone) ? 'Enter a valid 7 or 8 digit Lebanese phone number.' : undefined}
+          />
           <label className="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" checked={form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} className="w-4 h-4 rounded border-surface-300 text-primary-600" />
             Set as default address

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Phone, User as UserIcon, Save, Upload } from 'lucide-react'
+import { Mail, User as UserIcon, Save, Upload } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { Button, Input } from '@/components/ui'
+import { LebanesePhoneInput } from '@/components/checkout/LebanesePhoneInput'
 import { supabase } from '@/lib/supabase'
 import { STORAGE_BUCKETS } from '@/lib/constants'
-import { LEBANESE_PHONE_PLACEHOLDER } from '@/lib/lebanon'
+import { isValidLebanesePhone } from '@/lib/lebanon'
 import toast from 'react-hot-toast'
 
 export default function ProfilePage() {
@@ -39,6 +40,10 @@ export default function ProfilePage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (form.phone && !isValidLebanesePhone(form.phone)) {
+      toast.error('Enter a valid 7 or 8 digit Lebanese phone number.')
+      return
+    }
     setSaving(true)
     const { error } = await updateProfile({
       first_name: form.first_name,
@@ -99,12 +104,10 @@ export default function ProfilePage() {
             leftIcon={<Mail size={18} />}
             helperText="Email cannot be changed"
           />
-          <Input
-            label="Phone"
+          <LebanesePhoneInput
             value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            placeholder={LEBANESE_PHONE_PLACEHOLDER}
-            leftIcon={<Phone size={18} />}
+            onChange={(phone) => setForm({ ...form, phone })}
+            error={form.phone && !isValidLebanesePhone(form.phone) ? 'Enter a valid 7 or 8 digit Lebanese phone number.' : undefined}
           />
           <Button type="submit" loading={saving} leftIcon={<Save size={18} />}>
             Save Changes
