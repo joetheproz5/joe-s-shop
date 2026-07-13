@@ -4,6 +4,7 @@ import { Heart, Trash2, ShoppingCart } from 'lucide-react'
 import { useWishlistStore } from '@/stores/wishlistStore'
 import { useCartStore } from '@/stores/cartStore'
 import { formatCurrency, getDiscountPercentage } from '@/lib/utils'
+import { getProductImage } from '@/lib/productImages'
 import { Skeleton } from '@/components/ui'
 import toast from 'react-hot-toast'
 
@@ -43,7 +44,7 @@ export default function WishlistPage() {
             >
               <Link to={`/product/${product.slug}`} className="block relative aspect-square bg-surface-100 dark:bg-surface-800 overflow-hidden">
                 <img
-                  src={product.images?.[0]?.url || 'https://placehold.co/400x400?text=No+Image'}
+                  src={getProductImage(product)}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

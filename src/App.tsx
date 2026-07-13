@@ -14,13 +14,17 @@ import { lazy, Suspense } from 'react'
 
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const ShopPage = lazy(() => import('@/pages/ShopPage'))
+const CategoriesPage = lazy(() => import('@/pages/CategoriesPage'))
+const AboutPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.AboutPage })))
+const ContactPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.ContactPage })))
+const ShippingPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.ShippingPage })))
+const ReturnsPage = lazy(() => import('@/pages/InfoPages').then((module) => ({ default: module.ReturnsPage })))
 const ProductPage = lazy(() => import('@/pages/ProductPage'))
 const CartPage = lazy(() => import('@/pages/CartPage'))
 const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'))
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'))
-const AboutPage = lazy(() => import('@/pages/AboutPage'))
 const AccountLayout = lazy(() => import('@/pages/account/AccountLayout'))
 const ProfilePage = lazy(() => import('@/pages/account/ProfilePage'))
 const OrdersPage = lazy(() => import('@/pages/account/OrdersPage'))
@@ -84,6 +88,7 @@ export default function App() {
         <Route element={<StorefrontLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/shop" element={<ShopPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/product/:slug" element={<ProductPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
@@ -93,7 +98,9 @@ export default function App() {
           <Route path="/terms" element={<PlaceholderPage title="Terms of Service" />} />
           <Route path="/privacy" element={<PlaceholderPage title="Privacy Policy" />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<PlaceholderPage title="Contact Us" />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/shipping-policy" element={<ShippingPage />} />
+          <Route path="/returns" element={<ReturnsPage />} />
         </Route>
 
         {/* ===== Account (requires auth) ===== */}

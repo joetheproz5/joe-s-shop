@@ -1,5 +1,5 @@
 export const SITE_NAME = "Joe's Shop"
-export const SITE_DESCRIPTION = 'Premium products for modern living'
+export const SITE_DESCRIPTION = 'Tech, home, style, fitness, and everyday essentials'
 export const SITE_URL = 'https://joes-shop.com'
 
 export const ORDER_STATUSES = [

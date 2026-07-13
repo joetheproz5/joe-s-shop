@@ -11,6 +11,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, metadata?: Record<string, string>) => Promise<{ error: Error | null }>
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
+  logout: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: Error | null }>
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>
   isAdmin: boolean
@@ -30,7 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s)
       if (s?.user) {
-        setUser(s.user as unknown as User)
+        const u = s.user as unknown as User
+        setUser({ ...u, name: u.name || (u.email ? u.email.split('@')[0] : 'User') })
         fetchProfile(s.user.id)
       } else {
         setLoading(false)
@@ -42,7 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s)
       if (s?.user) {
-        setUser(s.user as unknown as User)
+        const u = s.user as unknown as User
+        setUser({ ...u, name: u.name || (u.email ? u.email.split('@')[0] : 'User') })
         fetchProfile(s.user.id)
       } else {
         setUser(null)
@@ -141,6 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signOut,
+        logout: signOut,
         resetPassword,
         updateProfile,
         isAdmin,

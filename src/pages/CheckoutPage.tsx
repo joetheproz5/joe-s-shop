@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase'
 import { generateOrderNumber } from '@/lib/utils'
 import type { Address } from '@/types'
 import toast from 'react-hot-toast'
+import { getProductImage } from '@/lib/productImages'
 
 const STEPS = [
   { key: 'shipping', label: 'Shipping', icon: MapPin },
@@ -107,7 +108,7 @@ export default function CheckoutPage() {
           product_id: item.product_id,
           variant_id: item.variant_id || null,
           product_name: item.product?.name || 'Product',
-          product_image: item.product?.images?.[0]?.url || '',
+          product_image: item.product ? getProductImage(item.product) : '',
           sku: item.variant?.sku || item.product?.sku || '',
           quantity: item.quantity,
           unit_price: price,
@@ -252,7 +253,7 @@ export default function CheckoutPage() {
                   return (
                     <div key={item.id} className="p-4 flex items-center gap-4">
                       <div className="w-14 h-14 rounded-lg bg-surface-100 dark:bg-surface-800 overflow-hidden flex-shrink-0">
-                        <img src={item.product?.images?.[0]?.url || ''} alt="" className="w-full h-full object-cover" />
+                        <img src={item.product ? getProductImage(item.product) : ''} alt="" className="h-full w-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{item.product?.name}</div>

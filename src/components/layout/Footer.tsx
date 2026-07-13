@@ -1,42 +1,103 @@
 import { Link } from 'react-router-dom'
-import { Instagram, Mail, MapPin } from 'lucide-react'
+import { Facebook, Instagram, Mail, Twitter, Youtube } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 const columns = [
-  { title: 'Shop', links: [
-    ['All products', '/shop'], ['New arrivals', '/shop?is_new_arrival=true'], ['Best sellers', '/shop?is_best_seller=true'], ['Featured', '/shop?is_featured=true'],
-  ] },
-  { title: 'Support', links: [
-    ['My account', '/account'], ['Orders', '/account/orders'], ['Contact', '/contact'], ['Returns', '/contact'],
-  ] },
-  { title: 'Joe’s', links: [
-    ['Our story', '/about'], ['Privacy', '/privacy'], ['Terms', '/terms'],
-  ] },
+  {
+    title: 'Shop',
+    links: [
+      { label: 'All products', path: '/shop' },
+      { label: 'New arrivals', path: '/shop?is_new_arrival=true' },
+      { label: 'Best sellers', path: '/shop?is_best_seller=true' },
+      { label: 'Categories', path: '/categories' },
+    ],
+  },
+  {
+    title: 'Account',
+    links: [
+      { label: 'My profile', path: '/account' },
+      { label: 'Orders', path: '/account/orders' },
+      { label: 'Wishlist', path: '/account/wishlist' },
+      { label: 'Addresses', path: '/account/addresses' },
+    ],
+  },
+  {
+    title: 'Help',
+    links: [
+      { label: 'Contact us', path: '/contact' },
+      { label: 'Shipping and delivery', path: '/shipping-policy' },
+      { label: 'Returns', path: '/returns' },
+      { label: 'Privacy', path: '/privacy' },
+    ],
+  },
+]
+
+const socials = [
+  { label: 'Instagram', icon: Instagram, href: '#' },
+  { label: 'Facebook', icon: Facebook, href: '#' },
+  { label: 'X', icon: Twitter, href: '#' },
+  { label: 'YouTube', icon: Youtube, href: '#' },
 ]
 
 export default function Footer() {
   const { isStaff } = useAuth()
 
   return (
-    <footer className="border-t border-surface-200 bg-[#f7f7f5] dark:border-surface-800 dark:bg-[#111]">
-      <div className="section-container py-16 sm:py-20">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
-          <div className="max-w-sm">
-            <Link to="/" className="inline-flex items-center gap-2.5 text-lg font-semibold tracking-[-.03em]"><span className="grid h-9 w-9 place-items-center rounded-full bg-surface-950 text-xs text-white dark:bg-white dark:text-surface-950">J</span>Joe's</Link>
-            <p className="mt-5 text-sm leading-6 text-surface-500 dark:text-surface-400">Thoughtfully selected products for modern life. Clear choices, honest value, and support that feels human.</p>
-            <div className="mt-6 flex gap-2">
-              <a href="mailto:hello@joesshop.com" aria-label="Email" className="grid h-10 w-10 place-items-center rounded-full border border-surface-300 hover:bg-white dark:border-surface-700 dark:hover:bg-surface-900"><Mail size={17} /></a>
-              <a href="#" aria-label="Instagram" className="grid h-10 w-10 place-items-center rounded-full border border-surface-300 hover:bg-white dark:border-surface-700 dark:hover:bg-surface-900"><Instagram size={17} /></a>
-              <span className="flex h-10 items-center gap-2 rounded-full border border-surface-300 px-4 text-xs text-surface-500 dark:border-surface-700"><MapPin size={14} /> New York</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            {columns.map((column) => <div key={column.title}><h3 className="text-xs font-semibold uppercase tracking-[.16em] text-surface-400">{column.title}</h3><ul className="mt-5 space-y-3.5">{column.links.map(([label, path]) => <li key={label}><Link to={path} className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">{label}</Link></li>)}{column.title === 'Joe’s' && isStaff && <li><Link to="/admin" className="text-sm text-surface-600 transition-colors hover:text-surface-950 dark:text-surface-400 dark:hover:text-white">Staff dashboard</Link></li>}</ul></div>)}
-          </div>
+    <footer className="border-t border-[#dde1e6] bg-[#f5f7f9] text-[#30343b] dark:border-surface-800 dark:bg-surface-950 dark:text-surface-200">
+      <div className="section-container grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_0.8fr_0.8fr]">
+        <div className="max-w-sm">
+          <Link to="/" className="inline-flex items-center gap-2.5 text-lg font-semibold text-[#202124] dark:text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0b57d0] text-sm font-bold text-white">J</span>
+            Joe's Shop
+          </Link>
+          <p className="mt-4 text-sm leading-6 text-[#626a73] dark:text-surface-400">
+            Straightforward shopping for technology, home, style, fitness, and everyday essentials.
+          </p>
+          <a href="mailto:hello@joesshop.com" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[#0b57d0] hover:text-[#0842a0] dark:text-blue-400">
+            <Mail size={16} /> hello@joesshop.com
+          </a>
         </div>
-        <div className="mt-16 flex flex-col gap-4 border-t border-surface-200 pt-7 text-xs text-surface-400 sm:flex-row sm:items-center sm:justify-between dark:border-surface-800">
-          <p>© {new Date().getFullYear()} Joe's Shop. All rights reserved.</p>
-          <p>Secure checkout · Visa · Mastercard · PayPal · Apple Pay</p>
+
+        {columns.map((column) => (
+          <div key={column.title}>
+            <h3 className="text-sm font-semibold text-[#202124] dark:text-white">{column.title}</h3>
+            <ul className="mt-4 space-y-3">
+              {column.links.map((link) => (
+                <li key={link.path}>
+                  <Link to={link.path} className="text-sm text-[#626a73] transition-colors hover:text-[#0b57d0] dark:text-surface-400 dark:hover:text-blue-400">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              {column.title === 'Account' && isStaff && (
+                <li>
+                  <Link to="/admin" className="text-sm text-[#626a73] transition-colors hover:text-[#0b57d0] dark:text-surface-400 dark:hover:text-blue-400">
+                    Staff dashboard
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-[#dde1e6] dark:border-surface-800">
+        <div className="section-container flex flex-col gap-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-[#717780] dark:text-surface-500">
+            &copy; {new Date().getFullYear()} Joe's Shop. All rights reserved.
+          </p>
+          <div className="flex items-center gap-1">
+            {socials.map((social) => (
+              <a
+                key={social.label}
+                href={social.href}
+                aria-label={social.label}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-[#626a73] transition-colors hover:bg-white hover:text-[#0b57d0] dark:text-surface-400 dark:hover:bg-surface-900 dark:hover:text-blue-400"
+              >
+                <social.icon size={16} />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

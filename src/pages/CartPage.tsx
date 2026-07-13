@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/utils'
 import { Button, Input } from '@/components/ui'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
+import { getProductImage } from '@/lib/productImages'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -99,7 +100,7 @@ export default function CartPage() {
               const product = item.product
               const variant = item.variant
               const price = variant?.sale_price || variant?.price || product?.sale_price || product?.selling_price || 0
-              const image = variant ? (product?.images?.[0]?.url) : (product?.images?.[0]?.url)
+              const image = product ? getProductImage(product) : ''
               const available = Math.max(0, variant?.stock_quantity ?? product?.stock_quantity ?? 0)
 
               return (

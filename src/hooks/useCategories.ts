@@ -13,18 +13,14 @@ export function useCategories() {
     queryFn: async (): Promise<Category[]> => {
       const { data, error } = await supabase
         .from('categories')
-        .select('*, product_count:products(count)')
+        .select('*')
         .eq('is_active', true)
         .is('parent_id', null)
         .order('sort_order', { ascending: true })
 
       if (error) throw new Error(error.message)
 
-      return (data || []).map((row: Record<string, unknown>) => ({
-        ...row,
-        product_count:
-          (row.product_count as { count: number }[] | null)?.[0]?.count ?? 0,
-      })) as Category[]
+      return (data || []).map((row) => ({ ...row, product_count: 0 })) as Category[]
     },
     staleTime: 1000 * 60 * 30, // 30 minutes
   })

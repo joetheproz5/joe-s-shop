@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useCartStore } from '@/stores/cartStore'
 import { useUIStore } from '@/stores/uiStore'
 import { formatCurrency, getDiscountPercentage, clsx } from '@/lib/utils'
+import { getProductImage } from '@/lib/productImages'
 import { Button, Modal } from '@/components/ui'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
@@ -60,7 +61,7 @@ export function QuickViewModal() {
           <div className="grid grid-cols-2 gap-6">
             {/* Image */}
             <div className="aspect-square rounded-xl overflow-hidden bg-surface-100 dark:bg-surface-800">
-              <img src={product.images?.[0]?.url || 'https://placehold.co/400x400?text=No+Image'} alt={product.name} className="w-full h-full object-cover" />
+              <img src={getProductImage(product)} alt={product.name} className="h-full w-full object-cover" />
             </div>
 
             {/* Info */}

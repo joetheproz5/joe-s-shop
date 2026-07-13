@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext'
 import { ProductCard } from '@/components/shop/ProductCard'
 import { Skeleton, Tabs, Button, Input } from '@/components/ui'
 import { formatCurrency, getDiscountPercentage, getStockStatus, clsx, formatDate } from '@/lib/utils'
+import { getProductImage } from '@/lib/productImages'
 import toast from 'react-hot-toast'
 
 export default function ProductPage() {
@@ -60,6 +61,7 @@ export default function ProductPage() {
   }
 
   const images = product.images || []
+  const activeImageUrl = getProductImage(product, activeImage)
   const variants = product.variants || []
   const activeVariant = variants.find((variant) => variant.id === selectedVariant)
   const availableStock = Math.max(0, activeVariant?.stock_quantity ?? product.stock_quantity)
@@ -119,10 +121,10 @@ export default function ProductPage() {
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setZoom((z) => ({ ...z, active: false }))}
           >
-            {images[activeImage] ? (
+            {activeImageUrl ? (
               <img
-                src={images[activeImage].url}
-                alt={images[activeImage].alt_text || product.name}
+                src={activeImageUrl}
+                alt={images[activeImage]?.alt_text || product.name}
                 className="w-full h-full object-cover transition-transform duration-200"
                 style={zoom.active ? { transform: `scale(2)`, transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
               />
@@ -146,7 +148,7 @@ export default function ProductPage() {
                     activeImage === i ? 'border-blue-600' : 'border-transparent opacity-70 hover:opacity-100'
                   )}
                 >
-                  <img src={img.url} alt={img.alt_text || `view ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={getProductImage(product, i)} alt={img.alt_text || `view ${i + 1}`} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>

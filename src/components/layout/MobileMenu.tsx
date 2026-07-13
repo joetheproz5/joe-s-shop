@@ -14,6 +14,7 @@ import {
   LogIn,
   LogOut,
   LayoutDashboard,
+  Package,
   Heart,
 } from 'lucide-react';
 import clsx from '@/lib/utils';
@@ -25,7 +26,7 @@ const categories = [
   { label: 'Electronics', path: '/shop?search=electronics' },
   { label: 'Clothing', path: '/shop?search=clothing' },
   { label: 'Home & Garden', path: '/shop?search=home' },
-  { label: 'Sports', path: '/shop?search=sports' },
+  { label: 'Sports', path: '/shop?search=fitness' },
   { label: 'Books', path: '/shop?search=books' },
 ];
 
@@ -49,7 +50,7 @@ export default function MobileMenu() {
   const navLinks = [
     { label: 'Home', path: '/', icon: Home },
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
-    { label: 'Categories', path: '/shop', icon: Grid3X3, hasSubmenu: true },
+    { label: 'Categories', path: '/categories', icon: Grid3X3, hasSubmenu: true },
     { label: 'About', path: '/about', icon: Info },
     { label: 'Contact', path: '/contact', icon: Phone },
   ];
@@ -74,14 +75,14 @@ export default function MobileMenu() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white shadow-2xl dark:bg-surface-950"
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-white shadow-2xl dark:bg-gray-900"
           >
             <div className="flex h-full flex-col overflow-y-auto">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
                 <span className="flex items-center gap-2 text-lg font-bold text-surface-950 dark:text-white">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-950 text-xs text-white dark:bg-white dark:text-surface-950">J</span>
-                  Joe's
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm text-white">J</span>
+                  Joe's Shop
                 </span>
                 <button
                   onClick={closeMobileMenu}
@@ -198,9 +199,20 @@ export default function MobileMenu() {
                       <User className="h-5 w-5" />
                       <span>Profile</span>
                     </Link>
+                    <Link
+                      to="/account/orders"
+                      onClick={closeMobileMenu}
+                      className={clsx(
+                        'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
+                        'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+                      )}
+                    >
+                      <Package className="h-5 w-5" />
+                      <span>Orders</span>
+                    </Link>
                     {isStaff && (
                       <Link
-                        to="/admin/dashboard"
+                        to="/admin"
                         onClick={closeMobileMenu}
                         className={clsx(
                           'flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all',
@@ -208,7 +220,7 @@ export default function MobileMenu() {
                         )}
                       >
                         <LayoutDashboard className="h-5 w-5" />
-                        <span>Dashboard</span>
+                        <span>Staff dashboard</span>
                       </Link>
                     )}
                     <button

@@ -71,8 +71,8 @@ const variantStyles: Record<ButtonVariant, string> = {
 /** Size style maps */
 const sizeStyles: Record<ButtonSize, string> = {
   sm: 'h-8 px-3 text-sm gap-1.5 rounded-lg',
-  md: 'h-10 px-4 text-sm gap-2 rounded-xl',
-  lg: 'h-12 px-6 text-base gap-2.5 rounded-xl',
+  md: 'h-10 px-4 text-sm gap-2 rounded-lg',
+  lg: 'h-12 px-6 text-base gap-2.5 rounded-lg',
 }
 
 /** Icon-only size adjustments */
@@ -110,9 +110,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileHover={isDisabled ? undefined : { scale: 1.02 }}
-        whileTap={isDisabled ? undefined : { scale: 0.97 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+        whileTap={isDisabled ? undefined : { scale: 0.98 }}
         className={clsx(
           // Base
           'inline-flex items-center justify-center font-medium transition-colors duration-200',
