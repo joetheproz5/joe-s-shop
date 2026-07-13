@@ -10,9 +10,11 @@ import { Button, Input } from '@/components/ui'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { getProductImage } from '@/lib/productImages'
+import { useAuth } from '@/context/AuthContext'
 
 export default function CartPage() {
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
   const { items, removeItem, updateQuantity, clearCart, getSubtotal, getTax, getShipping, getTotal } = useCartStore()
   const [couponCode, setCouponCode] = useState('')
   const [couponDiscount, setCouponDiscount] = useState(0)
@@ -30,6 +32,14 @@ export default function CartPage() {
       if (item.quantity > available) updateQuantity(item.product_id, item.variant_id, available)
     })
   }, [items, updateQuantity])
+
+  useEffect(() => {
+    if (!user) {
+      setCouponCode('')
+      setCouponDiscount(0)
+      setCouponError('')
+    }
+  }, [user])
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return
@@ -167,27 +177,38 @@ export default function CartPage() {
 
             {/* Coupon */}
             <div className="mb-6">
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" />
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) => { setCouponCode(e.target.value); setCouponError('') }}
-                    placeholder="Coupon code"
-                    className="input-field pl-9 py-2 text-sm"
-                  />
+              {authLoading ? (
+                <div className="h-10 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
+              ) : user ? (
+                <>
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" />
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => { setCouponCode(e.target.value); setCouponError('') }}
+                        placeholder="Coupon code"
+                        className="input-field pl-9 py-2 text-sm"
+                      />
+                    </div>
+                    <Button onClick={handleApplyCoupon} loading={couponLoading} variant="secondary" size="sm">
+                      Apply
+                    </Button>
+                  </div>
+                  {couponError && <p className="text-xs text-danger-500 mt-1.5">{couponError}</p>}
+                  {couponDiscount > 0 && (
+                    <p className="text-xs text-success-600 mt-1.5 flex items-center gap-1">
+                      <span>Coupon applied! You save {formatCurrency(couponDiscount)}</span>
+                      <button onClick={() => setCouponDiscount(0)} className="text-danger-500 hover:underline">Remove</button>
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-surface-200 p-3 text-sm dark:border-surface-700">
+                  <span className="flex items-center gap-2 text-surface-500"><Tag size={16} /> Coupons require an account</span>
+                  <Link to="/login" state={{ from: '/cart' }} className="shrink-0 font-semibold text-primary-600 hover:underline">Sign in</Link>
                 </div>
-                <Button onClick={handleApplyCoupon} loading={couponLoading} variant="secondary" size="sm">
-                  Apply
-                </Button>
-              </div>
-              {couponError && <p className="text-xs text-danger-500 mt-1.5">{couponError}</p>}
-              {couponDiscount > 0 && (
-                <p className="text-xs text-success-600 mt-1.5 flex items-center gap-1">
-                  <span>✓ Coupon applied! You save {formatCurrency(couponDiscount)}</span>
-                  <button onClick={() => setCouponDiscount(0)} className="text-danger-500 hover:underline">Remove</button>
-                </p>
               )}
             </div>
 

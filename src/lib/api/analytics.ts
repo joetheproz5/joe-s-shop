@@ -254,6 +254,7 @@ export async function fetchTopCustomers(limit: number = 10): Promise<TopCustomer
   // Aggregate
   const customerMap = new Map<string, { total: number; count: number }>()
   for (const order of orders || []) {
+    if (!order.user_id) continue
     const existing = customerMap.get(order.user_id) || { total: 0, count: 0 }
     existing.total += order.total || 0
     existing.count += 1

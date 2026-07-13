@@ -69,6 +69,10 @@ function getCheckoutErrorMessage(error: unknown) {
     return 'Checkout needs the Supabase migration 003_cash_on_delivery_checkout.sql before orders can be placed.'
   }
 
+  if (/Sign in before placing an order|permission denied for function place_cash_on_delivery_order/i.test(message)) {
+    return 'Guest checkout needs the Supabase migration 005_guest_checkout.sql before this order can be placed.'
+  }
+
   if (/row-level security|permission denied|42501/i.test(message)) {
     return 'Your account is not allowed to place this order. Sign out, sign back in, and try again.'
   }
@@ -87,6 +91,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState('new')
   const [saveAddress, setSaveAddress] = useState(false)
   const [loadingAddresses, setLoadingAddresses] = useState(true)
+  const [guestEmail, setGuestEmail] = useState('')
 
   const [shipping, setShipping] = useState<CheckoutAddress>(EMPTY_ADDRESS)
   const [billing, setBilling] = useState({ sameAsShipping: true, ...shipping })
@@ -154,7 +159,8 @@ export default function CheckoutPage() {
   const shippingCost = getShipping()
   const total = getTotal()
 
-  const canProceedShipping = shipping.first_name && shipping.last_name && shipping.street_address_1 && shipping.city && shipping.state && shipping.postal_code
+  const hasGuestContact = !!user || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim()) && !!shipping.phone.trim())
+  const canProceedShipping = shipping.first_name && shipping.last_name && shipping.street_address_1 && shipping.city && shipping.state && shipping.postal_code && hasGuestContact
 
   if (items.length === 0 && step < 3) {
     navigate('/cart')
@@ -162,15 +168,12 @@ export default function CheckoutPage() {
   }
 
   const handlePlaceOrder = async () => {
-    if (!user?.id) {
-      toast.error('Sign in before placing your order.')
-      navigate('/login', { state: { from: '/checkout' } })
-      return
-    }
-
     setSubmitting(true)
     try {
-      const shippingAddr = { ...shipping }
+      const shippingAddr = {
+        ...shipping,
+        ...(!user ? { email: guestEmail.trim().toLowerCase() } : {}),
+      }
       const billingAddr = billing.sameAsShipping ? shippingAddr : { ...billing, sameAsShipping: undefined }
       const orderItems = items.map((item) => ({
         product_id: item.product_id,
@@ -192,7 +195,7 @@ export default function CheckoutPage() {
 
       let addressSaved = true
       const alreadySaved = savedAddresses.some((address) => addressesMatch(toCheckoutAddress(address), shippingAddr))
-      if (saveAddress && selectedAddressId === 'new' && !alreadySaved) {
+      if (saveAddress && user?.id && selectedAddressId === 'new' && !alreadySaved) {
         const { error: addressError } = await supabase.from('addresses').insert({
           ...shippingAddr,
           user_id: user.id,
@@ -246,7 +249,23 @@ export default function CheckoutPage() {
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><MapPin size={24} /> Shipping Information</h2>
               <div className="card p-6 space-y-4">
-                {(loadingAddresses || savedAddresses.length > 0) && (
+                {!user && (
+                  <div className="rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-900/20">
+                    <Input
+                      label="Email address *"
+                      type="email"
+                      value={guestEmail}
+                      onChange={(event) => setGuestEmail(event.target.value)}
+                      placeholder="you@example.com"
+                      helperText="Used for your order confirmation."
+                      required
+                    />
+                    <p className="mt-3 text-xs text-surface-600 dark:text-surface-400">
+                      Already have an account? <Link to="/login" state={{ from: '/checkout' }} className="font-semibold text-primary-600 hover:underline">Sign in</Link>
+                    </p>
+                  </div>
+                )}
+                {user && (loadingAddresses || savedAddresses.length > 0) && (
                   <Select
                     label="Saved address"
                     value={selectedAddressId}
@@ -274,9 +293,9 @@ export default function CheckoutPage() {
                   <Input label="ZIP *" value={shipping.postal_code} onChange={(e) => updateShipping('postal_code', e.target.value)} required />
                 </div>
                 <Input label="Country" value={shipping.country} onChange={(e) => updateShipping('country', e.target.value)} />
-                <Input label="Phone" value={shipping.phone} onChange={(e) => updateShipping('phone', e.target.value)} placeholder="+1 (555) 000-0000" />
+                <Input label={`Phone${user ? '' : ' *'}`} value={shipping.phone} onChange={(e) => updateShipping('phone', e.target.value)} placeholder="+1 (555) 000-0000" required={!user} />
 
-                {selectedAddressId === 'new' && (
+                {user && selectedAddressId === 'new' && (
                   <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-200 p-3 dark:border-surface-700">
                     <input
                       type="checkbox"
@@ -445,7 +464,7 @@ export default function CheckoutPage() {
             <p className="text-lg font-semibold mb-8">Order Number: <span className="text-primary-600">{orderNumber}</span></p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/account/orders" className="btn-primary inline-flex justify-center">View Orders</Link>
+              {user && <Link to="/account/orders" className="btn-primary inline-flex justify-center">View Orders</Link>}
               <Link to="/shop" className="btn-secondary inline-flex justify-center">Continue Shopping</Link>
             </div>
           </motion.div>

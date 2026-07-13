@@ -229,7 +229,8 @@ create table if not exists public.coupons (
 -- ======================================================================
 create table if not exists public.orders (
   id               uuid primary key default gen_random_uuid(),
-  user_id          uuid not null references public.profiles(id) on delete restrict,
+  user_id          uuid references public.profiles(id) on delete restrict,
+  guest_email      text,
   order_number     text unique not null,
   status           text not null default 'pending'
                      check (status in ('pending','paid','processing','shipped','delivered','cancelled','refunded')),

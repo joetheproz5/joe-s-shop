@@ -1,4 +1,6 @@
--- Create cash-on-delivery orders atomically and without exposing privileged keys.
+-- Upgrade cash-on-delivery checkout to accept both customers and guests.
+-- This migration repeats the complete idempotent checkout definition so an
+-- existing project can apply it without replaying earlier migrations.
 
 alter table public.orders
   add column if not exists payment_method text not null default 'cash_on_delivery';

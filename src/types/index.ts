@@ -187,7 +187,8 @@ export interface OrderItem {
 
 export interface Order {
   id: string
-  user_id: string
+  user_id: string | null
+  guest_email?: string
   order_number: string
   status: OrderStatus
   payment_status: PaymentStatus

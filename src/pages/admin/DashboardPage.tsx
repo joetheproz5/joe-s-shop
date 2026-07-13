@@ -164,7 +164,7 @@ function RecentOrders() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
-        .select('id, order_number, status, total, created_at, user:profiles(first_name, last_name)')
+        .select('id, order_number, status, total, created_at, guest_email, user:profiles(first_name, last_name)')
         .order('created_at', { ascending: false })
         .limit(5)
       if (error) throw new Error(error.message)
@@ -192,7 +192,7 @@ function RecentOrders() {
               <div key={o.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-800/50">
                 <div>
                   <div className="font-medium text-sm">{o.order_number}</div>
-                  <div className="text-xs text-surface-500">{o.user?.first_name} {o.user?.last_name} | {formatDate(o.created_at)}</div>
+                  <div className="text-xs text-surface-500">{o.user ? `${o.user.first_name} ${o.user.last_name}`.trim() || 'Customer' : o.guest_email || 'Guest'} | {formatDate(o.created_at)}</div>
                 </div>
                 <div className="flex items-center gap-3">
                   {status && <span className={`badge-${status.color} text-xs`}>{status.label}</span>}

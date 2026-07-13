@@ -177,7 +177,7 @@ export function OrdersPage() {
           {orders.map((order) => (
             <tr key={order.id}>
               <td><div className="font-semibold">{order.order_number}</div><div className="text-xs text-surface-500">{order.items?.length ?? 0} items</div></td>
-              <td>{order.user ? `${order.user.first_name} ${order.user.last_name}`.trim() || 'Customer' : 'Guest'}</td>
+              <td>{order.user ? `${order.user.first_name} ${order.user.last_name}`.trim() || 'Customer' : order.guest_email || 'Guest'}</td>
               <td><StatusPill tone={statusTone[order.status]}>{order.status}</StatusPill></td>
               <td>
                 <StatusPill tone={statusTone[order.payment_status] ?? 'surface'}>{order.payment_status}</StatusPill>

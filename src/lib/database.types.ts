@@ -361,7 +361,8 @@ export type Database = {
       orders: {
         Row: {
           id: string
-          user_id: string
+          user_id: string | null
+          guest_email: string | null
           order_number: string
           status: string
           payment_status: string
@@ -388,7 +389,8 @@ export type Database = {
         }
         Insert: {
           id?: string
-          user_id: string
+          user_id?: string | null
+          guest_email?: string | null
           order_number?: string
           status?: string
           payment_status?: string
