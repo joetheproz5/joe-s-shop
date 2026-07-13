@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { STORAGE_BUCKETS } from '@/lib/constants'
 import { slugify } from '@/lib/utils'
+import { buildProductSearchFilters } from '@/lib/search'
 import type {
   Product,
   ProductFilters,
@@ -50,8 +51,8 @@ export async function fetchProducts(
   if (filters.max_price !== undefined) {
     query = query.lte('selling_price', filters.max_price)
   }
-  if (filters.search) {
-    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,sku.ilike.%${filters.search}%`)
+  for (const searchFilter of buildProductSearchFilters(filters.search || '')) {
+    query = query.or(searchFilter)
   }
   if (filters.is_featured) {
     query = query.eq('is_featured', true)
@@ -119,8 +120,8 @@ export async function fetchAdminProducts(
   if (filters.brand_id) query = query.eq('brand_id', filters.brand_id)
   if (filters.min_price !== undefined) query = query.gte('selling_price', filters.min_price)
   if (filters.max_price !== undefined) query = query.lte('selling_price', filters.max_price)
-  if (filters.search) {
-    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,sku.ilike.%${filters.search}%`)
+  for (const searchFilter of buildProductSearchFilters(filters.search || '')) {
+    query = query.or(searchFilter)
   }
   if (filters.is_featured) query = query.eq('is_featured', true)
   if (filters.is_new_arrival) query = query.eq('is_new_arrival', true)

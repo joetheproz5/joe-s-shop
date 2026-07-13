@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useDebounce } from '@/hooks/useDebounce'
+import { buildProductSearchFilters, normalizeSearchQuery } from '@/lib/search'
 import type {
   Product,
   ProductFilters,
@@ -58,8 +59,10 @@ export function useProducts(
   pagination: PaginationParams = { page: 1, limit: 12 },
   sort: SortParams = { sortBy: 'created_at', sortDir: 'desc' }
 ) {
+  const normalizedSearch = normalizeSearchQuery(filters.search || '')
+
   return useQuery({
-    queryKey: ['products', filters, pagination, sort],
+    queryKey: ['products', { ...filters, search: normalizedSearch }, pagination, sort],
     queryFn: async (): Promise<PaginatedResponse<Product>> => {
       const from = (pagination.page - 1) * pagination.limit
       const to = from + pagination.limit - 1
@@ -92,10 +95,8 @@ export function useProducts(
       if (filters.max_price !== undefined) {
         query = query.lte('selling_price', filters.max_price)
       }
-      if (filters.search) {
-        query = query.or(
-          `name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,sku.ilike.%${filters.search}%`
-        )
+      for (const searchFilter of buildProductSearchFilters(normalizedSearch)) {
+        query = query.or(searchFilter)
       }
       if (filters.is_featured) {
         query = query.eq('is_featured', true)
@@ -264,29 +265,31 @@ export function useRelatedProducts(categoryId: string, excludeId: string) {
 
 export function useProductSearch(query: string) {
   const debouncedQuery = useDebounce(query, 300)
+  const normalizedQuery = normalizeSearchQuery(debouncedQuery)
 
   return useQuery({
-    queryKey: ['products', 'search', debouncedQuery],
+    queryKey: ['products', 'search', normalizedQuery],
     queryFn: async (): Promise<Product[]> => {
-      if (!debouncedQuery.trim()) return []
+      if (!normalizedQuery) return []
 
-      const { data, error } = await supabase
+      let productQuery = supabase
         .from('products')
         .select(
           `*, images:product_images(*)`
         )
         .eq('status', 'active')
-        .or(
-          `name.ilike.%${debouncedQuery}%,description.ilike.%${debouncedQuery}%,sku.ilike.%${debouncedQuery}%`
-        )
-        .order('name', { ascending: true })
-        .limit(20)
+
+      for (const searchFilter of buildProductSearchFilters(normalizedQuery)) {
+        productQuery = productQuery.or(searchFilter)
+      }
+
+      const { data, error } = await productQuery.order('name', { ascending: true }).limit(20)
 
       if (error) throw new Error(error.message)
 
       return (data || []) as Product[]
     },
-    enabled: debouncedQuery.trim().length > 0,
+    enabled: normalizedQuery.length > 0,
     staleTime: 1000 * 60 * 2,
   })
 }
