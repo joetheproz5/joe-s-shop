@@ -36,7 +36,7 @@
       "name": "Audio",
       "slug": "audio",
       "description": "Wireless earbuds and over-ear headphones.",
-      "image": "/catalog/apple/airpods-pro-3.jpg",
+      "image": "/catalog/apple/airpods-pro-3.png",
       "sort_order": 3
     },
     {
@@ -256,7 +256,7 @@
       "category_id": "c1000000-0000-0000-0000-000000000003",
       "selling_price": 249,
       "stock_quantity": 34,
-      "image": "/catalog/apple/airpods-pro-3.jpg",
+      "image": "/catalog/apple/airpods-pro-3.png",
       "source_url": "https://www.apple.com/airpods-pro/",
       "is_featured": true,
       "is_new_arrival": true,

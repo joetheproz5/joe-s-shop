@@ -14,7 +14,7 @@ insert into public.brands (id, name, slug, description, is_active) values
 insert into public.categories (id, name, slug, description, sort_order, image_url, is_active) values
   ('c1000000-0000-0000-0000-000000000001', 'Smartphones', 'smartphones', 'Apple iPhone and Samsung Galaxy smartphones.', 1, 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/iphone-17.png', true),
   ('c1000000-0000-0000-0000-000000000002', 'Laptops', 'laptops', 'MacBook Air and MacBook Pro powered by Apple M5 chips.', 2, 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/macbook-air-m5.png', true),
-  ('c1000000-0000-0000-0000-000000000003', 'Audio', 'audio', 'Wireless earbuds and over-ear headphones.', 3, 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/airpods-pro-3.jpg', true),
+  ('c1000000-0000-0000-0000-000000000003', 'Audio', 'audio', 'Wireless earbuds and over-ear headphones.', 3, 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/airpods-pro-3.png', true),
   ('c1000000-0000-0000-0000-000000000004', 'Smartwatches', 'smartwatches', 'Apple Watch and Samsung Galaxy Watch models.', 4, 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/watch-series-11.jpg', true),
   ('c1000000-0000-0000-0000-000000000005', 'Charging & Cables', 'charging-cables', 'Official charging cables and wireless chargers.', 5, 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/magsafe-charger.jpg', true);
 
@@ -105,7 +105,7 @@ insert into public.product_images (product_id, url, alt_text, sort_order, is_fea
   ('a1000000-0000-0000-0000-000000000010', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/macbook-pro-m5-pro-max.jpg', 'MacBook Pro 16-inch M5 Max product image', 0, true),
   ('a1000000-0000-0000-0000-000000000011', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/airpods-4.jpg', 'AirPods 4 product image', 0, true),
   ('a1000000-0000-0000-0000-000000000012', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/airpods-4.jpg', 'AirPods 4 with Active Noise Cancellation product image', 0, true),
-  ('a1000000-0000-0000-0000-000000000013', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/airpods-pro-3.jpg', 'AirPods Pro 3 product image', 0, true),
+  ('a1000000-0000-0000-0000-000000000013', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/airpods-pro-3.png', 'AirPods Pro 3 product image', 0, true),
   ('a1000000-0000-0000-0000-000000000014', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/airpods-max-2.png', 'AirPods Max 2 product image', 0, true),
   ('a1000000-0000-0000-0000-000000000015', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/watch-series-11.jpg', 'Apple Watch Series 11 product image', 0, true),
   ('a1000000-0000-0000-0000-000000000016', 'https://joetheproz5.github.io/joe-s-shop/catalog/apple/watch-se-3.jpg', 'Apple Watch SE 3 product image', 0, true),
