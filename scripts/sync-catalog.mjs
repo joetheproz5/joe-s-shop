@@ -92,7 +92,7 @@ function entities() {
     is_featured: Boolean(product.is_featured),
     is_new_arrival: Boolean(product.is_new_arrival),
     is_best_seller: Boolean(product.is_best_seller),
-    seo_title: `${product.name} | Joe's Shop`,
+    seo_title: `${product.name} | The Tech Shelf`,
     seo_description: product.short_description,
   }))
 
@@ -135,7 +135,7 @@ function insertSql(table, rows) {
 }
 
 function writeSql(data) {
-  const sql = `-- Joe's Shop real catalog\n-- Catalog-only reset: customer profiles, orders, order-item snapshots, coupons, and settings are preserved.\n\nbegin;\n\ndelete from public.products;\ndelete from public.categories;\ndelete from public.brands;\n\n${insertSql('brands', data.brands)}\n${insertSql('categories', data.categories)}\n${insertSql('products', data.products)}\n${insertSql('product_categories', data.productCategories)}\n${insertSql('product_images', data.productImages)}\n${insertSql('product_tags', data.productTags)}\ncommit;\n`
+  const sql = `-- The Tech Shelf real catalog\n-- Catalog-only reset: customer profiles, orders, order-item snapshots, coupons, and settings are preserved.\n\nbegin;\n\ndelete from public.products;\ndelete from public.categories;\ndelete from public.brands;\n\n${insertSql('brands', data.brands)}\n${insertSql('categories', data.categories)}\n${insertSql('products', data.products)}\n${insertSql('product_categories', data.productCategories)}\n${insertSql('product_images', data.productImages)}\n${insertSql('product_tags', data.productTags)}\ncommit;\n`
   fs.writeFileSync(sqlPath, sql, 'utf8')
   fs.writeFileSync(seedPath, sql, 'utf8')
   console.log(`Wrote ${path.relative(root, sqlPath)} and ${path.relative(root, seedPath)}`)

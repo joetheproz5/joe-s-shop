@@ -88,7 +88,7 @@ export function truncate(text: string, length: number): string {
 export function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase()
   const random = Math.random().toString(36).substring(2, 6).toUpperCase()
-  return `JOE-${timestamp}-${random}`
+  return `TTS-${timestamp}-${random}`
 }
 
 export function getDiscountPercentage(original: number, sale: number): number {

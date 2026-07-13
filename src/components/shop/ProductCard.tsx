@@ -121,7 +121,7 @@ export function ProductCard({ product, variant = 'default' }: ProductCardProps) 
       <div className={clsx('flex min-w-0 flex-col', variant === 'default' ? 'pt-3' : 'py-1')}>
         <div className="mb-1 flex items-center justify-between gap-2">
           <span className="truncate text-xs font-medium text-surface-500 dark:text-surface-400">
-            {product.brand?.name || 'Joe\'s Shop'}
+            {product.brand?.name || 'The Tech Shelf'}
           </span>
           {variant === 'default' && (
             <span className="flex shrink-0 items-center gap-1 text-xs text-surface-500">

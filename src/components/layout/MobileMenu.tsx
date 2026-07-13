@@ -22,13 +22,14 @@ import clsx from '@/lib/utils';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useUIStore } from '@/stores/uiStore';
+import { BrandLogo } from './BrandLogo';
 
 const categories = [
-  { label: 'Electronics', path: '/shop?search=electronics' },
-  { label: 'Clothing', path: '/shop?search=clothing' },
-  { label: 'Home & Garden', path: '/shop?search=home' },
-  { label: 'Sports', path: '/shop?search=fitness' },
-  { label: 'Books', path: '/shop?search=books' },
+  { label: 'Smartphones', path: '/shop?search=smartphones' },
+  { label: 'Laptops', path: '/shop?search=laptops' },
+  { label: 'Audio', path: '/shop?search=audio' },
+  { label: 'Smartwatches', path: '/shop?search=smartwatches' },
+  { label: 'Charging & Cables', path: '/shop?search=charging+cables' },
 ];
 
 export default function MobileMenu() {
@@ -82,10 +83,9 @@ export default function MobileMenu() {
             <div className="flex h-full flex-col overflow-y-auto">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
-                <span className="flex items-center gap-2 text-lg font-bold text-surface-950 dark:text-white">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm text-white">J</span>
-                  Joe's Shop
-                </span>
+                <Link to="/" onClick={closeMobileMenu} aria-label="The Tech Shelf home">
+                  <BrandLogo className="w-[112px]" />
+                </Link>
                 <button
                   onClick={closeMobileMenu}
                   className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"

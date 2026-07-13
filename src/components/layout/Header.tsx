@@ -23,6 +23,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useUIStore } from '@/stores/uiStore';
+import { BrandLogo } from './BrandLogo';
 
 const navLinks = [
   { label: 'Home', path: '/' },
@@ -32,11 +33,11 @@ const navLinks = [
     path: '/categories',
     hasDropdown: true,
     children: [
-      { label: 'Electronics', path: '/shop?search=electronics' },
-      { label: 'Clothing', path: '/shop?search=clothing' },
-      { label: 'Home & Garden', path: '/shop?search=home' },
-      { label: 'Sports & Outdoors', path: '/shop?search=fitness' },
-      { label: 'Books & Media', path: '/shop?search=books' },
+      { label: 'Smartphones', path: '/shop?search=smartphones' },
+      { label: 'Laptops', path: '/shop?search=laptops' },
+      { label: 'Audio', path: '/shop?search=audio' },
+      { label: 'Smartwatches', path: '/shop?search=smartwatches' },
+      { label: 'Charging & Cables', path: '/shop?search=charging+cables' },
       { label: 'New Arrivals', path: '/shop?is_new_arrival=true' },
     ],
   },
@@ -159,10 +160,10 @@ export default function Header() {
           {/* Left: Logo */}
           <Link
             to="/"
-            className="flex items-center gap-2 text-xl font-bold tracking-tight text-surface-950 dark:text-white"
+            className="flex shrink-0 items-center"
+            aria-label="The Tech Shelf home"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">J</span>
-            <span>Joe's Shop</span>
+            <BrandLogo className="w-[112px]" />
           </Link>
 
           {/* Center: Desktop Navigation */}

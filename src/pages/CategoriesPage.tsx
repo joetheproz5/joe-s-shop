@@ -1,22 +1,22 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, BookOpen, Dumbbell, Home, Shirt, Smartphone, Sparkles } from 'lucide-react'
+import { ArrowRight, Cable, Headphones, Laptop, Smartphone, Sparkles, Watch } from 'lucide-react'
 import { useCategories } from '@/hooks/useCategories'
 
 const defaultCategories = [
-  { id: 'electronics', name: 'Electronics', product_count: 3, parent_id: null, href: '/shop?search=TechPro' },
-  { id: 'style', name: 'Clothing', product_count: 3, parent_id: null, href: '/shop?search=StyleHouse' },
-  { id: 'home', name: 'Home & Garden', product_count: 3, parent_id: null, href: '/shop?search=HomeEssentials' },
-  { id: 'fitness', name: 'Sports & Fitness', product_count: 2, parent_id: null, href: '/shop?search=ActiveGear' },
-  { id: 'books', name: 'Books & Media', product_count: 1, parent_id: null, href: '/shop?search=BookWorm' },
+  { id: 'smartphones', name: 'Smartphones', product_count: 0, parent_id: null, href: '/shop?search=smartphones' },
+  { id: 'laptops', name: 'Laptops', product_count: 0, parent_id: null, href: '/shop?search=laptops' },
+  { id: 'audio', name: 'Audio', product_count: 0, parent_id: null, href: '/shop?search=audio' },
+  { id: 'smartwatches', name: 'Smartwatches', product_count: 0, parent_id: null, href: '/shop?search=smartwatches' },
+  { id: 'charging', name: 'Charging & Cables', product_count: 0, parent_id: null, href: '/shop?search=charging+cables' },
 ]
 
 const categoryIcon = (name: string) => {
   const value = name.toLowerCase()
-  if (value.includes('elect')) return Smartphone
-  if (value.includes('cloth') || value.includes('fashion')) return Shirt
-  if (value.includes('home') || value.includes('garden')) return Home
-  if (value.includes('sport') || value.includes('fitness')) return Dumbbell
-  if (value.includes('book') || value.includes('media')) return BookOpen
+  if (value.includes('phone') || value.includes('elect')) return Smartphone
+  if (value.includes('laptop') || value.includes('computer')) return Laptop
+  if (value.includes('audio') || value.includes('headphone')) return Headphones
+  if (value.includes('watch') || value.includes('wearable')) return Watch
+  if (value.includes('charg') || value.includes('cable')) return Cable
   return Sparkles
 }
 

@@ -1,4 +1,4 @@
-# Joe's Shop
+# The Tech Shelf
 
 Modern React + Supabase e-commerce storefront with a protected admin dashboard for catalog, orders, customers, marketing, reviews, analytics, inventory, media, settings, and roles.
 
@@ -55,7 +55,7 @@ Set function secrets:
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
 supabase secrets set ORDER_WEBHOOK_SECRET=...
 supabase secrets set RESEND_API_KEY=...
-supabase secrets set ORDER_EMAIL_FROM="Joe's Shop <orders@your-verified-domain.com>"
+supabase secrets set ORDER_EMAIL_FROM="The Tech Shelf <orders@your-verified-domain.com>"
 supabase secrets set SITE_URL="https://joetheproz5.github.io/joe-s-shop"
 ```
 
@@ -73,7 +73,7 @@ Example webhook call:
 curl -X POST "$SUPABASE_URL/functions/v1/order-webhook" \
   -H "Content-Type: application/json" \
   -H "x-webhook-secret: $ORDER_WEBHOOK_SECRET" \
-  -d '{"order_number":"JOE-260709-ABC123","status":"paid","payment_status":"paid","provider":"demo"}'
+  -d '{"order_number":"TTS-260709-ABC123","status":"paid","payment_status":"paid","provider":"demo"}'
 ```
 
 ## Admin Modules

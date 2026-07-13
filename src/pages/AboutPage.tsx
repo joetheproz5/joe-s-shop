@@ -56,7 +56,7 @@ function Hero() {
             transition={{ duration: .7, delay: .1 }}
             className="mt-8 max-w-2xl text-lg leading-8 text-surface-600 sm:text-xl dark:text-surface-300"
           >
-            Joe's is a modern shop built around one simple belief: finding something good should feel good, too.
+            The Tech Shelf is a modern shop built around one simple belief: finding something good should feel good, too.
           </motion.p>
         </div>
       </div>
@@ -76,7 +76,7 @@ function Story() {
           Shopping became crowded. We wanted to make it considered again.
         </h2>
         <div className="mt-8 grid gap-6 text-base leading-8 text-surface-500 sm:grid-cols-2 dark:text-surface-400">
-          <p>Joe's began with a frustration we knew well: endless choices, unclear value, and too much time spent searching for products that simply work.</p>
+          <p>The Tech Shelf began with a frustration we knew well: endless choices, unclear value, and too much time spent searching for products that simply work.</p>
           <p>So we built the kind of store we wanted to visit—one with a point of view, useful information, and a calm experience from first look to front door.</p>
         </div>
       </div>
@@ -118,7 +118,7 @@ function Promise() {
       <div className="grid items-center gap-12 overflow-hidden rounded-[2rem] bg-[#dce9ff] p-8 sm:p-12 lg:grid-cols-2 lg:p-16 dark:bg-blue-950/35">
         <div className="max-w-xl">
           <div className="grid h-12 w-12 place-items-center rounded-full bg-white text-blue-600 shadow-sm dark:bg-surface-900"><ShieldCheck size={22} /></div>
-          <p className="eyebrow mt-8">The Joe's promise</p>
+          <p className="eyebrow mt-8">The Tech Shelf promise</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-[-.045em] sm:text-5xl">Confidence comes standard.</h2>
         </div>
         <div className="space-y-6 text-base leading-8 text-surface-600 dark:text-surface-300">

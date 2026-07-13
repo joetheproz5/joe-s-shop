@@ -89,7 +89,7 @@ function buildEmail(order: Record<string, unknown>, items: OrderItem[], recipien
     html: `<!doctype html><html><body style="margin:0;background:#f5f7fa;font-family:Arial,Helvetica,sans-serif;color:#202124">
       <div style="max-width:640px;margin:0 auto;padding:32px 16px">
         <div style="background:#fff;border:1px solid #e0e4e8;border-radius:12px;overflow:hidden">
-          <div style="padding:24px 28px;border-bottom:1px solid #e5e7eb"><a href="${siteUrl}/#/" style="color:#0b57d0;text-decoration:none;font-size:20px;font-weight:700">Joe's Shop</a></div>
+          <div style="padding:24px 28px;border-bottom:1px solid #e5e7eb"><a href="${siteUrl}/#/" style="color:#0b57d0;text-decoration:none;font-size:20px;font-weight:700">The Tech Shelf</a></div>
           <div style="padding:32px 28px">
             <p style="margin:0 0 10px;color:#0b57d0;font-size:13px;font-weight:700;text-transform:uppercase">Order ${escapeHtml(orderNumber)}</p>
             <h1 style="margin:0;font-size:28px;line-height:1.2">${copy.heading}</h1>
@@ -104,7 +104,7 @@ function buildEmail(order: Record<string, unknown>, items: OrderItem[], recipien
             <a href="${order.user_id ? `${siteUrl}/#/account/orders` : `${siteUrl}/#/`}" style="display:inline-block;margin-top:26px;padding:12px 18px;border-radius:8px;background:#0b57d0;color:#fff;text-decoration:none;font-weight:700">${order.user_id ? 'View orders' : 'Continue shopping'}</a>
           </div>
         </div>
-        <p style="margin:18px 0 0;text-align:center;color:#80868b;font-size:12px">This is a transactional message about your Joe's Shop order.</p>
+        <p style="margin:18px 0 0;text-align:center;color:#80868b;font-size:12px">This is a transactional message about your order from The Tech Shelf.</p>
       </div>
     </body></html>`,
   }
@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
       'Idempotency-Key': `order-${order.id}-${body.event}-${order.status}-${order.payment_status}`,
     },
     body: JSON.stringify({
-      from: Deno.env.get('ORDER_EMAIL_FROM') || "Joe's Shop <orders@resend.dev>",
+      from: Deno.env.get('ORDER_EMAIL_FROM') || 'The Tech Shelf <orders@resend.dev>',
       to: [recipient],
       subject: email.subject,
       html: email.html,

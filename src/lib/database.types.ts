@@ -1,4 +1,4 @@
-// Auto-generated-compatible database types for Joe's Shop.
+// Auto-generated-compatible database types for The Tech Shelf.
 // In production, regenerate with: supabase gen types typescript --project-id <id>
 
 export type Database = {

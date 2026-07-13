@@ -3,17 +3,16 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
-  BookOpen,
+  Cable,
   ChevronRight,
-  Dumbbell,
   Headphones,
-  Home,
+  Laptop,
   RotateCcw,
   ShieldCheck,
-  Shirt,
   Smartphone,
   Sparkles,
   Truck,
+  Watch,
 } from 'lucide-react'
 import { useFeaturedProducts, useNewArrivals, useBestSellers } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
@@ -27,11 +26,11 @@ import toast from 'react-hot-toast'
 
 const HERO_IMAGE = `${import.meta.env.BASE_URL}images/storefront-hero.png`
 const DEFAULT_CATEGORIES = [
-  { id: 'electronics', name: 'Electronics', product_count: 3, href: '/shop?search=TechPro' },
-  { id: 'style', name: 'Clothing', product_count: 3, href: '/shop?search=StyleHouse' },
-  { id: 'home', name: 'Home & Garden', product_count: 3, href: '/shop?search=HomeEssentials' },
-  { id: 'fitness', name: 'Sports & Fitness', product_count: 2, href: '/shop?search=ActiveGear' },
-  { id: 'books', name: 'Books & Media', product_count: 1, href: '/shop?search=BookWorm' },
+  { id: 'smartphones', name: 'Smartphones', product_count: 0, href: '/shop?search=smartphones' },
+  { id: 'laptops', name: 'Laptops', product_count: 0, href: '/shop?search=laptops' },
+  { id: 'audio', name: 'Audio', product_count: 0, href: '/shop?search=audio' },
+  { id: 'smartwatches', name: 'Smartwatches', product_count: 0, href: '/shop?search=smartwatches' },
+  { id: 'charging', name: 'Charging & Cables', product_count: 0, href: '/shop?search=charging+cables' },
   { id: 'new', name: 'New Arrivals', product_count: 4, href: '/shop?is_new_arrival=true' },
 ]
 
@@ -49,11 +48,11 @@ export default function HomePage() {
   const legacySubtitle = settings?.hero_subtitle?.trim() === "Shop handpicked essentials from the world's best brands. Fast shipping, easy returns."
 
   const hero = {
-    title: settings?.hero_title && !legacyTitle ? settings.hero_title : 'Tech, home, style and more.',
+    title: settings?.hero_title && !legacyTitle ? settings.hero_title : 'Technology, clearly chosen.',
     subtitle:
       settings?.hero_subtitle && !legacySubtitle
         ? settings.hero_subtitle
-        : 'Great everyday products, clear prices, and a shopping experience that stays out of your way.',
+        : 'Current devices, clear prices, and dependable delivery across Lebanon.',
     ctaText: settings?.hero_cta_text || 'Shop all products',
     ctaLink: settings?.hero_cta_link || '/shop',
   }
@@ -78,7 +77,7 @@ export default function HomePage() {
       <ProductSection
         kicker="Most popular"
         title="What people are buying"
-        description="Reliable favorites across every department."
+        description="Reliable favorites across phones, computing, audio, and wearables."
         link="/shop?is_best_seller=true"
       >
         <ProductGrid products={bestSellers} loading={bestSellersLoading} />
@@ -187,11 +186,11 @@ function AssuranceBar() {
 function CategorySection({ categories, loading }: { categories: any[]; loading: boolean }) {
   const iconFor = (name: string) => {
     const value = name.toLowerCase()
-    if (value.includes('elect')) return Smartphone
-    if (value.includes('cloth') || value.includes('fashion')) return Shirt
-    if (value.includes('home') || value.includes('garden')) return Home
-    if (value.includes('sport') || value.includes('fitness')) return Dumbbell
-    if (value.includes('book') || value.includes('media')) return BookOpen
+    if (value.includes('phone') || value.includes('elect')) return Smartphone
+    if (value.includes('laptop') || value.includes('computer')) return Laptop
+    if (value.includes('audio') || value.includes('headphone')) return Headphones
+    if (value.includes('watch') || value.includes('wearable')) return Watch
+    if (value.includes('charg') || value.includes('cable')) return Cable
     return Sparkles
   }
 
@@ -300,7 +299,7 @@ function Newsletter() {
     <section className="mt-12 border-t border-[#dfe3e8] bg-[#f7f9fc] dark:border-surface-800 dark:bg-surface-900/60">
       <div className="section-container grid gap-8 py-14 lg:grid-cols-[1fr_0.9fr] lg:items-center">
         <div>
-          <p className="text-sm font-semibold text-[#0b57d0] dark:text-blue-400">Joe's newsletter</p>
+          <p className="text-sm font-semibold text-[#0b57d0] dark:text-blue-400">The Tech Shelf newsletter</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-normal">The good stuff, occasionally.</h2>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-surface-500 dark:text-surface-400">
             {benefits.map((benefit) => <span key={benefit} className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#0b57d0]" />{benefit}</span>)}
@@ -365,4 +364,3 @@ function SectionHeader({ kicker, title, description, link }: {
     </div>
   )
 }
-

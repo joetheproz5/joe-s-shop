@@ -146,7 +146,7 @@ function OrderInvoice({ order, invoiceRef }: { order: Order; invoiceRef: React.R
     <div ref={invoiceRef} className="invoice-document bg-white p-1 text-surface-950 dark:bg-surface-900 dark:text-white">
       <div className="invoice-header flex flex-col gap-5 border-b border-surface-200 pb-6 sm:flex-row sm:items-start sm:justify-between dark:border-surface-700">
         <div>
-          <div className="invoice-brand text-xl font-bold">Joe's Shop</div>
+          <div className="invoice-brand text-xl font-bold">The Tech Shelf</div>
           <div className="invoice-subtitle mt-1 text-sm text-surface-500">Order invoice</div>
         </div>
         <div className="invoice-heading sm:text-right">

@@ -1,5 +1,5 @@
 -- ======================================================================
--- Joe's Shop — Initial Schema
+-- The Tech Shelf - Initial Schema
 -- PostgreSQL / Supabase migration
 -- ======================================================================
 
@@ -490,7 +490,7 @@ create trigger trg_reviews_rating
 -- ======================================================================
 create or replace function public.generate_order_number()
 returns text language sql as $$
-  select 'JOE-' || to_char(now(), 'YYMMDD') || '-' ||
+  select 'TTS-' || to_char(now(), 'YYMMDD') || '-' ||
          upper(substr(md5(
            random()::text || clock_timestamp()::text || txid_current()::text
          ), 1, 8))

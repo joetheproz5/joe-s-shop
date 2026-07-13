@@ -8,10 +8,10 @@ export function AboutPage() {
     <main className="min-h-screen bg-white dark:bg-surface-950">
       <section className="border-b border-[#e0e4e8] bg-[#f6f8fb] dark:border-surface-800 dark:bg-surface-900/50">
         <div className="section-container py-16 sm:py-24">
-          <p className="text-sm font-semibold text-[#0b57d0] dark:text-blue-400">About Joe's Shop</p>
+          <p className="text-sm font-semibold text-[#0b57d0] dark:text-blue-400">About The Tech Shelf</p>
           <h1 className="mt-3 max-w-4xl text-4xl font-semibold leading-tight tracking-normal sm:text-6xl">Technology shopping, without the guesswork.</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-surface-500 dark:text-surface-400">
-            Joe's Shop is built for people in Lebanon who want current devices, understandable choices, and dependable support from checkout through delivery.
+            The Tech Shelf is built for people in Lebanon who want current devices, understandable choices, and dependable support from checkout through delivery.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/shop" className="inline-flex h-11 items-center rounded-lg bg-[#0b57d0] px-5 text-sm font-semibold text-white hover:bg-[#0842a0]">Browse products</Link>
@@ -26,7 +26,7 @@ export function AboutPage() {
         </div>
         <div className="space-y-5 text-base leading-8 text-surface-600 dark:text-surface-300">
           <p>Product pages should show the device clearly, prices should be easy to understand, and checkout should ask only for information needed to deliver your order.</p>
-          <p>That is the standard behind Joe's Shop. We focus on Apple and Samsung products people genuinely compare and buy, pair them with clear specifications, and keep cash on delivery available for a familiar local checkout experience.</p>
+          <p>That is the standard behind The Tech Shelf. We focus on Apple and Samsung products people genuinely compare and buy, pair them with clear specifications, and keep cash on delivery available for a familiar local checkout experience.</p>
           <p>When something changes after an order is placed, customers should not have to chase the store. Order details, status updates, and direct support remain available throughout the process.</p>
         </div>
       </section>
@@ -141,7 +141,7 @@ export function ContactPage() {
           <h1 className="mt-2 text-4xl font-semibold tracking-normal sm:text-5xl">How can we help?</h1>
           <p className="mt-5 max-w-md text-lg leading-8 text-surface-500 dark:text-surface-400">Send us a message and our support team will point you in the right direction.</p>
           <div className="mt-9 space-y-5 text-sm">
-            <p className="flex items-center gap-3"><Mail className="text-[#0b57d0]" size={19} /> hello@joesshop.com</p>
+            <p className="flex items-center gap-3"><Mail className="text-[#0b57d0]" size={19} /> hello@thetechshelf.com</p>
             <p className="flex items-center gap-3"><Clock3 className="text-[#0b57d0]" size={19} /> Monday-Friday, 9:00-18:00</p>
           </div>
         </div>

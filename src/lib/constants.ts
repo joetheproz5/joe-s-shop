@@ -1,6 +1,6 @@
-export const SITE_NAME = "Joe's Shop"
-export const SITE_DESCRIPTION = 'Tech, home, style, fitness, and everyday essentials'
-export const SITE_URL = 'https://joes-shop.com'
+export const SITE_NAME = 'The Tech Shelf'
+export const SITE_DESCRIPTION = 'Phones, laptops, audio, wearables, and accessories for Lebanon.'
+export const SITE_URL = 'https://joetheproz5.github.io/joe-s-shop'
 
 export const ORDER_STATUSES = [
   { value: 'pending', label: 'Pending', color: 'warning' },

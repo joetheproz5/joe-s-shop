@@ -32,6 +32,7 @@ import { useAuth } from '@/context/AuthContext';
 import Breadcrumbs, { BreadcrumbItem } from './Breadcrumbs';
 import { hasAdminPermission, type AdminModule } from '@/lib/permissions';
 import { supabase } from '@/lib/supabase';
+import { BrandLogo, BrandMark } from './BrandLogo';
 
 type AdminAlerts = {
   orders: Array<{ id: string; order_number: string; total: number; created_at: string }>;
@@ -249,13 +250,9 @@ export default function AdminLayout() {
                 transition={{ duration: 0.15 }}
                 className="flex items-center gap-2"
               >
-                <Link to="/" className="text-lg font-extrabold tracking-tight">
-                  <span className="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
-                    Joe's
-                  </span>
-                  <span className="bg-gradient-to-r from-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
-                    {' '}Admin
-                  </span>
+                <Link to="/" className="flex items-center gap-2" aria-label="The Tech Shelf home">
+                  <BrandLogo className="w-[94px]" />
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Admin</span>
                 </Link>
               </motion.div>
             )}
@@ -264,9 +261,10 @@ export default function AdminLayout() {
           {(sidebarCollapsed || !sidebarOpen) && (
             <Link
               to="/"
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-500 text-xs font-bold text-white"
+              className="flex h-9 w-10 items-center justify-center overflow-hidden rounded-md bg-white"
+              aria-label="The Tech Shelf home"
             >
-              J
+              <BrandMark className="w-10" decorative />
             </Link>
           )}
 

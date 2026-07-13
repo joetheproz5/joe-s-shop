@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Mail, Twitter, Youtube } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { SITE_NAME } from '@/lib/constants'
+import { BrandLogo } from './BrandLogo'
 
 const columns = [
   {
@@ -46,15 +48,14 @@ export default function Footer() {
     <footer className="border-t border-[#dde1e6] bg-[#f5f7f9] text-[#30343b] dark:border-surface-800 dark:bg-surface-950 dark:text-surface-200">
       <div className="section-container grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_0.8fr_0.8fr]">
         <div className="max-w-sm">
-          <Link to="/" className="inline-flex items-center gap-2.5 text-lg font-semibold text-[#202124] dark:text-white">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0b57d0] text-sm font-bold text-white">J</span>
-            Joe's Shop
+          <Link to="/" className="inline-flex" aria-label={`${SITE_NAME} home`}>
+            <BrandLogo className="w-[132px]" />
           </Link>
           <p className="mt-4 text-sm leading-6 text-[#626a73] dark:text-surface-400">
-            Straightforward shopping for technology, home, style, fitness, and everyday essentials.
+            Straightforward shopping for phones, laptops, audio, wearables, and accessories in Lebanon.
           </p>
-          <a href="mailto:hello@joesshop.com" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[#0b57d0] hover:text-[#0842a0] dark:text-blue-400">
-            <Mail size={16} /> hello@joesshop.com
+          <a href="mailto:hello@thetechshelf.com" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[#0b57d0] hover:text-[#0842a0] dark:text-blue-400">
+            <Mail size={16} /> hello@thetechshelf.com
           </a>
         </div>
 
@@ -84,7 +85,7 @@ export default function Footer() {
       <div className="border-t border-[#dde1e6] dark:border-surface-800">
         <div className="section-container flex flex-col gap-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-[#717780] dark:text-surface-500">
-            &copy; {new Date().getFullYear()} Joe's Shop. All rights reserved.
+            &copy; {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
           </p>
           <div className="flex items-center gap-1">
             {socials.map((social) => (
