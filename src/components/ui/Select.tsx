@@ -322,7 +322,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
     const hasError = !!error
 
     return (
-      <div ref={containerRef} className={clsx('relative w-full', className)} onKeyDown={handleKeyDown}>
+      <div ref={containerRef} className={clsx('relative min-w-0 w-full max-w-full', className)} onKeyDown={handleKeyDown}>
         {label && (
           <label
             htmlFor={selectId}
@@ -341,7 +341,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled || loading}
           className={clsx(
-            'flex w-full items-center justify-between gap-2 border bg-white dark:bg-surface-900',
+            'flex min-w-0 w-full max-w-full items-center justify-between gap-2 overflow-hidden border bg-white dark:bg-surface-900',
             'transition-all duration-200',
             'focus:outline-none focus:ring-2 focus:ring-offset-1',
             'focus:ring-primary-500 dark:focus:ring-primary-400 dark:focus:ring-offset-surface-950',
@@ -358,7 +358,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
           aria-controls={menuId}
         >
           {/* Selected text / placeholder */}
-          <span className={clsx('truncate text-left', !displayText && 'text-surface-400 dark:text-surface-500')}>
+          <span className={clsx('min-w-0 flex-1 truncate text-left', !displayText && 'text-surface-400 dark:text-surface-500')}>
             {loading ? (
               <span className="flex items-center gap-2">
                 <Loader2 size={16} className="animate-spin" />
@@ -416,7 +416,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
             role="listbox"
             aria-multiselectable={multiple || undefined}
             className={clsx(
-              'absolute z-50 mt-1 w-full overflow-hidden rounded-xl',
+              'absolute inset-x-0 z-50 mt-1 min-w-0 max-w-full overflow-hidden rounded-xl',
               'bg-white dark:bg-surface-900 border border-surface-200 dark:border-surface-700',
               'shadow-lg dark:shadow-xl',
               'py-1 animate-fade-in'
@@ -424,8 +424,8 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
           >
             {/* Search input */}
             {searchable && (
-              <div className="border-b border-surface-200 dark:border-surface-700 px-2 py-1.5">
-                <div className="flex items-center gap-2 rounded-lg bg-surface-50 dark:bg-surface-800 px-2">
+              <div className="min-w-0 border-b border-surface-200 dark:border-surface-700 px-2 py-1.5">
+                <div className="flex min-w-0 items-center gap-2 rounded-lg bg-surface-50 dark:bg-surface-800 px-2">
                   <Search size={14} className="text-surface-400" />
                   <input
                     ref={searchInputRef}
@@ -435,7 +435,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
                       setSearchQuery(e.target.value)
                       setFocusedIndex(-1)
                     }}
-                    className="flex-1 bg-transparent py-1 text-sm outline-none text-surface-800 dark:text-surface-200 placeholder:text-surface-400"
+                    className="min-w-0 w-full flex-1 bg-transparent py-1 text-sm outline-none text-surface-800 dark:text-surface-200 placeholder:text-surface-400"
                     placeholder="Search..."
                     aria-label="Search options"
                   />
@@ -468,7 +468,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
                               onClick={() => handleSelect(option.value)}
                               disabled={option.disabled}
                               className={clsx(
-                                'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors text-left',
+                                'flex min-w-0 w-full items-center gap-2 px-3 py-2 text-sm transition-colors text-left',
                                 option.disabled
                                   ? 'opacity-40 cursor-not-allowed'
                                   : 'hover:bg-surface-100 dark:hover:bg-surface-800',
@@ -490,7 +490,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
                                 </span>
                               )}
                               {option.icon && <span className="flex-shrink-0" aria-hidden="true">{option.icon}</span>}
-                              <span className="flex-1 truncate">{option.label}</span>
+                              <span className="min-w-0 flex-1 truncate">{option.label}</span>
                               {!multiple && isSelected(option.value) && (
                                 <Check size={14} className="text-primary-600 dark:text-primary-400 flex-shrink-0" />
                               )}
@@ -512,7 +512,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
                       onClick={() => handleSelect(option.value)}
                       disabled={option.disabled}
                       className={clsx(
-                        'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors text-left',
+                        'flex min-w-0 w-full items-center gap-2 px-3 py-2 text-sm transition-colors text-left',
                         option.disabled
                           ? 'opacity-40 cursor-not-allowed'
                           : 'hover:bg-surface-100 dark:hover:bg-surface-800',
@@ -534,7 +534,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
                         </span>
                       )}
                       {option.icon && <span className="flex-shrink-0" aria-hidden="true">{option.icon}</span>}
-                      <span className="flex-1 truncate">{option.label}</span>
+                      <span className="min-w-0 flex-1 truncate">{option.label}</span>
                       {!multiple && isSelected(option.value) && (
                         <Check size={14} className="text-primary-600 dark:text-primary-400 flex-shrink-0" />
                       )}

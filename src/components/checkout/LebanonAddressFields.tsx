@@ -49,7 +49,7 @@ export function LebanonAddressFields({ value, onChange, required = false }: Leba
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid min-w-0 gap-4 sm:grid-cols-2">
       <Select
         label={`Governorate${required ? ' *' : ''}`}
         value={value.state || null}
@@ -59,7 +59,7 @@ export function LebanonAddressFields({ value, onChange, required = false }: Leba
         clearable={false}
         searchable
       />
-      <div>
+      <div className="min-w-0">
         <Select
           label={`City / town${required ? ' *' : ''}`}
           value={manualCity ? OTHER_CITY : value.city || null}
