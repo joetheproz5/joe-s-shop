@@ -64,7 +64,7 @@ function buildEmail(order: Record<string, unknown>, items: OrderItem[], recipien
         ? paymentCopy
         : (STATUS_COPY[status] || paymentCopy || STATUS_COPY.processing)
   const address = (order.shipping_address || {}) as OrderAddress
-  const siteUrl = Deno.env.get('SITE_URL') || 'https://joetheproz5.github.io/joe-s-shop'
+  const siteUrl = (Deno.env.get('SITE_URL') || 'https://joetheproz5.github.io/joe-s-shop').replace(/\/+$/, '')
   const orderNumber = String(order.order_number || '')
   const addressLines = [
     address.street_address_1,
@@ -89,7 +89,7 @@ function buildEmail(order: Record<string, unknown>, items: OrderItem[], recipien
     html: `<!doctype html><html><body style="margin:0;background:#f5f7fa;font-family:Arial,Helvetica,sans-serif;color:#202124">
       <div style="max-width:640px;margin:0 auto;padding:32px 16px">
         <div style="background:#fff;border:1px solid #e0e4e8;border-radius:12px;overflow:hidden">
-          <div style="padding:24px 28px;border-bottom:1px solid #e5e7eb"><a href="${siteUrl}" style="color:#0b57d0;text-decoration:none;font-size:20px;font-weight:700">Joe's Shop</a></div>
+          <div style="padding:24px 28px;border-bottom:1px solid #e5e7eb"><a href="${siteUrl}/#/" style="color:#0b57d0;text-decoration:none;font-size:20px;font-weight:700">Joe's Shop</a></div>
           <div style="padding:32px 28px">
             <p style="margin:0 0 10px;color:#0b57d0;font-size:13px;font-weight:700;text-transform:uppercase">Order ${escapeHtml(orderNumber)}</p>
             <h1 style="margin:0;font-size:28px;line-height:1.2">${copy.heading}</h1>
@@ -101,7 +101,7 @@ function buildEmail(order: Record<string, unknown>, items: OrderItem[], recipien
               <tr><td style="padding:12px 0 0;font-size:18px;font-weight:700">Total</td><td style="padding:12px 0 0;text-align:right;font-size:18px;font-weight:700">${money(order.total)}</td></tr>
             </table>
             ${addressLines ? `<div style="margin-top:26px;padding:18px;background:#f8fafc;border-radius:8px"><strong style="display:block;margin-bottom:8px">Delivery address</strong><div style="color:#5f6368;line-height:1.6">${addressLines}</div></div>` : ''}
-            <a href="${order.user_id ? `${siteUrl}/account/orders` : siteUrl}" style="display:inline-block;margin-top:26px;padding:12px 18px;border-radius:8px;background:#0b57d0;color:#fff;text-decoration:none;font-weight:700">${order.user_id ? 'View orders' : 'Continue shopping'}</a>
+            <a href="${order.user_id ? `${siteUrl}/#/account/orders` : `${siteUrl}/#/`}" style="display:inline-block;margin-top:26px;padding:12px 18px;border-radius:8px;background:#0b57d0;color:#fff;text-decoration:none;font-weight:700">${order.user_id ? 'View orders' : 'Continue shopping'}</a>
           </div>
         </div>
         <p style="margin:18px 0 0;text-align:center;color:#80868b;font-size:12px">This is a transactional message about your Joe's Shop order.</p>
