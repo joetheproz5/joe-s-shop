@@ -8,9 +8,11 @@ import { useCartStore } from '@/stores/cartStore'
 import { useAuth } from '@/context/AuthContext'
 import { formatCurrency } from '@/lib/utils'
 import { Button, Input, Select } from '@/components/ui'
+import { LebanonAddressFields } from '@/components/checkout/LebanonAddressFields'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 import { getProductImage } from '@/lib/productImages'
+import { LEBANESE_PHONE_PLACEHOLDER, LEBANON_COUNTRY, normalizeLebanonLocation } from '@/lib/lebanon'
 import type { Address } from '@/types'
 
 type CheckoutAddress = Pick<
@@ -20,11 +22,11 @@ type CheckoutAddress = Pick<
 
 const EMPTY_ADDRESS: CheckoutAddress = {
   first_name: '', last_name: '', street_address_1: '', street_address_2: '',
-  city: '', state: '', postal_code: '', country: 'United States', phone: '',
+  city: '', state: '', postal_code: '', country: LEBANON_COUNTRY, phone: '',
 }
 
 function toCheckoutAddress(address: Address): CheckoutAddress {
-  return {
+  return normalizeLebanonLocation({
     first_name: address.first_name,
     last_name: address.last_name,
     street_address_1: address.street_address_1,
@@ -32,9 +34,9 @@ function toCheckoutAddress(address: Address): CheckoutAddress {
     city: address.city,
     state: address.state,
     postal_code: address.postal_code,
-    country: address.country,
+    country: LEBANON_COUNTRY,
     phone: address.phone || '',
-  }
+  })
 }
 
 function addressesMatch(left: CheckoutAddress, right: CheckoutAddress) {
@@ -138,6 +140,10 @@ export default function CheckoutPage() {
     setSelectedAddressId('new')
   }
 
+  const updateBillingLocation = (field: 'city' | 'state' | 'postal_code' | 'country', value: string) => {
+    setBilling((current) => ({ ...current, [field]: value }))
+  }
+
   const chooseAddress = (value: string | string[] | null) => {
     const id = typeof value === 'string' ? value : 'new'
     setSelectedAddressId(id)
@@ -160,7 +166,7 @@ export default function CheckoutPage() {
   const total = getTotal()
 
   const hasGuestContact = !!user || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim()) && !!shipping.phone.trim())
-  const canProceedShipping = shipping.first_name && shipping.last_name && shipping.street_address_1 && shipping.city && shipping.state && shipping.postal_code && hasGuestContact
+  const canProceedShipping = shipping.first_name && shipping.last_name && shipping.street_address_1 && shipping.city && shipping.state && hasGuestContact
 
   if (items.length === 0 && step < 3) {
     navigate('/cart')
@@ -256,7 +262,7 @@ export default function CheckoutPage() {
                       type="email"
                       value={guestEmail}
                       onChange={(event) => setGuestEmail(event.target.value)}
-                      placeholder="you@example.com"
+                      placeholder="rami.haddad@example.com"
                       helperText="Used for your order confirmation."
                       required
                     />
@@ -282,18 +288,13 @@ export default function CheckoutPage() {
                   />
                 )}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Input label="First name *" value={shipping.first_name} onChange={(e) => updateShipping('first_name', e.target.value)} required />
-                  <Input label="Last name *" value={shipping.last_name} onChange={(e) => updateShipping('last_name', e.target.value)} required />
+                  <Input label="First name *" value={shipping.first_name} onChange={(e) => updateShipping('first_name', e.target.value)} placeholder="Rami" autoComplete="given-name" required />
+                  <Input label="Last name *" value={shipping.last_name} onChange={(e) => updateShipping('last_name', e.target.value)} placeholder="Haddad" autoComplete="family-name" required />
                 </div>
-                <Input label="Street address *" value={shipping.street_address_1} onChange={(e) => updateShipping('street_address_1', e.target.value)} required />
-                <Input label="Apartment, suite, etc." value={shipping.street_address_2} onChange={(e) => updateShipping('street_address_2', e.target.value)} />
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <Input label="City *" value={shipping.city} onChange={(e) => updateShipping('city', e.target.value)} required />
-                  <Input label="State *" value={shipping.state} onChange={(e) => updateShipping('state', e.target.value)} required />
-                  <Input label="ZIP *" value={shipping.postal_code} onChange={(e) => updateShipping('postal_code', e.target.value)} required />
-                </div>
-                <Input label="Country" value={shipping.country} onChange={(e) => updateShipping('country', e.target.value)} />
-                <Input label={`Phone${user ? '' : ' *'}`} value={shipping.phone} onChange={(e) => updateShipping('phone', e.target.value)} placeholder="+1 (555) 000-0000" required={!user} />
+                <Input label="Building, street, and area *" value={shipping.street_address_1} onChange={(e) => updateShipping('street_address_1', e.target.value)} placeholder="Building 12, Hamra Street" autoComplete="address-line1" required />
+                <Input label="Floor, apartment, or landmark (optional)" value={shipping.street_address_2} onChange={(e) => updateShipping('street_address_2', e.target.value)} placeholder="3rd floor, near the pharmacy" autoComplete="address-line2" />
+                <LebanonAddressFields key={selectedAddressId} value={shipping} onChange={updateShipping} required />
+                <Input label={`Lebanese phone${user ? '' : ' *'}`} type="tel" inputMode="tel" autoComplete="tel" value={shipping.phone} onChange={(e) => updateShipping('phone', e.target.value)} placeholder={LEBANESE_PHONE_PLACEHOLDER} required={!user} />
 
                 {user && selectedAddressId === 'new' && (
                   <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-200 p-3 dark:border-surface-700">
@@ -345,12 +346,8 @@ export default function CheckoutPage() {
                       <Input label="First name" value={billing.first_name} onChange={(e) => setBilling({ ...billing, first_name: e.target.value })} />
                       <Input label="Last name" value={billing.last_name} onChange={(e) => setBilling({ ...billing, last_name: e.target.value })} />
                     </div>
-                    <Input label="Street address" value={billing.street_address_1} onChange={(e) => setBilling({ ...billing, street_address_1: e.target.value })} />
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      <Input label="City" value={billing.city} onChange={(e) => setBilling({ ...billing, city: e.target.value })} />
-                      <Input label="State" value={billing.state} onChange={(e) => setBilling({ ...billing, state: e.target.value })} />
-                      <Input label="ZIP" value={billing.postal_code} onChange={(e) => setBilling({ ...billing, postal_code: e.target.value })} />
-                    </div>
+                    <Input label="Building, street, and area" value={billing.street_address_1} onChange={(e) => setBilling({ ...billing, street_address_1: e.target.value })} placeholder="Building 12, Hamra Street" />
+                    <LebanonAddressFields value={billing} onChange={updateBillingLocation} />
                   </div>
                 )}
 
@@ -421,7 +418,7 @@ export default function CheckoutPage() {
                 <div className="card p-4">
                   <div className="font-semibold mb-2 text-sm">Shipping Address</div>
                   <p className="text-sm text-surface-600 dark:text-surface-400 whitespace-pre-line">
-                    {shipping.first_name} {shipping.last_name}\n{shipping.street_address_1}\n{shipping.city}, {shipping.state} {shipping.postal_code}
+                    {shipping.first_name} {shipping.last_name}\n{shipping.street_address_1}\n{shipping.city}, {shipping.state}{shipping.postal_code ? ` ${shipping.postal_code}` : ''}\n{shipping.country}
                   </p>
                 </div>
                 <div className="card p-4">

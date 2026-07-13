@@ -97,7 +97,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="First name"
-                placeholder="Jane"
+                placeholder="Rami"
                 value={form.first_name}
                 onChange={(e) => set('first_name', e.target.value)}
                 error={errors.first_name}
@@ -105,7 +105,7 @@ export default function RegisterPage() {
               />
               <Input
                 label="Last name"
-                placeholder="Doe"
+                placeholder="Haddad"
                 value={form.last_name}
                 onChange={(e) => set('last_name', e.target.value)}
                 error={errors.last_name}
@@ -115,7 +115,7 @@ export default function RegisterPage() {
             <Input
               label="Email address"
               type="email"
-              placeholder="you@example.com"
+              placeholder="rami.haddad@example.com"
               value={form.email}
               onChange={(e) => set('email', e.target.value)}
               error={errors.email}

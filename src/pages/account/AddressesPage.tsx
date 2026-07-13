@@ -5,12 +5,14 @@ import { MapPin, Plus, Pencil, Trash2, Star, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { Button, Input, Modal } from '@/components/ui'
+import { LebanonAddressFields } from '@/components/checkout/LebanonAddressFields'
+import { LEBANESE_PHONE_PLACEHOLDER, LEBANON_COUNTRY, normalizeLebanonLocation } from '@/lib/lebanon'
 import type { Address } from '@/types'
 import toast from 'react-hot-toast'
 
 const EMPTY: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
   label: 'Home', first_name: '', last_name: '', street_address_1: '', street_address_2: '',
-  city: '', state: '', postal_code: '', country: 'United States', phone: '', is_default: false,
+  city: '', state: '', postal_code: '', country: LEBANON_COUNTRY, phone: '', is_default: false,
 }
 
 export default function AddressesPage() {
@@ -68,13 +70,26 @@ export default function AddressesPage() {
 
   const openAdd = () => { setForm(EMPTY); setEditing(null); setOpen(true) }
   const openEdit = (a: Address) => {
-    setForm({
+    setForm(normalizeLebanonLocation({
       label: a.label, first_name: a.first_name, last_name: a.last_name,
       street_address_1: a.street_address_1, street_address_2: a.street_address_2 || '',
-      city: a.city, state: a.state, postal_code: a.postal_code, country: a.country,
+      city: a.city, state: a.state, postal_code: a.postal_code, country: LEBANON_COUNTRY,
       phone: a.phone || '', is_default: a.is_default,
-    })
+    }))
     setEditing(a.id); setOpen(true)
+  }
+
+  const updateLocation = (field: 'city' | 'state' | 'postal_code' | 'country', value: string) => {
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  const submitAddress = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!form.state || !form.city) {
+      toast.error('Select a governorate and city before saving.')
+      return
+    }
+    saveMutation.mutate()
   }
 
   if (isLoading) return <div className="grid sm:grid-cols-2 gap-4">{[1, 2].map((i) => <div key={i} className="card p-6 h-48 animate-pulse bg-surface-100 dark:bg-surface-800" />)}</div>
@@ -127,22 +142,16 @@ export default function AddressesPage() {
       )}
 
       <Modal isOpen={open} onClose={() => setOpen(false)} title={editing ? 'Edit Address' : 'Add Address'} size="md">
-        <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate() }} className="space-y-4">
+        <form onSubmit={submitAddress} className="space-y-4">
           <Input label="Label" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="Home, Work, etc." />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required />
-            <Input label="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required />
+            <Input label="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} placeholder="Rami" required />
+            <Input label="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} placeholder="Haddad" required />
           </div>
-          <Input label="Street address" value={form.street_address_1} onChange={(e) => setForm({ ...form, street_address_1: e.target.value })} required />
-          <Input label="Apartment, suite, etc. (optional)" value={form.street_address_2} onChange={(e) => setForm({ ...form, street_address_2: e.target.value })} />
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
-            <Input label="State / Province" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} required />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Postal code" value={form.postal_code} onChange={(e) => setForm({ ...form, postal_code: e.target.value })} required />
-            <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          </div>
+          <Input label="Building, street, and area" value={form.street_address_1} onChange={(e) => setForm({ ...form, street_address_1: e.target.value })} placeholder="Building 12, Hamra Street" required />
+          <Input label="Floor, apartment, or landmark (optional)" value={form.street_address_2} onChange={(e) => setForm({ ...form, street_address_2: e.target.value })} placeholder="3rd floor, near the pharmacy" />
+          <LebanonAddressFields key={editing || 'new'} value={form} onChange={updateLocation} required />
+          <Input label="Lebanese phone" type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={LEBANESE_PHONE_PLACEHOLDER} />
           <label className="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" checked={form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} className="w-4 h-4 rounded border-surface-300 text-primary-600" />
             Set as default address

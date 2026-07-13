@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { Button, Input } from '@/components/ui'
 import { supabase } from '@/lib/supabase'
 import { STORAGE_BUCKETS } from '@/lib/constants'
+import { LEBANESE_PHONE_PLACEHOLDER } from '@/lib/lebanon'
 import toast from 'react-hot-toast'
 
 export default function ProfilePage() {
@@ -102,7 +103,7 @@ export default function ProfilePage() {
             label="Phone"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            placeholder="+1 (555) 000-0000"
+            placeholder={LEBANESE_PHONE_PLACEHOLDER}
             leftIcon={<Phone size={18} />}
           />
           <Button type="submit" loading={saving} leftIcon={<Save size={18} />}>
